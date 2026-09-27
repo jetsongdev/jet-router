@@ -5,13 +5,13 @@ import { registerRouter } from '../hooks/register.js';
 const choice = { choice: 'low', contextSufficient: true, risky: false };
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 
-function world(provider = async () => choice) {
+function world(provider = async () => choice, now = async () => 10) {
   const handlers = new Map(), logs = [], sent = [], calls = [];
   let expire;
   const $ = {
     command: { register: async () => {} },
     ui: { status() {}, log(text) { logs.push(text); } },
-    clock: { now: async () => 10, sleep: (ms, { signal }) => new Promise((resolve, reject) => {
+    clock: { now, sleep: (ms, { signal }) => new Promise((resolve, reject) => {
       expire = resolve;
       signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
     }) },
@@ -175,4 +175,30 @@ test('status retains only the last completed summary and clears it on session st
   assert.ok(text.includes(w.logs[0]));
   assert.ok(!text.includes('CANARY_SECRET'));
   await w.start(); assert.match((await w.command('status')).text, /최근 완료: 없음/);
+});
+
+
+test('a third submission remains ambiguous while an earlier submit is unsettled', async () => {
+  const w = world(); await w.start(); await w.command('shadow');
+  const pending = deferred();
+  const first = w.event('prompt.submit', { text: 'same', wait: false, origin: { kind: 'composer' } }, () => pending.promise);
+  await w.event('prompt.submit', { text: 'same', wait: false, origin: { kind: 'composer' } });
+  await w.submit('t1', 'same'); await w.step();
+  pending.resolve({ text: 'same' }); await first;
+  assert.equal(w.calls.length, 0);
+});
+
+test('mid-turn input during the final timing read cannot revive a stale recommendation', async () => {
+  const timing = deferred(), atTiming = deferred();
+  let reads = 0;
+  const w = world(undefined, () => {
+    if (++reads === 2) { atTiming.resolve(); return timing.promise; }
+    return Promise.resolve(10);
+  });
+  await w.start(); await w.command('shadow'); await w.submit();
+  const stepping = w.step(); await atTiming.promise;
+  await w.event('prompt.submit', { turnId: 't1', text: 'changed', wait: false, origin: { kind: 'composer' } });
+  timing.resolve(20); await stepping;
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 0);
 });

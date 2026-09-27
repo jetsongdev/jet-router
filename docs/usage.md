@@ -185,4 +185,4 @@ npm run validate
 npm run test:hooks
 ```
 
-현재 기록은 단위 테스트 24개와 Claude 오프라인 hook 테스트 1개 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Jev/live 모델 호출은 검증하지 않았습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.
+현재 기록은 단위 테스트 26개와 Claude 오프라인 hook 테스트 1개 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Jev/live 모델 호출은 검증하지 않았습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.

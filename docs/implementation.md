@@ -38,7 +38,7 @@ failed with missing policy module (exit 1). Following implementation:
 
 | Command | Evidence |
 | --- | --- |
-| `npm test` | Exit 0; 24 offline policy, Jev protocol and lifecycle tests passed |
+| `npm test` | Exit 0; 26 offline policy, Jev protocol and lifecycle tests passed |
 | `npm run validate` | Exit 0; strict plugin/module and marketplace validation passed |
 | `npm run test:hooks` | Exit 0; 1 installed Claude 2.1.283 test passed, mocked downstream endpoints |
 | `git diff --check` | Exit 0; whitespace check |
@@ -74,3 +74,7 @@ command separates current mode/lock from the previous completed summary; that
 summary is memory-only and cleared on session start. Node tests cover these
 cases and the installed offline hook test asserts the formatted completion line.
 Live terminal placement remains unverified.
+
+
+[First review and regression fixes](review-01.md) records two reproduced
+lifecycle races and the next [transport decision](provider-transport.md).

@@ -13,13 +13,11 @@ export function registerRouter(on, classify) {
   let pending;
   let lastSummary;
   const turns = new Map();
+  const submissions = new Set();
 
   function invalidate() {
     pending = undefined;
-    for (const turn of turns.values()) {
-      turn.valid = false;
-      turn.cancel?.();
-    }
+    for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
   }
 
@@ -50,14 +48,14 @@ export function registerRouter(on, classify) {
   });
 
   on('prompt.submit', async ($, e, next) => {
-    if (mode === 'off' || locked) return next(e);
-    const ambiguous = pending !== undefined || turns.size > 0 || e.turnId !== undefined || e.wait ||
+    const ambiguous = mode === 'off' || locked || submissions.size > 0 || turns.size > 0 || e.turnId !== undefined || e.wait ||
       !['composer', 'bridge'].includes(e.origin?.kind) || Boolean(e.attachments?.length) ||
       Boolean(e.context?.length) || !e.text.trim() || e.text.length > 6000;
     if (ambiguous) {
-      for (const turn of turns.values()) { turn.valid = false; turn.record = undefined; turn.cancel?.(); }
+      for (const turn of turns.values()) invalidateTurn(turn);
     }
     const ticket = { text: ambiguous ? undefined : e.text, ambiguous };
+    submissions.add(ticket);
     pending = ticket;
     try {
       return await next(e);
@@ -65,6 +63,7 @@ export function registerRouter(on, classify) {
       // A turn must have consumed this exact submission synchronously through
       // next. Queued/blocked submissions cannot become a later turn's decision.
       if (pending === ticket) pending = undefined;
+      submissions.delete(ticket);
     }
   });
 
@@ -73,7 +72,7 @@ export function registerRouter(on, classify) {
     pending = undefined;
     const valid = mode === 'shadow' && !locked && turns.size === 0 &&
       ticket && !ticket.ambiguous && ticket.text === e.text;
-    for (const turn of turns.values()) { turn.valid = false; turn.cancel?.(); }
+    for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
     if (mode === 'shadow' && !locked) turns.set(e.turnId, { valid: Boolean(valid), text: valid ? e.text : '', started: false });
     return next(e);
@@ -132,6 +131,7 @@ export function registerRouter(on, classify) {
       record.recommendation = parsed?.choice ?? 'keep';
       record.reasonCode = outcome.reason ?? (parsed ? (parsed.contextSufficient ? 'shadow' : 'context') : 'invalid-response');
       record.latencyMs = Math.max(0, (await $.clock.now()) - began);
+      if (!turn.valid) return yield* next(e);
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (safeEffort(e.effort) === 'unsupported') record.reasonCode = 'unsupported';
     if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn) turn.record = record;
@@ -142,6 +142,13 @@ export function registerRouter(on, classify) {
 
 function safeEffort(value) {
   return ['low', 'medium', 'high', 'xhigh', 'max'].includes(value) ? value : 'unsupported';
+}
+
+function invalidateTurn(turn) {
+  turn.valid = false;
+  turn.record = undefined;
+  turn.text = '';
+  turn.cancel?.();
 }
 
 function publish($, text) {
