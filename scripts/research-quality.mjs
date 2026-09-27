@@ -27,7 +27,7 @@ export function improves(base, candidate, expectedCount) {
 }
 
 // Isolated copies: experiment instructions never modify the running MCP server.
-async function adapter(addition) {
+export async function adapter(addition) {
   const dir = mkdtempSync(join(tmpdir(), 'jet-router-research-'));
   try {
     writeFileSync(join(dir, 'package.json'), '{"type":"module"}');
