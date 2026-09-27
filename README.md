@@ -137,3 +137,5 @@ npm run test:hooks
 코드는 [공개 저장소](https://github.com/jetsongdev/jet-router)에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`이며 정식 release/tag는 없습니다. 배포 라이선스는 아직 선택하지 않았습니다.
 
 Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했고 선택적 모델 지원 목록 조회를 연결했습니다. Claude 실제 UI 검증은 토큰 부족으로 보류했습니다. [검증 범위·남은 작업](docs/evaluations/shadow-closeout-2026-09-27.md), [모델 조회 설정](docs/codex-mcp.md#모델별-추천-후보-조회-선택)을 참고하세요.
+
+추천 품질 평가 준비: [파일럿 평가셋·채점 방법](docs/quality-evaluation.md). 조정용/검증용 사례를 분리했으며 아직 실호출 품질 결과는 아닙니다.
