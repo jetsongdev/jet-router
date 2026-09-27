@@ -2,7 +2,7 @@
 
 기존 Claude Code 모델·대화·입력창을 유지하면서 프롬프트마다 필요한 effort를 선택하는 실험적 플러그인입니다.
 
-**현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. 실제 Jev 호출·품질 평가는 아직 하지 않았고, 로컬 모델 연결과 effort 자동 변경(enforce)은 미지원입니다.
+**현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. [합성 입력 12건 실호출](docs/evaluations/jev-smoke-2026-09-27.md)을 마쳤으며, 본격 품질 평가가 남아 있습니다. 로컬 모델 연결과 effort 자동 변경(enforce)은 미지원입니다.
 
 ## 동작 원리
 
@@ -47,6 +47,53 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 
 **[전체 사용 가이드](docs/usage.md)**: 설정, 기존 대화에 적용하기, 로컬/공개 설치, 명령어, 메시지 예시, 중지·문제 해결.
 
+## Jev 사용 설정
+
+Jev helper가 실행되는 머신에 Node 22+가 필요합니다. 플러그인을 로드한 뒤 Claude에서 `/plugin` → **Installed → jet-router → Configure options**를 엽니다.
+
+| 옵션 | 설정 |
+| --- | --- |
+| `provider` | `jev` 선택. 기본값 `fake`는 외부 호출 없는 고정 테스트 결과 |
+| `cloudConsent` | TypeSafe로 현재 입력을 전송하는 데 동의하면 `true`. 기본값 `false` |
+| `jevApiKey` | TypeSafe API 키 입력. sensitive 옵션으로 Claude secure storage에 저장하도록 선언됨 |
+
+키는 채팅·명령 인자·Git 파일에 넣지 마세요. 키 입력 UI와 secure storage 재로드는 아직 수동 검증하지 않았습니다. Configure options의 세부 위치는 Claude 버전에 따라 달라질 수 있습니다. 저장 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. [공식 플러그인 설정 안내](https://code.claude.com/docs/en/plugins-reference#user-configuration)
+
+새로 시작한 세션은 항상 off입니다. 다음 명령으로 상태를 확인하고 관찰을 켭니다.
+
+```text
+/jet-router status
+/jet-router shadow
+```
+
+Jev 선택·전송 동의·키가 모두 있어야 분류합니다. 현재 프롬프트와 effort를 `api.typesafe.ai`로 보내며 API 비용이 발생할 수 있습니다. 전체 대화나 파일은 수집하지 않습니다. 데이터 처리 정책을 확인하고 민감한 입력 전에는 `/jet-router off` 또는 `/jet-router lock`을 사용하세요. off는 이미 보낸 요청을 회수하지 않습니다.
+
+응답 종료 후 다음과 같은 별도 요약이 나옵니다. 시간은 예시입니다.
+
+```text
+[jet-router] 관찰 · Jev · medium 유지 · 추천 low(미평가) · 분류 180ms
+```
+
+shadow는 추천만 표시합니다. 세션 기본 effort와 실제 요청 effort는 변경하지 않습니다. `미평가`는 자동 적용에 필요한 본격 품질·정책 평가를 마치지 않았다는 뜻입니다.
+
+### 개발 평가용 `.env`와의 차이
+
+**플러그인은 프로젝트 `.env`를 자동으로 읽지 않습니다.** 일반 사용자는 위 Configure options를 사용합니다. 이번 개발 평가에서는 프로젝트 루트 `.env`의 `TYPESAFE_API_KEY`만 별도 평가 실행기에 전달했습니다. `.env`는 Git에서 제외되어 있습니다.
+
+외부 호출 없이 평가 준비를 확인하려면 플러그인 폴더에서 실행합니다.
+
+```sh
+node scripts/evaluate-jev.mjs --dry-run
+```
+
+실제 API 호출·비용을 승인한 개발 평가에서만 다음을 사용합니다. 경로는 본인의 `.env` 경로로 바꿉니다. 실행기는 해당 파일의 `TYPESAFE_API_KEY`만 읽고 키를 출력하지 않습니다.
+
+```sh
+node scripts/evaluate-jev.mjs --live --key-file /absolute/path/to/project/.env
+```
+
+합성 입력 최대 12건을 순차 호출하며 첫 통신·응답 오류에서 중단하고 재시도하지 않습니다. 이 명령은 플러그인을 설치하거나 설정을 저장하지 않습니다.
+
 ## 검증과 지원 범위
 
 Claude Code **2.1.283**에서 manifest와 오프라인 hook 테스트를 검증했습니다. Function hooks는 early access이며 다른 버전은 미검증입니다. Herdr와 SDD 문서는 실행에 필요하지 않습니다.
@@ -59,7 +106,7 @@ npm run validate
 npm run test:hooks
 ```
 
-`test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다.
+`test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다. 별도 실호출 결과는 위 평가 기록을 참고하세요.
 
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)

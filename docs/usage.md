@@ -4,7 +4,7 @@
 
 현재는 **fake 또는 선택적 Jev의 off/shadow 관찰**을 지원합니다. 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.
 
-Jev 연결은 로컬 mock으로 검증했으며 실제 API 호출과 품질 평가는 미실시입니다. 자동 적용(enforce)은 미지원입니다. 아래 자동 적용 설명은 목표 동작입니다.
+Jev 연결은 로컬 mock과 [합성 입력 12건 실호출](evaluations/jev-smoke-2026-09-27.md)로 확인했습니다. 실제 Claude 세션 연결과 본격 품질 평가는 남아 있습니다. 자동 적용(enforce)은 미지원입니다. 아래 자동 적용 설명은 목표 동작입니다.
 
 ## 2. 기본 effort와 프롬프트별 적용
 
@@ -211,4 +211,9 @@ npm run validate
 npm run test:hooks
 ```
 
-현재 기록은 Node 테스트 39개와 Claude 오프라인 hook 테스트 2개(fake/Jev 각 1개) 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Jev/live 모델 호출은 검증하지 않았습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.
+현재 기록은 Node 테스트 43개와 Claude 오프라인 hook 테스트 2개(fake/Jev 각 1개) 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Claude 실제 요청은 검증하지 않았습니다. 별도 helper를 통한 Jev 합성 입력 실호출은 12건 완료했습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.
+
+
+### 개발용 평가 실행기
+
+`node scripts/evaluate-jev.mjs --dry-run`은 키를 읽거나 전송하지 않고 고정 합성 입력의 해시·크기만 출력합니다. 승인된 실호출은 `--live --key-env TYPESAFE_API_KEY` 또는 `--live --key-file /absolute/path/to/.env`로 실행합니다. 후자는 TYPESAFE_API_KEY만 파싱하고 쉘 코드를 실행하지 않습니다. 최대 12회이며 첫 전송/응답 오류에서 중단하고 재시도하지 않습니다. 이 실행기는 플러그인 설정을 저장하거나 활성화하지 않습니다.

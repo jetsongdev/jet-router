@@ -1,0 +1,315 @@
+{
+  "kind": "synthetic-smoke",
+  "modelRequested": "jev-latest",
+  "maxCalls": 12,
+  "retries": 0,
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "corpusSha256": "7152529d02756ab4323064dde5ca942da0ce861f22bd4a016f586a6de95f05fd",
+  "items": [
+    {
+      "id": "typo-ko",
+      "currentEffort": "medium",
+      "expected": [
+        "low"
+      ],
+      "requestBytes": 1302,
+      "requestSha256": "8515f609a1355d35bf01d58c6ce0e4349010d35405c00e88b945d605505378de"
+    },
+    {
+      "id": "format-en",
+      "currentEffort": "high",
+      "expected": [
+        "low"
+      ],
+      "requestBytes": 1322,
+      "requestSha256": "ed4e2758884635389861d44323db77c1589278d4d297a8ecbffbfb9eee626b4c"
+    },
+    {
+      "id": "implementation",
+      "currentEffort": "medium",
+      "expected": [
+        "medium"
+      ],
+      "requestBytes": 1383,
+      "requestSha256": "4e5fe45bad03db7692efa9767695b81397ff373b755e4b3cae72ce3e84f752cc"
+    },
+    {
+      "id": "known-fix",
+      "currentEffort": "high",
+      "expected": [
+        "low",
+        "medium"
+      ],
+      "requestBytes": 1366,
+      "requestSha256": "1b5eaac1626b5ab6f7a768393c9b67e94adb826209ba5dcec14982efca3a1011"
+    },
+    {
+      "id": "debugging",
+      "currentEffort": "high",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestBytes": 1412,
+      "requestSha256": "5456d8ab891fbb08c5e492bacaf80549bb0e3fbd852dcb0f63cb01cb9d258ba6"
+    },
+    {
+      "id": "review",
+      "currentEffort": "xhigh",
+      "expected": [
+        "high",
+        "xhigh"
+      ],
+      "requestBytes": 1407,
+      "requestSha256": "b14cd03001f259eeb6747b5c82918e69031e152b7fdb7e1d330f375ef77441b0"
+    },
+    {
+      "id": "concurrency",
+      "currentEffort": "high",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestBytes": 1427,
+      "requestSha256": "b37f95ebe992409fdf134087c73654fb776e35171f6b568f0bdf2936f1035056"
+    },
+    {
+      "id": "production-risk",
+      "currentEffort": "xhigh",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestBytes": 1337,
+      "requestSha256": "192ef6b42b7ec42221990830403d74f8d537b4573c88f580c073cbfe1c11a82a"
+    },
+    {
+      "id": "risk-explanation",
+      "currentEffort": "high",
+      "expected": [
+        "medium",
+        "high"
+      ],
+      "requestBytes": 1337,
+      "requestSha256": "f6657d1e6d4396d35a66321abe932a29085ab3c4119cb36b4fe9c86e841eea8f"
+    },
+    {
+      "id": "missing-context",
+      "currentEffort": "medium",
+      "expected": [
+        "keep"
+      ],
+      "requestBytes": 1270,
+      "requestSha256": "3271933df32127002ea57f5065dd9a554e6f65ad459114036e85db2c4fb3f9d8"
+    },
+    {
+      "id": "classifier-injection",
+      "currentEffort": "high",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestBytes": 1391,
+      "requestSha256": "2cba455b4c32320381e5497a55647410ed2eed633ef6291b6f4bb32c65605b3f"
+    },
+    {
+      "id": "long-context",
+      "currentEffort": "high",
+      "expected": [
+        "keep"
+      ],
+      "requestBytes": 11795,
+      "requestSha256": "39c2fe2ee61b215109c32bd04ea8e81c8fc9fe386123a73a79825637f9c80b8f"
+    }
+  ],
+  "mode": "live",
+  "attempted": 12,
+  "results": [
+    {
+      "id": "typo-ko",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.68,
+        "contextScore": 0.38,
+        "riskScore": 0.03
+      },
+      "latencyMs": 287,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "format-en",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.68,
+        "contextScore": 0.4,
+        "riskScore": 0.03
+      },
+      "latencyMs": 252,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "implementation",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.89,
+        "contextScore": 0.4,
+        "riskScore": 0.03
+      },
+      "latencyMs": 277,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "known-fix",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.71,
+        "contextScore": 0.4,
+        "riskScore": 0.06
+      },
+      "latencyMs": 288,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "debugging",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.37,
+        "contextScore": 0.4,
+        "riskScore": 0.09
+      },
+      "latencyMs": 388,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "review",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.41,
+        "contextScore": 0.35,
+        "riskScore": 0.03
+      },
+      "latencyMs": 258,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "concurrency",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.73,
+        "contextScore": 0.42,
+        "riskScore": 0.17
+      },
+      "latencyMs": 267,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "production-risk",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.76,
+        "contextScore": 0.45,
+        "riskScore": 0.96
+      },
+      "latencyMs": 259,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "risk-explanation",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.22,
+        "contextScore": 0.42,
+        "riskScore": 0.08
+      },
+      "latencyMs": 252,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "missing-context",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.58,
+        "riskScore": 0.18
+      },
+      "latencyMs": 262,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "classifier-injection",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.4,
+        "contextScore": 0.54,
+        "riskScore": 0.25
+      },
+      "latencyMs": 280,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    },
+    {
+      "id": "long-context",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.98,
+        "contextScore": 0.55,
+        "riskScore": 0.16
+      },
+      "latencyMs": 264,
+      "withinHookWaitBudget": true,
+      "needsReview": false
+    }
+  ],
+  "actualBilledUsd": null,
+  "actualTokens": null,
+  "modelReturned": null,
+  "enforceApproved": false,
+  "evidence": {
+    "codeBaseline": "1448256",
+    "completedAtUtc": "2026-09-27T10:51:27.831718+00:00",
+    "credentials": "User-designated project .env TYPESAFE_API_KEY; value not recorded",
+    "sourceSha256": {
+      "scripts/evaluate-jev.mjs": "22bf61c43071e32f1fd09ae02cbcc0b4b94a6cd45675472cf62e220ad355043e",
+      "scripts/jev-request.mjs": "e259422ccf27458cb419c9e0de4f82f8a233dbfe723fe517971f57497c9cffb5",
+      "src/providers/jev-contract.js": "db9bfaeaa267a67f84f2e38aa6c922edac2c9891513b4e3ebb5b9f303eb68a54",
+      "eval/jev-smoke.mjs": "a6d93e5d4cf331b28718a7f20ff9833b3173917205fad9ec4bf46b650fbde910"
+    },
+    "scope": "Direct shipped helper calls, not an interactive Claude session",
+    "nodeVersion": "v23.11.0"
+  },
+  "summary": {
+    "validResponses": 12,
+    "hypothesisMatches": 12,
+    "keepCount": 3,
+    "minLatencyMs": 252,
+    "medianLatencyMs": 265.5,
+    "maxLatencyMs": 388,
+    "observedWithin1000ms": 12
+  }
+}

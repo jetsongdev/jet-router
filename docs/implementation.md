@@ -38,7 +38,7 @@ failed with missing policy module (exit 1). Following implementation:
 
 | Command | Evidence |
 | --- | --- |
-| `npm test` | Exit 0; 39 offline policy, Jev protocol, transport, CLI and lifecycle tests passed |
+| `npm test` | Exit 0; 43 offline policy, Jev protocol, transport, CLI and lifecycle tests passed |
 | `npm run validate` | Exit 0; strict plugin/module and marketplace validation passed |
 | `npm run test:hooks` | Exit 0; 2 installed Claude 2.1.283 tests passed (fake/Jev), mocked downstream endpoints/process |
 | `git diff --check` | Exit 0; whitespace check |
@@ -106,3 +106,14 @@ The first new test run exposed a missing reject function in the test's deferred
 helper; that fixture was fixed. Strict validation also caught the host rule that
 $ cannot cross an import; the process adapter now lives at hook module scope,
 while protocol parsing remains a pure imported function.
+
+
+## First live smoke follow-up
+
+After the user requested the next evaluation and designated the project .env key,
+12 synthetic Jev calls completed successfully. [The run record](evaluations/jev-smoke-2026-09-27.md)
+separates these live helper results from prior mock-only evidence and identifies
+unknown billing/model metadata. No plugin installation, settings mutation or
+interactive Claude request was performed. The earlier no-live-call statements
+above describe the implementation stage before this follow-up. No enforce gate
+was relaxed after the results; context score calibration remains unresolved.
