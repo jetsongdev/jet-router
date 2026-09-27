@@ -37,14 +37,14 @@ test('invalid, empty, long inputs and malformed ids are skipped without provider
   }
 });
 
-for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${referenceEffort} is sent to provider, not displayed as actual effort`, async () => {
+for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${referenceEffort} is sent to provider and displayed before recommendation`, async () => {
   const shadow = createShadow({ ...config, referenceEffort }, async (state, key) => {
     assert.deepEqual(state, { userPrompt: input.prompt, currentEffort: referenceEffort });
     assert.equal(key, config.apiKey);
     return { decision };
   });
   const out = await shadow(input);
-  assert.equal(out.systemMessage, `[jet-router] low 추천 · Jev · shadow`);
+  assert.equal(out.systemMessage, `[jet-router] Jev.shadow(): ${referenceEffort} → low`);
   assert.equal(JSON.stringify(out).includes('canary'), false);
   assert.deepEqual(Object.keys(out).sort(), ['continue', 'systemMessage']);
   assert.equal(out.continue, true);
