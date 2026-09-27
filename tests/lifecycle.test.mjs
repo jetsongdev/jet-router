@@ -29,7 +29,7 @@ function world(provider = async () => choice, now = async () => 10, options = {}
     const stream = event('turn.step', e, async function* (value) { sent.push(value); yield 'chunk'; return 'result'; });
     assert.deepEqual(await stream.next(), { value: 'chunk', done: false });
     assert.deepEqual(await stream.next(), { value: 'result', done: true });
-    assert.equal(sent.at(-1), e);
+    assert.ok(sent.includes(e)); // Concurrent steps may finish in a different order.
   };
   return { event, command, start, submit, step, logs, calls, sent, expire: () => expire() };
 }
@@ -273,4 +273,36 @@ test('Jev off during a request drops the late reply without logging sensitive fa
   pending.reject(new Error('KEY_CANARY')); await new Promise(resolve => setImmediate(resolve));
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(w.logs.length, 0); assert.equal(w.calls.length, 0);
+});
+
+test('model changes discard a completed recommendation and the next turn can classify', async () => {
+  const w = world();
+  await w.start(); await w.command('shadow'); await w.submit(); await w.step();
+  await w.step({ index: 1, model: 'changed-model' });
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 0);
+  assert.equal(w.calls.length, 1);
+  await w.submit('t2', 'new request');
+  await w.step({ turnId: 't2', model: 'changed-model' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  assert.equal(w.calls.length, 2);
+  assert.equal(w.logs.length, 1);
+});
+
+test('model change during Jev classification cancels the stale result without changing requests', async () => {
+  const pending = deferred(), began = deferred();
+  let processes = 0;
+  const w = world(undefined, undefined, jevOptions, () => {
+    processes++; began.resolve(); return pending.promise;
+  });
+  await w.start(); await w.command('shadow'); await w.submit();
+  const first = w.step(); await began.promise;
+  await w.step({ index: 1, model: 'changed-model' });
+  await first;
+  pending.resolve(jevResult);
+  await new Promise(resolve => setImmediate(resolve));
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(processes, 1);
+  assert.equal(w.logs.length, 0);
+  assert.deepEqual(w.sent.map(e => e.model).sort(), ['changed-model', 'unchanged']);
 });

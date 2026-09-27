@@ -109,10 +109,12 @@ export function registerRouter(on, classify, options = {}) {
     const turn = turns.get(e.turnId);
     if (!turn || turn.completing) return yield* next(e);
     if (turn.started) {
+      if (turn.model !== (e.model ?? null)) invalidateTurn(turn);
       if (turn.record) turn.record.forwarded = safeEffort(e.effort);
       return yield* next(e);
     }
     turn.started = true;
+    turn.model = e.model ?? null;
     const effort = safeEffort(e.effort);
     const record = { provider, mode: 'shadow', original: effort,
       recommendation: 'keep', forwarded: effort, reasonCode: 'correlation', latencyMs: null };
