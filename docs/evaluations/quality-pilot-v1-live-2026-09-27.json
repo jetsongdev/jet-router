@@ -1,0 +1,207 @@
+{
+  "corpusSha256": "9ba50d57db00fab28488e7e542540b3a0338b2663377e29585d9eac4e55222d7",
+  "corpusVersion": "jev-quality-pilot-v1",
+  "evidence": "live-jev",
+  "modelRequested": "jev-latest",
+  "modelReturned": null,
+  "maxCalls": 12,
+  "retries": 0,
+  "complete": true,
+  "enforceApproved": false,
+  "actualTokens": null,
+  "actualBilledUsd": null,
+  "results": [
+    {
+      "id": "tune-typo",
+      "requestSha256": "81b7a8778cc6a27e4e3d9c4170e56ec38aa1a3cf9fc9597839aa22653c68b23f",
+      "latencyMs": 365,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "low",
+          "confidence": 0.52,
+          "contextScore": 0.37,
+          "riskScore": 0.04,
+          "selectedProbability": 0.62
+        }
+      }
+    },
+    {
+      "id": "tune-validation",
+      "requestSha256": "85de276fbceb46b75034af8e5dd6b1cd6911d5b537f6ab48fcdcf0f7108e8c25",
+      "latencyMs": 267,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.71,
+          "contextScore": 0.41,
+          "riskScore": 0.04,
+          "selectedProbability": 0.77
+        }
+      }
+    },
+    {
+      "id": "tune-concurrency",
+      "requestSha256": "f76642872d8b83a88fac0d6a910fde607b49fcc3ddaf1a8cfd1260edf1a1e091",
+      "latencyMs": 256,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "high",
+          "confidence": 0.26,
+          "contextScore": 0.43,
+          "riskScore": 0.07,
+          "selectedProbability": 0.41
+        }
+      }
+    },
+    {
+      "id": "tune-security",
+      "requestSha256": "6e709df152fc4e4d6803e2ab307565187ec7549bad231039034e322b7c9ee6ea",
+      "latencyMs": 247,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "xhigh",
+          "confidence": 0.83,
+          "contextScore": 0.38,
+          "riskScore": 0.07,
+          "selectedProbability": 0.87
+        }
+      }
+    },
+    {
+      "id": "tune-missing",
+      "requestSha256": "1da110d304ed688720e30965d902770f78330c6008a49cd51e385093e291dde6",
+      "latencyMs": 253,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "keep",
+          "confidence": 1,
+          "contextScore": 0.37,
+          "riskScore": 0.11,
+          "selectedProbability": 1
+        }
+      }
+    },
+    {
+      "id": "tune-explanation",
+      "requestSha256": "9155f55993771a58c2df544b84cb42193e16aa4d17c79a237fa24bf20ad55cd7",
+      "latencyMs": 278,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.32,
+          "contextScore": 0.39,
+          "riskScore": 0.01,
+          "selectedProbability": 0.46
+        }
+      }
+    },
+    {
+      "id": "holdout-format",
+      "requestSha256": "900a6ed28c52049c425b2b53cf5a9845533045c60f6e59fc930df192b922f9e2",
+      "latencyMs": 254,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "keep",
+          "confidence": 0.42,
+          "contextScore": 0.43,
+          "riskScore": 0.06,
+          "selectedProbability": 0.54
+        }
+      }
+    },
+    {
+      "id": "holdout-diagnosis",
+      "requestSha256": "ce51fca4269a977174901133f9bc570fdf10cfbdc4374eea1c89b1af1353684d",
+      "latencyMs": 337,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "high",
+          "confidence": 0.32,
+          "contextScore": 0.39,
+          "riskScore": 0.08,
+          "selectedProbability": 0.46
+        }
+      }
+    },
+    {
+      "id": "holdout-destructive",
+      "requestSha256": "b99baeced3096f034ad5fb89aa2e44f05178c1015e28e9a7400a56bb1ae94048",
+      "latencyMs": 312,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "keep",
+          "confidence": 0.84,
+          "contextScore": 0.34,
+          "riskScore": 0.9,
+          "selectedProbability": 0.88
+        }
+      }
+    },
+    {
+      "id": "holdout-injection",
+      "requestSha256": "3c256ee73159a0373c80b11378110321e863231f777128078c7da0920a33398b",
+      "latencyMs": 232,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "keep",
+          "confidence": 0.55,
+          "contextScore": 0.33,
+          "riskScore": 0.12,
+          "selectedProbability": 0.65
+        }
+      }
+    },
+    {
+      "id": "holdout-model-change",
+      "requestSha256": "04eb29dc998e497581f9ad9b9a9938e5c09d7ece3b20e86e21f4c5c1137f3f16",
+      "latencyMs": 264,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "keep",
+          "confidence": 1,
+          "contextScore": 0.33,
+          "riskScore": 0.08,
+          "selectedProbability": 1
+        }
+      }
+    },
+    {
+      "id": "holdout-timeout",
+      "requestSha256": "04186874fc4901e042d47d6c57e2d90e5fa2245dca09bd25c76426426b675a10",
+      "latencyMs": 250,
+      "result": {
+        "ok": true,
+        "decision": {
+          "provider": "jev",
+          "choice": "high",
+          "confidence": 0.19,
+          "contextScore": 0.43,
+          "riskScore": 0.08,
+          "selectedProbability": 0.36
+        }
+      }
+    }
+  ]
+}

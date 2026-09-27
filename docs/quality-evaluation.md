@@ -1,6 +1,6 @@
 # 추천 품질 파일럿 v1
 
-현재 단계는 **실행 전 평가 설계와 오프라인 채점기**다. Jev 실호출이나 작업 모델 비교는 하지 않았다.
+평가 설계·오프라인 채점기와 실호출 실행기를 구현했다. [첫 12건 실호출 결과](evaluations/quality-pilot-v1-live-2026-09-27.md)는 tune 6/6, holdout 5/6 기대 범위 일치였다. 작업 모델 비교는 하지 않았다.
 기존 계약 fixture 14개와 smoke 12개를 추천 정확도 평가로 재사용하지 않는다.
 
 ## 고정한 입력과 가설
@@ -32,7 +32,7 @@ node scripts/evaluate-quality.mjs --dry-run
 
 다음 실호출 단계의 제안 한도는 **12건, 순차 1회, 자동 재시도 0회**다. 전송·스키마·timeout
 실패가 발생하면 중단해 원인을 기록한다. 중단된 일부 결과를 전체 평가 성공으로 집계하지 않는다.
-금액은 아직 측정하지 않았으며, 실호출 실행기와 별도 실행 범위를 확정한 뒤 수행한다.
+금액은 아직 측정하지 않았다. 승인된 첫 실행은 12건 모두 완료했으며 재실행은 별도 실행 범위를 정한다.
 
 ## 결과 입력과 채점
 
@@ -73,3 +73,17 @@ node scripts/evaluate-quality.mjs --score /absolute/path/to/results.json
 
 모든 출력은 enforceApproved=false다. 이 파일럿은 기준 개선용이며 배포 합격선이 아니다.
 향후 기본 effort 대비 작업 성공률·회귀·비용 비교의 허용 범위는 실행 전에 별도로 확정해야 한다.
+
+
+## 실호출 실행기
+
+```sh
+node scripts/run-quality.mjs --live --key-file /absolute/path/to/.env > results.json
+# 또는 환경변수 이름만 지정
+node scripts/run-quality.mjs --live --key-env TYPESAFE_API_KEY > results.json
+```
+
+키 파일에서는 TYPESAFE_API_KEY만 파싱하며 shell로 실행하지 않는다. 순차 최대 12건,
+재시도 없이 첫 실패에서 중단한다. 제품과 동일한 routingInput/helper 경로를 사용한다.
+모든 결과에는 실제 호출에 대응하는 계획 해시와 정규화된 점수만 저장한다.
+중단 시 결과 파일을 보존하고 종료 코드 1을 반환한다. 부분 결과는 전체 채점기에 넣지 않는다.

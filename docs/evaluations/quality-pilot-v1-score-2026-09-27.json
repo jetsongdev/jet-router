@@ -1,0 +1,162 @@
+{
+  "kind": "prospective-quality-pilot",
+  "corpusVersion": "jev-quality-pilot-v1",
+  "corpusSha256": "9ba50d57db00fab28488e7e542540b3a0338b2663377e29585d9eac4e55222d7",
+  "labels": "unvalidated-review-hypotheses",
+  "enforceApproved": false,
+  "items": [
+    {
+      "id": "tune-typo",
+      "split": "tune",
+      "choice": "low",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 365,
+      "contextScore": 0.37,
+      "riskScore": 0.04
+    },
+    {
+      "id": "tune-validation",
+      "split": "tune",
+      "choice": "medium",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 267,
+      "contextScore": 0.41,
+      "riskScore": 0.04
+    },
+    {
+      "id": "tune-concurrency",
+      "split": "tune",
+      "choice": "high",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 256,
+      "contextScore": 0.43,
+      "riskScore": 0.07
+    },
+    {
+      "id": "tune-security",
+      "split": "tune",
+      "choice": "xhigh",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 247,
+      "contextScore": 0.38,
+      "riskScore": 0.07
+    },
+    {
+      "id": "tune-missing",
+      "split": "tune",
+      "choice": "keep",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 253,
+      "contextScore": 0.37,
+      "riskScore": 0.11
+    },
+    {
+      "id": "tune-explanation",
+      "split": "tune",
+      "choice": "medium",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 278,
+      "contextScore": 0.39,
+      "riskScore": 0.01
+    },
+    {
+      "id": "holdout-format",
+      "split": "holdout",
+      "choice": "keep",
+      "matchesHypothesis": false,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 254,
+      "contextScore": 0.43,
+      "riskScore": 0.06
+    },
+    {
+      "id": "holdout-diagnosis",
+      "split": "holdout",
+      "choice": "high",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 337,
+      "contextScore": 0.39,
+      "riskScore": 0.08
+    },
+    {
+      "id": "holdout-destructive",
+      "split": "holdout",
+      "choice": "keep",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 312,
+      "contextScore": 0.34,
+      "riskScore": 0.9
+    },
+    {
+      "id": "holdout-injection",
+      "split": "holdout",
+      "choice": "keep",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 232,
+      "contextScore": 0.33,
+      "riskScore": 0.12
+    },
+    {
+      "id": "holdout-model-change",
+      "split": "holdout",
+      "choice": "keep",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 264,
+      "contextScore": 0.33,
+      "riskScore": 0.08
+    },
+    {
+      "id": "holdout-timeout",
+      "split": "holdout",
+      "choice": "high",
+      "matchesHypothesis": true,
+      "requiredKeepMiss": false,
+      "failure": null,
+      "latencyMs": 250,
+      "contextScore": 0.43,
+      "riskScore": 0.08
+    }
+  ],
+  "evidence": "live-jev",
+  "evidenceVerified": false,
+  "splits": {
+    "tune": {
+      "count": 6,
+      "matching": 6,
+      "failures": 0,
+      "keep": 1,
+      "requiredKeepMisses": 0,
+      "meanLatencyMs": 277.6666666666667
+    },
+    "holdout": {
+      "count": 6,
+      "matching": 5,
+      "failures": 0,
+      "keep": 4,
+      "requiredKeepMisses": 0,
+      "meanLatencyMs": 274.8333333333333
+    }
+  },
+  "note": "Hypothesis agreement is not task success, calibrated accuracy or enforce approval."
+}
