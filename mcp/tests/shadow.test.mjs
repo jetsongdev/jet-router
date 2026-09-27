@@ -44,7 +44,7 @@ for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${ref
     return { decision };
   });
   const out = await shadow(input);
-  assert.equal(out.systemMessage, `[jet-router] ${referenceEffort} - Jev -> low (shadow)`);
+  assert.equal(out.systemMessage, `[jet-router] ${referenceEffort} - [Jev] -> low (shadow)`);
   assert.equal(JSON.stringify(out).includes('canary'), false);
   assert.deepEqual(Object.keys(out).sort(), ['continue', 'systemMessage']);
   assert.equal(out.continue, true);

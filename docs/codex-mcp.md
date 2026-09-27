@@ -107,7 +107,7 @@ GUI 클라이언트는 이 터미널 환경을 자동 상속하지 않을 수 �
 예상 안내:
 
 ```text
-[jet-router] medium - Jev -> low (shadow)
+[jet-router] medium - [Jev] -> low (shadow)
 [jet-router] Jev 생략: 전송 미동의 (shadow)
 ```
 

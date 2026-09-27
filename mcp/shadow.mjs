@@ -60,7 +60,7 @@ export function createShadow(config, classify = classifyJev) {
       const checked = parseHelperBody(classified?.decision
         ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason });
       if (!checked.decision) return message(`Jev 생략: ${checked.reason}`);
-      return message(`${config.referenceEffort} - Jev -> ${checked.decision.choice}`);
+      return message(`${config.referenceEffort} - [Jev] -> ${checked.decision.choice}`);
     } catch {
       return message('Jev 생략: provider-error');
     } finally {
