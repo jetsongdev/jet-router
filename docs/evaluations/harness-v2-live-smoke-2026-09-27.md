@@ -66,3 +66,17 @@ Codex는 코드와 실행 명령을 출력했으며 직접 테스트를 실행�
 `node --test <임시폴더>/count-items.test.mjs <임시폴더>/limiter.test.mjs` 종료 코드 0, 6/6 통과.
 null/undefined, 배열, 잘못된 입력, FIFO/동시 실행 수 1, sync throw/reject 이후 큐 진행 및 원래 오류 전달을 검사했다.
 이는 현재 Codex 설정의 생성 코드에 대한 로컬 테스트이며 Jev 추천 effort로 실행한 품질 비교가 아니다.
+
+
+## Codex 취소 후 다음 턴 복구와 확률 표시
+
+- 2026-09-27 22:47~22:48 KST, 코드 `3d97848`, 새 Codex 0.157.1 세션 `jet-router-cancel`, pane `w10:p4`.
+- 파일/도구 사용을 금지한 Promise 설명 합성 요청을 제출했다.
+- `Jev.shadow(): medium → keep (50%)`와 working 상태를 확인한 뒤 Escape를 보냈다.
+- interrupted 표시와 idle 복귀를 확인하고 같은 세션에 greeting 오타 요청을 제출했다.
+- 새 안내 `Jev.shadow(): medium → low (74%)`가 표시되고 Hello로 수정한 코드가 정상 반환됐다.
+- 화면 설정은 GPT-6-Astra medium이었다. 임의 재시도와 설정 변경은 하지 않았다.
+
+검증 범위는 **Jev 판정 완료 후 Codex 작업 취소 → 다음 턴 정상 판정/응답**이다.
+Jev HTTP 요청이 진행 중인 순간의 취소, 오래된 MCP 응답 수신, 실제 요청 effort trace는 검증하지 않았다.
+확률은 선택 후보의 확률이며 keep은 노력 수준이 아닌 변경 보류 선택이다.
