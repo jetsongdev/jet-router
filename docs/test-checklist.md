@@ -103,3 +103,9 @@ MCP 연결/도구 schema/미동의·오류/동시 요청 처리는 오프라인 
 
 클라이언트가 추천을 실제 적용하는 enforce, 지원 effort 매핑, 기본값 복귀 검증은
 이번 구현 범위 밖이며 N/A다.
+
+## Claude Code 실제 코드·토큰 비교
+
+[전용 체크리스트](claude-quality-checklist.md)에 설치 shadow 확인, 무과금 plan, 1과제 smoke,
+6과제 반복 비교, 결과 리포트 생성 명령을 정리했다. Codex와 같은 합성 과제·독립 검사를 쓰되
+Claude 캐시 읽기/쓰기 집계는 별도로 처리한다. CLI 비교 스크립트는 플러그인 enforce를 실행하지 않는다.

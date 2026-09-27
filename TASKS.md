@@ -208,3 +208,10 @@ Jev에 제공하는 후보와 사용자에게 표시하는 유효 추천은 활�
 - [x] 24개 코드 독립 검사·재검사, 토큰·캐시·지연 비교와 공식 API/Codex 단가 추정 리포트 작성.
 - 결과: [토큰·비용 리포트](docs/evaluations/downshift-2026-09-28/README.md). 양쪽 12/12 통과, 출력 47.9% 감소. 동일 캐시 비용 13.1% 감소는 Jev 비용 제외 가정값.
 - 범위: 재사용 합성 4과제, gpt-6-astra, 기본 xhigh. 최소 필요 effort·전체 요청 순절감·enforce 품질 기준은 입증하지 않음.
+
+## Claude 동일 과제 비교 준비 — 2026-09-28
+
+- [x] [설치·비교 체크리스트](docs/claude-quality-checklist.md), smoke/full 설정, 무과금 plan, Jev route, 독립 CLI run, 오프라인 report 구현.
+- [x] 환경변수 effort 우선순위, 모델별 후보 제한, 세션 분리, 캐시 읽기/쓰기, 실패 중단·부분 결과 검증을 mock으로 확인.
+- [ ] 토큰 확보 후 Claude smoke 및 full 실제 실행. 설치 UI·서버 effort 적용은 아직 미검증.
+- 제품 enforce 자동 적용은 미구현 상태 유지.

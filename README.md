@@ -145,3 +145,5 @@ Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했�
 [실제 코드 품질 비교·그래프](docs/evaluations/task-quality-2026-09-27/README.md): Codex gpt-6-astra의 48개 독립 실행을 저장·재검사했습니다. 세 지침 변경안은 모두 기준선과 동률이라 폐기했습니다. 작은 합성 과제군에서 품질 향상은 확인하지 못했으며, enforce 활성화 근거로 사용하지 않습니다.
 
 [하향 추천 적용 시 토큰·예상 비용 비교](docs/evaluations/downshift-2026-09-28/README.md): 기본 xhigh와 Jev 추천 medium/high를 24회 실제 실행했습니다. 하향 추천된 4과제에서 검사 통과를 유지하며 출력 토큰 47.9% 감소를 관측했습니다. 공식 단가 예상 비용은 관측 캐시 기준 19.0%, 동일 캐시 비율 가정에서 13.1% 감소했으며 Jev 비용은 제외했습니다.
+
+[Claude Code 동일 과제 비교 체크리스트·스크립트](docs/claude-quality-checklist.md): shadow 설치 확인과 CLI 명시적 effort 비교를 구분합니다. `node scripts/claude-quality.mjs plan eval/claude-quality/smoke.json`은 모델 호출 없이 실행 계획을 확인합니다. 실제 Claude 생성 검증은 아직 보류이며 enforce 구현을 의미하지 않습니다.
