@@ -120,7 +120,8 @@ Jev에 제공하는 후보와 사용자에게 표시하는 유효 추천은 활�
   Claude는 훅의 model/effort, Codex는 사용자 참고 effort를 사용한다.
   미확인 모델·지원 목록·맥락은 추정하지 않고 불확실성으로 전달하며 shadow만 허용한다.
 - [x] 새 기준 Jev 실호출 3건을 실제 MCP/STDIO 경로로 확인했다. [실행 기록](docs/evaluations/harness-v2-live-smoke-2026-09-27.md).
-- [ ] 연결 후 실제 Claude/Codex 입력창의 훅 동작을 재검증한다. MCP 직접 호출 결과와 구분한다.
+- [x] 새 Codex 0.157.1 입력창에서 오타 프롬프트의 훅 표시와 정상 응답을 Herdr로 확인했다.
+- [ ] Claude 입력창과 Codex 반복/취소 사례를 추가 검증한다. 화면 설정은 실제 요청 trace와 구분한다.
 
 ### 2단계 — 응답 검사와 오프라인 회귀 평가
 

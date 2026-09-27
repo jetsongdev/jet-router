@@ -18,10 +18,27 @@
 ## 검증 한계
 
 - Codex 입력창의 UserPromptSubmit 훅을 이번 실행에서 호출한 것은 아니다.
-  새 프로세스로 MCP 서버에 직접 연결했다. Codex 재시작 후 화면 표시 확인은 별도다.
+  새 프로세스로 MCP 서버에 직접 연결했다. 이후 Herdr로 별도 검증한 결과는 아래에 기록한다.
 - 실제 작업 모델을 실행하거나 effort를 변경하지 않았다. 추천 품질·토큰 절감 증거가 아니다.
 - 사례별 1회 호출이다. 이전 수동 limiter 사례의 medium과 차이가 있지만,
   이번에는 기준도 v2로 변경되어 반복 안정성이나 개선의 증거로 해석하지 않는다.
 - 반환 provider 모델 버전·실제 토큰·비용은 이 MCP 응답에서 확인하지 못했다.
 
 [정규화 실행 결과](harness-v2-live-smoke-2026-09-27.json)
+
+
+## 실제 Codex 입력창 확인 — Herdr
+
+- 2026-09-27 22:25 KST, 오른쪽 테스트 pane `w10:p4`, agent `jet-router-smoke`.
+- Codex 0.157.1을 테스트 폴더에서 새로 시작했다. 화면 모델은 GPT-6-Astra medium.
+- 같은 greeting 오타 프롬프트 1건을 `herdr agent prompt`로 입력창에 제출했다.
+- `herdr agent read --source recent-unwrapped`에서 다음을 확인했다:
+
+```text
+↳ Hook · [jet-router] Jev.shadow(): medium → low
+```
+
+Codex는 Hello로 수정한 함수 코드를 반환하고 idle로 돌아왔다. 턴 종료 후 화면 설정도 medium이다.
+이는 native UserPromptSubmit → MCP → 새 하네스 → Jev → 표시 → 응답 흐름의 단일 사례 증거다.
+실제 요청의 effort wire trace, 반복 안정성, Claude 입력창은 검증하지 않았다.
+테스트 pane은 사용자가 확인할 수 있도록 열어 두었다.
