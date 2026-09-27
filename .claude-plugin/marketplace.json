@@ -2,5 +2,5 @@
   "name": "jet-router",
   "owner": { "name": "jetsongdev" },
   "metadata": { "description": "Experimental Claude Code effort routing plugins" },
-  "plugins": [{ "name": "jet-router", "source": "./", "description": "Offline effort routing preview for Claude Code" }]
+  "plugins": [{ "name": "jet-router", "source": "./", "description": "Fake and opt-in Jev shadow effort routing for Claude Code" }]
 }

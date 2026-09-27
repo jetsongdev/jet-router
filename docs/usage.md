@@ -166,7 +166,7 @@ Jev shadow의 표시 예시입니다. “미평가”는 응답 형식만 검증
 
 `유지`는 라우터가 다음 훅에 넘긴 요청값을 설명합니다. 서버 수신이나 모델 내부 추론량을 증명하지 않습니다. 지연은 전체 Claude 응답 시간이 아니라 분류 대기 시간입니다. 신뢰도·비용 절감량은 현재 표시하지 않습니다.
 
-## 7. 로컬 marketplace 설치와 향후 공개 설치
+## 7. 로컬·공개 marketplace 설치
 
 폴더 직접 로드가 아닌 설치 방식이 필요할 때만 사용합니다. 다음은 Claude 세션 안에서 실행하는 명령이며 사용자 설정·설치 상태를 변경합니다.
 
@@ -175,14 +175,14 @@ Jev shadow의 표시 예시입니다. “미평가”는 응답 형식만 검증
 /plugin install jet-router@jet-router
 ```
 
-원격 코드와 manifest를 게시한 이후에는 다음 형태로 설치할 수 있습니다. **현재 로컬 구현을 이 작업에서 원격에 푸시하지 않았으므로 지금 사용 가능한 배포 명령으로 보장하지 않습니다.**
+코드와 manifest는 공개 저장소에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`입니다. Claude 세션 안에서 다음 형태로 설치합니다.
 
 ```text
 /plugin marketplace add jetsongdev/jet-router
 /plugin install jet-router@jet-router
 ```
 
-설치 범위를 확인하고, 로드가 보류되면 화면의 안내를 따릅니다. GitHub marketplace 추가 및 설치 형식의 근거는 [공식 설치 문서](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace)입니다. 이 두 설치 절차는 jet-router에서 실제 실행하지 않았습니다.
+설치 범위를 확인하고, 로드가 보류되면 화면의 안내를 따릅니다. GitHub marketplace 추가 및 설치 형식의 근거는 [공식 설치 문서](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace)입니다. 원격 새 clone의 테스트·manifest 검증은 통과했지만 이 두 marketplace 설치 절차는 jet-router에서 실제 실행하지 않았습니다.
 
 ## 8. 중지와 문제 해결
 

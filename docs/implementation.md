@@ -134,3 +134,19 @@ including every request hash; `git diff --check` exited 0. Existing stale-result
 request identity, consent, key, timeout and helper CLI tests cover the touched
 paths. No real API calls or credential reads were needed for this refactor.
 The prior live report remains an immutable record of its earlier source hashes.
+
+
+## Publication and clean-checkout verification
+
+The user explicitly requested a push. Published `feat/effort-router` to
+`https://github.com/jetsongdev/jet-router.git`; remote SHA matched
+`c9517b6e42be1b812d361661e027c908ac96fc85`. The previously empty remote now points
+HEAD at that branch. No force push, main-branch merge, PR, tag or release was made.
+
+Cloned the public branch into a fresh temporary directory without .env, local
+handoff documents or dependencies. `npm test` (43), `npm run test:hooks` (2), and
+`npm run validate` all exited 0; the clone stayed clean. This verifies shipped
+files and offline runtime loading, not marketplace installation, secure-storage
+configuration or an interactive Claude session. README/usage now reflect the
+published repository and include the remote installation commands. The old
+no-push statements above describe earlier stages.

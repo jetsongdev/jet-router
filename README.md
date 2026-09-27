@@ -22,7 +22,16 @@
 
 ## 시작하기
 
-플러그인 코드가 있는 로컬 폴더를 지정합니다. 아래 경로는 실제 경로로 바꾸세요.
+공개 저장소에서 설치하려면 Claude 세션 안에서 실행합니다.
+
+```text
+/plugin marketplace add jetsongdev/jet-router
+/plugin install jet-router@jet-router
+```
+
+설치 후 function hooks 활성화 설정을 확인하고 Claude의 reload/재시작 안내를 따릅니다. 원격에서 새로 clone한 코드의 테스트·manifest 검증은 통과했으며, 위 marketplace 설치와 실제 설정 UI는 아직 수동 검증하지 않았습니다. 자세한 활성화 방법은 [사용 가이드](docs/usage.md)를 참고하세요.
+
+로컬 폴더에서 직접 로드하려면 플러그인 코드가 있는 폴더를 지정합니다. 아래 경로는 실제 경로로 바꾸세요.
 
 ```sh
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-router
@@ -111,4 +120,4 @@ npm run test:hooks
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)
 
-현재 구현은 로컬 브랜치에 있으며 이 작업에서는 원격에 게시하지 않았습니다. 공개 설치 전에 코드 게시와 배포 라이선스 선택이 필요합니다.
+코드는 [공개 저장소](https://github.com/jetsongdev/jet-router)에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`이며 정식 release/tag는 없습니다. 배포 라이선스는 아직 선택하지 않았습니다.
