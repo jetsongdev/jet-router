@@ -214,3 +214,29 @@ manifests. All commands exited 0. Native Codex hook/UI checks remain manual;
 no live API calls or user settings changes were made. The user authorized pushing
 the isolated branch after this verification; default-branch integration remains
 separate.
+
+
+## HARNESS-001 stage one — offline request preparation
+
+Implemented `src/harness.js` with explicit host/reference/unknown provenance,
+model capabilities, event correlation and context-missing state. Request choices
+are the intersection of advertised fixture capabilities and current policy,
+plus keep. All outputs remain enforce-ineligible. Unknown required facts skip;
+model summaries are unverified input, not host facts. No adapter runtime or
+existing provider transport was changed.
+
+Added a fixed 14-case contract corpus and an offline-only runner. Reports contain
+versions and request hashes, not prompt/context/event ids or credentials. A
+committed report detects request drift; it is contract evidence, not Jev quality
+or verified model capabilities. Initial focused tests failed with the expected
+missing-module error (exit 1); after implementation all 20 new tests passed.
+
+Verification: `npm test` (65), `npm --prefix mcp test` (18),
+`npm run test:hooks` (2) and `npm run validate` all exit 0.
+`node scripts/evaluate-harness.mjs --dry-run` exits 0, fixtures 14/14, provider
+calls 0. No credentials were read or live API/model requests performed.
+
+Next: establish actual host capability/context provenance, validate dynamic
+response choices and transport, then wire adapters. Current helper rebuilds
+fixed-choice requests and cannot consume the new prepared payload as-is.
+See [harness guide](harness.md) and [TASKS](../TASKS.md) for boundaries.
