@@ -21,7 +21,9 @@ requests, secret lookup or project-prompt transmission were performed.
   fake shadow, status/off/lock/unlock commands, enforce refusal.
 - Conservative prompt/turn matching, bounded wait, cancellation on lifecycle
   changes and rejection of stale outcomes; identical request delegation.
-- Sanitized UI records with no prompt/key/error body and no separate log files.
+- One sanitized summary after main-turn completion, with no prompt/key/error body
+  or separate log files. Assistant response content is unchanged; duplicate
+  tool-step/subagent summaries and stale summaries are suppressed.
 - Pure Jev request builder and strict parser, opt-in taskContext, bounded inputs,
   distribution and finite-number validation. No network adapter.
 
@@ -36,7 +38,7 @@ failed with missing policy module (exit 1). Following implementation:
 
 | Command | Evidence |
 | --- | --- |
-| `npm test` | Exit 0; 17 offline policy, Jev protocol and lifecycle tests passed |
+| `npm test` | Exit 0; 20 offline policy, Jev protocol and lifecycle tests passed |
 | `npm run validate` | Exit 0; strict plugin/module and marketplace validation passed |
 | `npm run test:hooks` | Exit 0; 1 installed Claude 2.1.283 test passed, mocked downstream endpoints |
 | `git diff --check` | Exit 0; whitespace check |

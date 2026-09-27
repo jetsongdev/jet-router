@@ -52,8 +52,20 @@ Subagents, max effort and unsupported effort values bypass classification.
 One decision is reused as an observation for the turn; subsequent steps are not
 classified again. A stalled fixture is bounded to 1 second.
 
-Logs contain only provider/mode, original/recommended/forwarded effort, reason
-code and classifier latency. `forwarded` means delegated to the next hook, not
+After the main turn completes, one separate line appears below the response:
+
+```text
+[jet-router] shadow · fake · high → 추천 low · high 유지 · 0ms · shadow
+```
+
+This example uses the `low` fixture; the default recommendation is `keep`.
+The assistant answer itself is unchanged. No duplicate line appears for tool
+steps or subagents. Interrupted/error turns are labeled; off/lock/session changes
+suppress pending summaries. If effort changed manually during the tool loop, the
+line shows the last forwarded effort rather than claiming the initial one stayed.
+
+The line contains only provider/mode, original/recommended/forwarded effort,
+reason code and classifier latency. Forwarded means delegated to the next hook, not
 confirmed on the wire or a measurement of internal reasoning. Jet-router writes
 no log files; UI messages may remain in Claude's own transcript retention.
 It does not read files, past conversations, environment keys or SDD documents.

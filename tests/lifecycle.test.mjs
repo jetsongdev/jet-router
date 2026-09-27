@@ -37,9 +37,11 @@ test('off does not classify; shadow is explicit and delegates identical requests
   const w = world(); await w.start(); await w.submit(); await w.step();
   assert.equal(w.calls.length, 0);
   await w.command('shadow'); await w.submit(); await w.step(); await w.step({ index: 1 });
-  assert.equal(w.calls.length, 1); assert.equal(w.logs.length, 1);
-  assert.match(w.logs[0], /"recommendation":"low"/);
-  assert.match(w.logs[0], /"forwarded":"high"/);
+  assert.equal(w.calls.length, 1); assert.equal(w.logs.length, 0);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 1);
+  assert.match(w.logs[0], /high → 추천 low/);
+  assert.match(w.logs[0], /high 유지/);
   assert.ok(!w.logs[0].includes('CANARY_SECRET'));
 });
 
@@ -84,9 +86,11 @@ test('timeout and errors preserve the original and never leak exception text', a
   const w = world(() => { began.resolve(); return pending.promise; });
   await w.start(); await w.command('shadow'); await w.submit();
   const stepping = w.step(); await began.promise; w.expire(); await stepping;
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.match(w.logs[0], /timeout/); pending.resolve(choice);
   const broken = world(() => { throw new Error('SECRET_API_KEY'); });
   await broken.start(); await broken.command('shadow'); await broken.submit(); await broken.step();
+  await broken.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.match(broken.logs[0], /provider-error/); assert.ok(!broken.logs[0].includes('SECRET_API_KEY'));
 });
 
@@ -121,4 +125,41 @@ test('off while the clock yields prevents even starting classification', async (
   const stepping = w.step();
   await w.command('off'); await stepping;
   assert.equal(w.calls.length, 0); assert.equal(w.logs.length, 0);
+});
+
+
+test('footer appears after completion delegation, once, and uses the last forwarded effort', async () => {
+  const w = world(); await w.start(); await w.command('shadow'); await w.submit(); await w.step();
+  await w.step({ index: 1, effort: 'medium' });
+  await w.event('turn.complete', { turnId: 't1', agentId: 'child' });
+  assert.equal(w.logs.length, 0);
+  const result = await w.event('turn.complete', { turnId: 't1', reason: 'answer' }, async () => {
+    assert.equal(w.logs.length, 0);
+    return { untouched: true };
+  });
+  assert.deepEqual(result, { untouched: true });
+  assert.equal(w.logs.length, 1);
+  assert.match(w.logs[0], /마지막 요청 medium/);
+  assert.ok(!w.logs[0].includes('\n'));
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 1);
+});
+
+test('off or session change during completion suppresses the stale footer', async () => {
+  for (const action of ['off', 'session']) {
+    const w = world(); await w.start(); await w.command('shadow'); await w.submit(); await w.step();
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' }, async () => {
+      if (action === 'off') await w.command('off'); else await w.start();
+    });
+    assert.equal(w.logs.length, 0);
+  }
+});
+
+test('interrupted and failed completed turns are labeled without changing responses', async () => {
+  for (const [reason, label] of [['aborted', '중단'], ['error', '오류'], ['refusal', '거절']]) {
+    const w = world(); await w.start(); await w.command('shadow'); await w.submit(); await w.step();
+    const response = { text: 'original response' };
+    assert.equal(await w.event('turn.complete', { turnId: 't1', reason }, async () => response), response);
+    assert.equal(w.logs.length, 1); assert.ok(w.logs[0].endsWith(label));
+  }
 });

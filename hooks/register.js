@@ -52,7 +52,7 @@ export function registerRouter(on, classify) {
       !['composer', 'bridge'].includes(e.origin?.kind) || Boolean(e.attachments?.length) ||
       Boolean(e.context?.length) || !e.text.trim() || e.text.length > 6000;
     if (ambiguous) {
-      for (const turn of turns.values()) { turn.valid = false; turn.cancel?.(); }
+      for (const turn of turns.values()) { turn.valid = false; turn.record = undefined; turn.cancel?.(); }
     }
     const ticket = { text: ambiguous ? undefined : e.text, ambiguous };
     pending = ticket;
@@ -76,19 +76,31 @@ export function registerRouter(on, classify) {
     return next(e);
   });
 
-  on('turn.complete', ($, e, next) => {
-    if (e.agentId === undefined) {
-      const turn = turns.get(e.turnId);
-      if (turn) { turn.valid = false; turn.cancel?.(); }
-      turns.delete(e.turnId);
+  on('turn.complete', async ($, e, next) => {
+    const turn = e.agentId === undefined ? turns.get(e.turnId) : undefined;
+    if (!turn || turn.completing) return next(e);
+    turn.completing = true;
+    turn.valid = false;
+    turn.cancel?.();
+    try {
+      const result = await next(e);
+      if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn && turn.record) {
+        publish($, turn.record, e.reason);
+      }
+      return result;
+    } finally {
+      if (turns.get(e.turnId) === turn) turns.delete(e.turnId);
     }
-    return next(e);
   });
 
   on('turn.step', async function* ($, e, next) {
     if (mode !== 'shadow' || locked || e.agentId !== undefined) return yield* next(e);
     const turn = turns.get(e.turnId);
-    if (!turn || turn.started) return yield* next(e);
+    if (!turn || turn.completing) return yield* next(e);
+    if (turn.started) {
+      if (turn.record) turn.record.forwarded = safeEffort(e.effort);
+      return yield* next(e);
+    }
     turn.started = true;
     const record = { provider: 'fake', mode: 'shadow', original: safeEffort(e.effort),
       recommendation: 'keep', forwarded: safeEffort(e.effort), reasonCode: 'correlation', latencyMs: 0 };
@@ -118,7 +130,7 @@ export function registerRouter(on, classify) {
       record.latencyMs = Math.max(0, (await $.clock.now()) - began);
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (safeEffort(e.effort) === 'unsupported') record.reasonCode = 'unsupported';
-    if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn) publish($, record);
+    if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn) turn.record = record;
     // Shadow always delegates the exact original object, including all fields.
     return yield* next(e);
   });
@@ -128,8 +140,11 @@ function safeEffort(value) {
   return ['low', 'medium', 'high', 'xhigh', 'max'].includes(value) ? value : 'unsupported';
 }
 
-function publish($, record) {
+function publish($, record, outcome) {
   // Provider strings, prompts, errors, IDs and API keys never enter the UI.
-  const text = `[jet-router] ${JSON.stringify(record)}`;
-  try { $.ui.status(text); $.ui.log(text); } catch { /* Display is optional. */ }
+  const forwarded = record.original === record.forwarded
+    ? `${record.forwarded} 유지` : `마지막 요청 ${record.forwarded}`;
+  const ending = outcome === 'aborted' ? ' · 중단' : outcome === 'error' ? ' · 오류' : outcome === 'refusal' ? ' · 거절' : '';
+  const text = `[jet-router] ${record.mode} · ${record.provider} · ${record.original} → 추천 ${record.recommendation} · ${forwarded} · ${record.latencyMs}ms · ${record.reasonCode}${ending}`;
+  try { $.ui.log(text); } catch { /* Display is optional. */ }
 }

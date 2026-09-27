@@ -13,6 +13,10 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     on('ui.status', () => ({ value: undefined }));
     on('ui.log', ($, e) => { logs.push(e.text); return { value: undefined }; });
     on('turn.start', ($, e) => ({ turnId: e.turnId }));
+    on('turn.complete', ($, e) => {
+      expect(logs).toHaveLength(0);
+      return { text: e.answer };
+    });
     on('prompt.submit', async ($, e) => {
       await engine.turn.start({ turnId: 'runtime-turn', text: e.text });
       return { text: e.text, origin: e.origin };
@@ -31,9 +35,13 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     for await (const chunk of stream) void chunk;
     await stream.result;
     expect(requests).toEqual([input]);
+    expect(logs).toHaveLength(0);
+    const completed = await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
+    expect(completed.text).toBe('done');
     expect(logs).toHaveLength(1);
-    expect(logs[0]).toContain('"provider":"fake"');
-    expect(logs[0]).toContain('"reasonCode":"context"');
+    expect(logs[0]).toContain('[jet-router] shadow · fake');
+    expect(logs[0]).toContain('high → 추천 keep · high 유지');
+    expect(logs[0]).toContain('context');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
     expect((await command('enforce')).text).toContain('unavailable');
   });
