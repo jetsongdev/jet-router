@@ -1,0 +1,10 @@
+{
+  "taskId": "effort-router-sdd-01",
+  "specRepository": "https://github.com/jetsongdev/project-handoffs",
+  "specPath": "projects/jev-companion/tasks/effort-router-sdd-01",
+  "specSha": "73bb4001ba941b1510e4c02b71a8f7b662023eb2",
+  "codeRepository": "https://github.com/jetsongdev/jet-router",
+  "codeBaseline": "02d90fdd2ed063be0a8507dde5726a05038ab6f0",
+  "executionBasis": "User requested official documentation review and implementation after the pinned P0 report. Local implementation only; no push, installation, live provider calls or enforce activation.",
+  "scope": "P1 policy, P2 offline hook preview, P3 pure Jev protocol preparation; provider transport and P4/P5 remain gated"
+}

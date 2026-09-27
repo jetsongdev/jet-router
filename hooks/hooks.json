@@ -1,0 +1,4 @@
+{
+  "description": "Offline effort routing preview; off by default",
+  "modules": ["./register.js"]
+}

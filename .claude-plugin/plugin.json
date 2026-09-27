@@ -1,0 +1,15 @@
+{
+  "name": "jet-router",
+  "version": "0.1.0",
+  "description": "Experimental Claude Code effort router: offline off/shadow preview",
+  "author": { "name": "jetsongdev" },
+  "repository": "https://github.com/jetsongdev/jet-router",
+  "userConfig": {
+    "fakeChoice": {
+      "type": "string",
+      "title": "Offline fixture recommendation",
+      "description": "Testing only: keep, low, medium, high, or xhigh. No model is called.",
+      "default": "keep"
+    }
+  }
+}
