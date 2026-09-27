@@ -30,3 +30,12 @@ test('status explains current mode and keeps the previous result explicitly hist
   assert.match(text, /외부 전송: 없음/);
   assert.match(status('shadow', false), /최근 완료: 없음/);
 });
+
+test('Jev status distinguishes consent from activity and marks recommendations unevaluated', () => {
+  assert.match(status('shadow', false, undefined, 'jev', false), /차단\(미동의\)/);
+  assert.match(status('off', false, undefined, 'jev', true), /중지\(동의됨\)/);
+  assert.match(status('shadow', true, undefined, 'jev', true), /중지\(동의됨\)/);
+  assert.match(status('shadow', false, undefined, 'jev', true), /허용\(분류 대상 입력\)/);
+  assert.match(summary({ ...record, provider: 'jev', reasonCode: 'unevaluated' }), /Jev · high 유지 · 추천 low\(미평가\)/);
+  assert.match(summary({ ...record, provider: 'jev', reasonCode: 'no-consent', latencyMs: null }), /분류 생략\(외부 전송 미동의\)$/);
+});

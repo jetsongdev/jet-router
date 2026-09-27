@@ -50,13 +50,15 @@ are explicitly validated to avoid missing a plugin-module failure.
 The inspected `HttpInit` exposes method, headers, body, auth and socketPath. It
 does not expose redirect policy, cancellation signal or response-size controls.
 Thus an HTTP loopback URL alone is not sufficient evidence for the required
-no-external-redirect guarantee. No local/hosted network transport is implemented.
-Do not silently replace this with a proxy, command hook, process or daemon.
+no-external-redirect guarantee. At P0 no local/hosted network transport was implemented. The user subsequently
+approved the bounded one-shot Node helper in [the transport decision](provider-transport.md);
+Jev shadow is now wired through it, without a proxy or daemon. Local provider
+transport remains unimplemented.
 The pure Jev parser's input length cap is not a network download bound.
 A follow-up static inspection found a host-level 30-second timeout and 4 MiB
 limit, but also automatic redirects that can retain POST bodies on 307/308.
 See the [transport decision proposal](provider-transport.md) for evidence and
-the proposed bounded one-shot helper. This is not live-network verification.
+the approved bounded one-shot helper. This is not live-network verification.
 
 Provider-specific context/risk/confidence thresholds need evaluation and approval.
 Jev scores are retained as scores; no arbitrary 0.5 conversion or shared

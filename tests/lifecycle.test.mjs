@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import { registerRouter } from '../hooks/register.js';
 
 const choice = { choice: 'low', contextSufficient: true, risky: false };
-const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
+const deferred = () => { let resolve, reject; const promise = new Promise((r, j) => { resolve = r; reject = j; }); return { promise, resolve, reject }; };
 
-function world(provider = async () => choice, now = async () => 10) {
+function world(provider = async () => choice, now = async () => 10, options = {}, run = async () => { throw new Error('unexpected process'); }) {
   const handlers = new Map(), logs = [], sent = [], calls = [];
   let expire;
   const $ = {
+    plugin: { root: '/plugin with spaces' }, process: { run },
     command: { register: async () => {} },
     ui: { status() {}, log(text) { logs.push(text); } },
     clock: { now, sleep: (ms, { signal }) => new Promise((resolve, reject) => {
@@ -16,7 +17,7 @@ function world(provider = async () => choice, now = async () => 10) {
       signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
     }) },
   };
-  registerRouter((name, ...args) => handlers.set(name, args.at(-1)), async state => { calls.push(state); return provider(state); });
+  registerRouter((name, ...args) => handlers.set(name, args.at(-1)), async state => { calls.push(state); return provider(state); }, options);
   const event = (name, e, next = async e => e) => handlers.get(name)($, e, next);
   const command = args => event('command.run', { args });
   const start = () => event('session.start', {});
@@ -201,4 +202,69 @@ test('mid-turn input during the final timing read cannot revive a stale recommen
   timing.resolve(20); await stepping;
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(w.logs.length, 0);
+});
+
+const jevOptions = { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY' };
+const jevResult = { exitCode: 0, stdout: JSON.stringify({ ok: true, decision: {
+  provider: 'jev', providerModel: 'jev-test', choice: 'low', confidence: 0.9, contextScore: 0.95, riskScore: 0.01,
+} }), stderr: '' };
+
+test('Jev requires consent and key; fake, off, lock and protected input never spawn', async () => {
+  for (const [options, mode, step] of [
+    [{ ...jevOptions, cloudConsent: false }, 'shadow', {}],
+    [{ ...jevOptions, cloudConsent: 'true' }, 'shadow', {}],
+    [{ ...jevOptions, jevApiKey: '' }, 'shadow', {}],
+    [{ ...jevOptions, provider: 'fake' }, 'shadow', {}],
+    [jevOptions, 'off', {}], [jevOptions, 'lock', {}],
+    [jevOptions, 'shadow', { effort: 'max' }], [jevOptions, 'shadow', { agentId: 'child' }],
+  ]) {
+    let calls = 0;
+    const w = world(undefined, undefined, options, async () => { calls++; return jevResult; });
+    await w.start(); await w.command(mode); await w.submit(); await w.step(step);
+    assert.equal(calls, 0);
+  }
+});
+
+test('Jev passes sensitive data only via stdin and labels the unchanged result unevaluated', async () => {
+  const calls = [];
+  const w = world(undefined, undefined, jevOptions, async (...args) => { calls.push(args); return jevResult; });
+  await w.start(); await w.command('shadow'); await w.submit(); await w.step(); await w.step({ index: 1 });
+  assert.equal(calls.length, 1);
+  const [argv, init] = calls[0];
+  assert.deepEqual(argv, ['node', '/plugin with spaces/scripts/jev-request.mjs']);
+  assert.ok(!JSON.stringify(argv).includes('CANARY'));
+  assert.equal(JSON.parse(init.stdin).apiKey, 'KEY_CANARY');
+  assert.equal(JSON.parse(init.stdin).state.currentEffort, 'high');
+  assert.equal(init.timeoutMs, 4000); assert.equal(init.env.NODE_DEBUG, '');
+  assert.equal(init.env.NODE_OPTIONS, ''); assert.equal(init.env.NODE_TLS_REJECT_UNAUTHORIZED, '1');
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.match(w.logs[0], /Jev · high 유지 · 추천 low\(미평가\)/);
+  assert.ok(!w.logs[0].includes('CANARY'));
+  assert.equal(w.calls.length, 0); // Never falls back to fake.
+});
+
+test('Jev failure has no fallback and timeout keeps only one outstanding helper', async () => {
+  const pending = deferred(), began = deferred(); let processes = 0;
+  const w = world(undefined, undefined, jevOptions, () => { processes++; began.resolve(); return pending.promise; });
+  await w.start(); await w.command('shadow'); await w.submit();
+  const stepping = w.step(); await began.promise; w.expire(); await stepping;
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.match(w.logs[0], /시간 초과/);
+  await w.submit('t2', 'next'); await w.step({ turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  assert.match(w.logs[1], /이전 요청 정리 중/); assert.equal(processes, 1);
+  pending.resolve(jevResult); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(w.logs.length, 2);
+  await w.submit('t3', 'next'); await w.step({ turnId: 't3' }); assert.equal(processes, 2);
+  assert.equal(w.calls.length, 0);
+});
+
+test('Jev off during a request drops the late reply without logging sensitive failures', async () => {
+  const pending = deferred(), began = deferred();
+  const w = world(undefined, undefined, jevOptions, () => { began.resolve(); return pending.promise; });
+  await w.start(); await w.command('shadow'); await w.submit();
+  const stepping = w.step(); await began.promise; await w.command('off'); await stepping;
+  pending.reject(new Error('KEY_CANARY')); await new Promise(resolve => setImmediate(resolve));
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 0); assert.equal(w.calls.length, 0);
 });

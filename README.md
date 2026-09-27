@@ -2,7 +2,7 @@
 
 기존 Claude Code 모델·대화·입력창을 유지하면서 프롬프트마다 필요한 effort를 선택하는 실험적 플러그인입니다.
 
-**현재는 오프라인 미리보기입니다.** 고정 테스트 결과를 반환하는 `fake` 분류기로 off/shadow를 지원합니다. 실제 Jev 호출, 로컬 모델 연결, effort 자동 변경(enforce)은 아직 지원하지 않습니다.
+**현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. 실제 Jev 호출·품질 평가는 아직 하지 않았고, 로컬 모델 연결과 effort 자동 변경(enforce)은 미지원입니다.
 
 ## 동작 원리
 
@@ -17,7 +17,7 @@
 | 모드 | 현재 지원 | 동작 |
 | --- | --- | --- |
 | off | 지원·초기값 | 분류하지 않음 |
-| shadow | fake만 지원 | 추천 결과를 표시하고 원래 effort 유지 |
+| shadow | fake·선택적 Jev | 추천 결과를 표시하고 원래 effort 유지 |
 | enforce | 미지원 | 향후 정책을 통과한 추천을 해당 턴에 적용 |
 
 ## 시작하기
@@ -43,7 +43,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 [jet-router] 관찰 · fake(테스트) · high 유지 · 추천 보류(맥락 부족) · 분류 0ms
 ```
 
-이 문구는 실제 난도 분석 결과가 아니라 fake의 고정 결과입니다. 일반 Claude 응답에는 구독 사용량/API 비용이 발생할 수 있습니다. 라우터 자체는 외부 요청을 보내지 않습니다.
+이 문구는 실제 난도 분석 결과가 아니라 fake의 고정 결과입니다. 일반 Claude 응답에는 구독 사용량/API 비용이 발생할 수 있습니다. 기본 fake는 외부 요청을 보내지 않습니다. Jev는 별도 선택·전송 동의·키 설정 후 shadow에서만 현재 입력을 전송합니다.
 
 **[전체 사용 가이드](docs/usage.md)**: 설정, 기존 대화에 적용하기, 로컬/공개 설치, 명령어, 메시지 예시, 중지·문제 해결.
 
@@ -51,7 +51,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 
 Claude Code **2.1.283**에서 manifest와 오프라인 hook 테스트를 검증했습니다. Function hooks는 early access이며 다른 버전은 미검증입니다. Herdr와 SDD 문서는 실행에 필요하지 않습니다.
 
-Node 22+에서 실행하며 의존성 설치·빌드가 필요하지 않습니다.
+Jev helper 실행과 개발 검증에는 Node 22+가 필요하며 의존성 설치·빌드가 필요하지 않습니다.
 
 ```sh
 npm test
@@ -59,7 +59,7 @@ npm run validate
 npm run test:hooks
 ```
 
-`test:hooks`는 설치된 Claude 바이너리의 테스트 도구에서 모델·UI 등을 mock합니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다.
+`test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다.
 
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)

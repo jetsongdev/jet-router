@@ -8,6 +8,18 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     const requests: unknown[] = [];
     const logs: string[] = [];
     const engine = $;
+    let processes = 0;
+    on('process.run', ($, e) => {
+      processes++;
+      expect(e.argv[0]).toBe('node');
+      expect(e.argv[1].endsWith('/scripts/jev-request.mjs')).toBe(true);
+      expect(JSON.stringify(e.argv)).not.toContain('CANARY');
+      expect(e.init?.timeoutMs).toBe(4000);
+      expect(JSON.parse(e.init?.stdin ?? '{}').state.userPrompt).toBe('RUNTIME_CANARY');
+      return { value: { exitCode: 0, stdout: JSON.stringify({ ok: true, decision: {
+        provider: 'jev', choice: 'low', confidence: 0.8, contextScore: 0.9, riskScore: 0.1,
+      } }), stderr: '' } };
+    });
     on('session.start', ($, e) => ({ cwd: e.cwd }));
     on('command.register', ($, e) => ({ value: { command: e.name } }));
     on('ui.status', () => ({ value: undefined }));
@@ -27,7 +39,9 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     });
     await $.session.start({ cwd: '/offline-no-sdd', surface: 'terminal', isInteractive: true });
     const command = (args: string) => $.command.run({ command: 'jet-router', args, origin: { kind: 'composer' } });
-    expect((await command('status')).text).toContain('꺼짐(off)');
+    const initialStatus = (await command('status')).text;
+    expect(initialStatus).toContain('꺼짐(off)');
+    const jev = initialStatus?.includes('분류기: Jev');
     await command('shadow');
     await $.prompt.submit({ text: 'RUNTIME_CANARY', origin: { kind: 'composer' }, wait: false });
     const input = { turnId: 'runtime-turn', index: 0, model: 'claude-opus-5-5', effort: 'high' as const, messageCount: 1 };
@@ -39,8 +53,9 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     const completed = await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
     expect(completed.text).toBe('done');
     expect(logs).toHaveLength(1);
-    expect(logs[0]).toContain('[jet-router] 관찰 · fake(테스트)');
-    expect(logs[0]).toContain('high 유지 · 추천 보류(맥락 부족)');
+    expect(processes).toBe(jev ? 1 : 0);
+    expect(logs[0]).toContain(jev ? '[jet-router] 관찰 · Jev' : '[jet-router] 관찰 · fake(테스트)');
+    expect(logs[0]).toContain(jev ? 'high 유지 · 추천 low(미평가)' : 'high 유지 · 추천 보류(맥락 부족)');
     expect(logs[0]).toContain('분류 0ms');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
     expect((await command('enforce')).text).toContain('아직 사용할 수 없습니다');

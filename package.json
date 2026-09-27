@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "test:hooks": "claude plugin test .",
+    "test:hooks": "node scripts/test-hooks.mjs",
     "validate": "claude plugin validate --strict .claude-plugin/plugin.json && claude plugin validate --strict .claude-plugin/marketplace.json"
   },
   "engines": { "node": ">=22" }

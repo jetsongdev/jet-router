@@ -1,7 +1,7 @@
 {
   "name": "jet-router",
   "version": "0.1.0",
-  "description": "Experimental Claude Code effort router: offline off/shadow preview",
+  "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
   "userConfig": {
@@ -10,6 +10,25 @@
       "title": "Offline fixture recommendation",
       "description": "Testing only: keep, low, medium, high, or xhigh. No model is called.",
       "default": "keep"
+    },
+    "provider": {
+      "type": "string",
+      "title": "Classifier",
+      "description": "fake is offline. Jev requires explicit cloud consent and an API key.",
+      "options": ["fake", "jev"],
+      "default": "fake"
+    },
+    "cloudConsent": {
+      "type": "boolean",
+      "title": "Allow Jev cloud requests",
+      "description": "Send each eligible current prompt and effort to api.typesafe.ai in shadow. No files/history. Charges may apply; off cannot undo an already sent request. Review TypeSafe data policy before enabling.",
+      "default": false
+    },
+    "jevApiKey": {
+      "type": "string",
+      "title": "TypeSafe API key",
+      "description": "Optional for fake. Stored by Claude in secure storage; passed to the Jev helper through stdin, never argv.",
+      "sensitive": true
     }
   }
 }

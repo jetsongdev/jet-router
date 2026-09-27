@@ -1,13 +1,16 @@
 import { parseDecision } from '../src/policy.js';
+import { parseHelperResult } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status } from '../src/report.js';
 
 export function register(on, options) {
-  registerRouter(on, fakeProvider(options.fakeChoice));
+  registerRouter(on, fakeProvider(options.fakeChoice), options);
 }
 
-// The injected provider is for offline tests. Runtime exposes only the fake.
-export function registerRouter(on, classify) {
+// The injected fake provider keeps lifecycle tests offline.
+export function registerRouter(on, classify, options = {}) {
+  const provider = options.provider === 'jev' ? 'jev' : 'fake';
+  const flight = { busy: false };
   let mode = 'off';
   let locked = false;
   let pending;
@@ -26,7 +29,7 @@ export function registerRouter(on, classify) {
     mode = 'off';
     locked = false;
     lastSummary = undefined;
-    await $.command.register({ name: 'jet-router', description: 'Offline effort routing preview',
+    await $.command.register({ name: 'jet-router', description: 'Effort routing observation (no automatic changes)',
       argumentHint: 'status|shadow|off|lock|unlock', immediate: true });
     return next(e);
   });
@@ -44,7 +47,7 @@ export function registerRouter(on, classify) {
       return { text: '사용법: /jet-router status|shadow|off|lock|unlock' };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
-    return { text: status(mode, locked, lastSummary) };
+    return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true) };
   });
 
   on('prompt.submit', async ($, e, next) => {
@@ -105,7 +108,7 @@ export function registerRouter(on, classify) {
       return yield* next(e);
     }
     turn.started = true;
-    const record = { provider: 'fake', mode: 'shadow', original: safeEffort(e.effort),
+    const record = { provider, mode: 'shadow', original: safeEffort(e.effort),
       recommendation: 'keep', forwarded: safeEffort(e.effort), reasonCode: 'correlation', latencyMs: null };
     if (turn.valid && e.index === 0 && e.effort !== 'max' && safeEffort(e.effort) !== 'unsupported') {
       const timer = new AbortController();
@@ -116,7 +119,10 @@ export function registerRouter(on, classify) {
       try {
         outcome = await Promise.race([
           Promise.resolve().then(() => turn.valid && mode === 'shadow' && !locked
-            ? classify({ userPrompt: turn.text, currentEffort: e.effort, taskContext: null }) : null)
+            ? (provider === 'jev'
+              ? classifyJev($, { userPrompt: turn.text, currentEffort: e.effort, taskContext: null }, options, flight,
+                () => turn.valid && mode === 'shadow' && !locked && turns.get(e.turnId) === turn)
+              : classify({ userPrompt: turn.text, currentEffort: e.effort, taskContext: null })) : null)
             .then(value => ({ value }), () => ({ reason: 'provider-error' })),
           $.clock.sleep(1000, { signal: timer.signal }).then(() => ({ reason: 'timeout' })),
           cancelled,
@@ -127,10 +133,12 @@ export function registerRouter(on, classify) {
         turn.text = '';
       }
       if (!turn.valid || turns.get(e.turnId) !== turn || mode !== 'shadow' || locked) return yield* next(e);
-      const parsed = parseDecision(outcome.value);
+      const parsed = provider === 'jev' ? outcome.value?.decision : parseDecision(outcome.value);
       record.recommendation = parsed?.choice ?? 'keep';
-      record.reasonCode = outcome.reason ?? (parsed ? (parsed.contextSufficient ? 'shadow' : 'context') : 'invalid-response');
+      record.reasonCode = outcome.reason ?? (provider === 'jev' ? (outcome.value?.reason ?? (parsed ? 'unevaluated' : 'invalid-response'))
+        : (parsed ? (parsed.contextSufficient ? 'shadow' : 'context') : 'invalid-response'));
       record.latencyMs = Math.max(0, (await $.clock.now()) - began);
+      if (['no-consent', 'missing-key', 'busy', 'invalid-input'].includes(record.reasonCode)) record.latencyMs = null;
       if (!turn.valid) return yield* next(e);
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (safeEffort(e.effort) === 'unsupported') record.reasonCode = 'unsupported';
@@ -154,4 +162,23 @@ function invalidateTurn(turn) {
 function publish($, text) {
   // Provider strings, prompts, errors, IDs and API keys never enter the UI.
   try { $.ui.log(text); } catch { /* Display is optional. */ }
+}
+
+async function classifyJev($, state, options, flight, active) {
+  if (options.cloudConsent !== true) return { reason: 'no-consent' };
+  if (typeof options.jevApiKey !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(options.jevApiKey)) return { reason: 'missing-key' };
+  if (!active()) return { reason: 'cancelled' };
+  if (flight.busy) return { reason: 'busy' };
+  flight.busy = true;
+  try {
+    const result = await $.process.run(['node', `${$.plugin.root}/scripts/jev-request.mjs`], {
+      cwd: $.plugin.root,
+      stdin: JSON.stringify({ apiKey: options.jevApiKey, state }),
+      timeoutMs: 4000,
+      env: { NODE_OPTIONS: '', NODE_DEBUG: '', NODE_DEBUG_NATIVE: '', SSLKEYLOGFILE: '',
+        NODE_TLS_REJECT_UNAUTHORIZED: '1', NODE_USE_ENV_PROXY: '0' },
+    });
+    return parseHelperResult(result);
+  } catch { return { reason: 'provider-error' }; }
+  finally { flight.busy = false; }
 }

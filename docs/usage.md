@@ -2,9 +2,9 @@
 
 ## 1. 현재 가능한 것
 
-현재는 **fake 기반 off/shadow 미리보기**입니다. Jev API 키가 필요하지 않으며, 키를 받거나 다른 provider로 자동 전환하지 않습니다. `fake`는 요청을 분석하지 않고 설정된 고정값만 반환합니다.
+현재는 **fake 또는 선택적 Jev의 off/shadow 관찰**을 지원합니다. 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.
 
-실제 Jev 연결과 자동 적용(enforce)은 준비 중입니다. 아래 자동 적용 설명은 목표 동작이며 현재 실행 결과가 아닙니다.
+Jev 연결은 로컬 mock으로 검증했으며 실제 API 호출과 품질 평가는 미실시입니다. 자동 적용(enforce)은 미지원입니다. 아래 자동 적용 설명은 목표 동작입니다.
 
 ## 2. 기본 effort와 프롬프트별 적용
 
@@ -78,7 +78,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 | 명령 | 동작 |
 | --- | --- |
 | `/jet-router status` | 현재 모드·잠금·분류기·외부 전송 여부·최근 완료 결과 |
-| `/jet-router shadow` | fake 추천 관찰 시작, 실제 effort 변경 없음 |
+| `/jet-router shadow` | 선택한 분류기 관찰 시작, 실제 effort 변경 없음 |
 | `/jet-router off` | 분류 중지, 진행 중 판단 무효화 |
 | `/jet-router lock` | 현재 모드를 유지하며 분류 일시 정지 |
 | `/jet-router unlock` | 잠금 해제. off였다면 계속 off |
@@ -93,6 +93,24 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 설치된 플러그인은 `/plugin`의 Installed에서 jet-router를 선택하고 **Configure options**에서 값을 바꿀 수 있습니다. 변경 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. 이 플러그인의 설정 UI 경로는 아직 수동 실행하지 않았습니다. [공식 관리 방법](https://code.claude.com/docs/en/discover-plugins#manage-installed-plugins)
 
 기본 `keep` fixture는 맥락 충분 여부를 false로 반환하므로 “추천 보류(맥락 부족)”라고 표시합니다. `low`로 설정하면 모든 분류 대상에 low를 추천합니다. 어느 쪽도 실제 요청의 난도를 판단한 결과는 아닙니다.
+
+### Jev shadow 설정
+
+Node 22+ 실행 파일이 Claude 프로세스의 PATH에 있어야 합니다. `/plugin` → Installed → jet-router → Configure options에서 다음을 설정한 뒤 안내에 따라 reload/재시작합니다. 키 입력 UI의 실제 저장·재로드는 아직 수동 검증하지 않았습니다.
+
+| 옵션 | 값·의미 |
+| --- | --- |
+| `provider` | 기본 `fake`. Jev를 쓰려면 `jev` 선택 |
+| `cloudConsent` | 기본 false. 현재 프롬프트와 effort의 TypeSafe 외부 전송에 동의할 때만 true |
+| `jevApiKey` | TypeSafe API 키. sensitive 옵션으로 Claude의 secure storage 사용. 채팅·명령 인자·저장소에 적지 않음 |
+
+동의 전 TypeSafe의 데이터 처리·보관 정책을 확인하세요. 이 구현은 해당 정책이나 계정 요금·한도를 검증하지 않았습니다. 설정만으로 전송하지는 않으며, 새 세션은 off입니다. `/jet-router status` 확인 후 `/jet-router shadow`에서 분류 대상 입력이 전송됩니다. API 키가 없거나 잘못된 형식이면 전송을 생략합니다.
+
+전송 대상은 `https://api.typesafe.ai/v1/systemone`으로 고정되어 있습니다. 현재 프롬프트(최대 6,000자)·현재 effort·고정 분류 질문만 보내며 파일, 전체 대화, 시스템 지침은 수집하지 않습니다. `taskContext`는 null입니다. 이 제한이 프롬프트 자체에 포함된 비밀을 제거해 주지는 않으므로 민감한 입력 전에는 off/lock을 사용하세요.
+
+모든 redirect를 거부하고 재시도·자동 fallback을 하지 않습니다. helper 입력·응답은 각각 64 KiB 한도이며 응답 한도는 다운로드 중 적용됩니다. hook의 대기 한도는 1초, helper의 HTTPS 전체 요청 한도는 3초, 호스트 process 한도는 4초입니다. Node 시작 시간 등은 별도이므로 이 값은 실제 완료 시간 보장이 아닙니다. 느린 호출은 추천을 표시하지 않을 수 있습니다.
+
+`off`, lock, 새 입력, 중단 또는 대기 timeout은 늦은 결과를 무효화합니다. 이미 시작된 HTTPS 요청이 즉시 취소되거나 비용이 없어지는 것은 보장하지 않습니다. 아직 끝나지 않은 helper가 있으면 다음 분류를 생략하여 같은 활성화 내 요청이 중첩되지 않게 합니다.
 
 ## 6. 메시지 읽기
 
@@ -128,6 +146,14 @@ jet-router
 수동 잠금: 꺼짐
 effort 자동 변경: 미지원
 최근 완료: [jet-router] 관찰 · fake(테스트) · high 유지 · 추천 low · 분류 12ms
+```
+
+Jev shadow의 표시 예시입니다. “미평가”는 응답 형식만 검증했으며 추천 정확도와 정책 임계값을 아직 평가하지 않았다는 뜻입니다. 맥락·위험 점수에 임의의 기준값을 적용하지 않습니다.
+
+```text
+[jet-router] 관찰 · Jev · medium 유지 · 추천 low(미평가) · 분류 180ms
+[jet-router] 관찰 · Jev · high 유지 · 분류 생략(외부 전송 미동의)
+[jet-router] 관찰 · Jev · high 유지 · 추천 없음(redirect 차단) · 분류 35ms
 ```
 
 향후 enforce 표시안은 다음과 같습니다. **현재 출력되거나 적용되는 기능은 아닙니다.**
@@ -173,7 +199,7 @@ effort 자동 변경: 미지원
 
 즉시 관찰을 중지하려면 `/jet-router off`를 사용합니다. 직접 로드한 플러그인을 제외하려면 다음 실행에서 `--plugin-dir`를 빼세요. marketplace로 설치했다면 `/plugin`에서 jet-router를 비활성화하거나 제거합니다. 라우터를 중지하려고 다른 플러그인도 사용하는 function-hook 환경 변수를 일괄 제거할 필요는 없습니다.
 
-프롬프트·키·오류 본문은 요약에 넣지 않고 별도 로그 파일도 만들지 않습니다. UI 로그는 Claude 자체 대화 기록에 남을 수 있습니다. 라우터는 외부로 보내지 않지만, 일반 Claude 응답에는 원래 서비스 사용량·비용이 적용됩니다.
+프롬프트·키·오류 본문은 요약에 넣지 않고 별도 로그 파일도 만들지 않습니다. UI 로그는 Claude 자체 대화 기록에 남을 수 있습니다. 기본 fake는 외부로 보내지 않습니다. 동의한 Jev shadow에는 별도 API 비용이 발생할 수 있으며, 일반 Claude 응답에도 원래 서비스 사용량·비용이 적용됩니다.
 
 ## 9. 개발 검증
 
@@ -185,4 +211,4 @@ npm run validate
 npm run test:hooks
 ```
 
-현재 기록은 단위 테스트 26개와 Claude 오프라인 hook 테스트 1개 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Jev/live 모델 호출은 검증하지 않았습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.
+현재 기록은 Node 테스트 39개와 Claude 오프라인 hook 테스트 2개(fake/Jev 각 1개) 통과입니다. 실제 터미널 표시, 기존 대화 재개, marketplace 설치, Jev/live 모델 호출은 검증하지 않았습니다. 자세한 범위는 [구현 기록](implementation.md), 공식 계약의 한계는 [호환성 조사](compatibility.md)를 참고하세요.
