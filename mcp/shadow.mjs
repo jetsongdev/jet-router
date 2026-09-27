@@ -28,7 +28,7 @@ export function readConfig(env) {
 }
 
 const result = systemMessage => ({ continue: true, ...(systemMessage ? { systemMessage } : {}) });
-const message = detail => result(`[jet-router] shadow · ${detail} · 추천만`);
+const message = detail => result(`[jet-router] ${detail} (shadow)`);
 
 // One MCP process owns a bounded set of event ids, never prompt text or results.
 // Ids are supplied by the host; this is duplicate suppression, not authentication.
@@ -60,7 +60,7 @@ export function createShadow(config, classify = classifyJev) {
       const checked = parseHelperBody(classified?.decision
         ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason });
       if (!checked.decision) return message(`Jev 생략: ${checked.reason}`);
-      return message(`Jev · 참고 ${config.referenceEffort} → 추천 ${checked.decision.choice}`);
+      return message(`${config.referenceEffort} - Jev -> ${checked.decision.choice}`);
     } catch {
       return message('Jev 생략: provider-error');
     } finally {

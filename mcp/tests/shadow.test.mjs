@@ -10,7 +10,7 @@ const forbidden = () => assert.fail('provider must not run');
 test('default off and fake require no credentials or provider call', async () => {
   assert.deepEqual(await createShadow(readConfig({}), forbidden)(input), { continue: true });
   const out = await createShadow(readConfig({ JET_ROUTER_MODE: 'shadow' }), forbidden)(input);
-  assert.match(out.systemMessage, /fake.*keep.*추천만/);
+  assert.match(out.systemMessage, /fake.*keep.*\(shadow\)$/);
 });
 
 for (const [name, patch, expected] of [
@@ -44,7 +44,7 @@ for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${ref
     return { decision };
   });
   const out = await shadow(input);
-  assert.equal(out.systemMessage, `[jet-router] shadow · Jev · 참고 ${referenceEffort} → 추천 low · 추천만`);
+  assert.equal(out.systemMessage, `[jet-router] ${referenceEffort} - Jev -> low (shadow)`);
   assert.equal(JSON.stringify(out).includes('canary'), false);
   assert.deepEqual(Object.keys(out).sort(), ['continue', 'systemMessage']);
   assert.equal(out.continue, true);

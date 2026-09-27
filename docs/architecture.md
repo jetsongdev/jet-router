@@ -151,7 +151,7 @@ sequenceDiagram
 예상 안내는 실제 적용값을 모른다는 점을 명시한다.
 
 ```text
-[jet-router] shadow · Jev · 참고 high → 추천 medium · 추천만
+[jet-router] high - Jev -> medium (shadow)
 ```
 
 구현: [mcp/server.mjs](../mcp/server.mjs), [mcp/shadow.mjs](../mcp/shadow.mjs).
