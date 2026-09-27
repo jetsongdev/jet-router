@@ -39,7 +39,11 @@ test('invalid, empty, long inputs and malformed ids are skipped without provider
 
 for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${referenceEffort} is sent to provider and displayed before recommendation`, async () => {
   const shadow = createShadow({ ...config, referenceEffort }, async (state, key) => {
-    assert.deepEqual(state, { userPrompt: input.prompt, currentEffort: referenceEffort });
+    assert.equal(state.prompt, input.prompt);
+    assert.deepEqual(state.effort, { value: referenceEffort, source: 'user-reference' });
+    assert.deepEqual(state.target, { model: null, source: 'unknown', supportedEfforts: null });
+    assert.equal(state.context.missingRequired, null);
+    assert.deepEqual(state.event, { sessionId: input.session_id, turnId: input.turn_id, correlated: true });
     assert.equal(key, config.apiKey);
     return { decision };
   });

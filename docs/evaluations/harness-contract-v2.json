@@ -1,0 +1,185 @@
+{
+  "kind": "offline-contract-evaluation",
+  "contractVersion": "routing-input-v1",
+  "criteriaVersion": "jev-effort-provenance-v2",
+  "policyVersion": "shadow-preflight-v2",
+  "corpusVersion": "routing-contract-fixtures-v2",
+  "corpusSha256": "d52e3ab4a101310d06353adada8a7383060d12176783dd8738746fc0839fb942",
+  "providerCalls": 0,
+  "providerModelReturned": null,
+  "enforceApproved": false,
+  "equivalentHostRequests": true,
+  "passed": true,
+  "items": [
+    {
+      "id": "codex-observed",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1664,
+      "requestSha256": "38a6d80a5e800f8bf2d1932bdc9e6f3cb901f8b8fac9516323c7bbb3b161d491"
+    },
+    {
+      "id": "claude-observed",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1664,
+      "requestSha256": "38a6d80a5e800f8bf2d1932bdc9e6f3cb901f8b8fac9516323c7bbb3b161d491"
+    },
+    {
+      "id": "reference-effort",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1694,
+      "requestSha256": "ba4c47f4f4e3321554524d057e90d6455dee5c6f23a98e6baf62e8c20318028d"
+    },
+    {
+      "id": "limited-support",
+      "status": "ready",
+      "choices": [
+        "medium",
+        "high",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1478,
+      "requestSha256": "428574c2fab1cfa17bdbf848338159048dbc6637fc86026df1ba71ca281af2fd"
+    },
+    {
+      "id": "unknown-model",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1686,
+      "requestSha256": "fd2bb47faf7774ed29ffe67f9d478989078d272f1f493e9ee34fb2832a17606e"
+    },
+    {
+      "id": "unknown-support",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1681,
+      "requestSha256": "9c1924e2f705a313c7469a0e3d85a34b1c36b8a81b5250f38b8c616b0fb8e0fc"
+    },
+    {
+      "id": "no-consent",
+      "status": "skip",
+      "reason": "no-consent",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "uncorrelated",
+      "status": "skip",
+      "reason": "correlation",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "missing-context",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1666,
+      "requestSha256": "82de03bcd0a6600a47f6f7a92ab5ff04d04a26cecc70f6c72642c457cdc26adf"
+    },
+    {
+      "id": "unknown-context",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1681,
+      "requestSha256": "3e3b69b601f609f2fd59a59a50b142f072e1b7ab13fcad916699d7567ef68fc5"
+    },
+    {
+      "id": "summary-provenance",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1700,
+      "requestSha256": "2a134c517cb5d24b6d2e29b5907527fa24e9b2b2418816831f4092c669e5c88f"
+    },
+    {
+      "id": "injected-instructions",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1669,
+      "requestSha256": "cbe2734018691bb85dbe42c72ea56013c28009fe724ca55329f7f0daac83bdb0"
+    },
+    {
+      "id": "max-protected",
+      "status": "skip",
+      "reason": "protected-effort",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "oversized",
+      "status": "skip",
+      "reason": "invalid-input",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    }
+  ]
+}

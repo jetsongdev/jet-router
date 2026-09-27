@@ -1,19 +1,20 @@
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { prepareRoutingRequest } from '../src/harness.js';
 import { EFFORTS } from '../src/policy.js';
 import { PROCESS_ENV, PROCESS_TIMEOUT_MS, HELPER_OUTPUT_LIMIT, parseHelperResult, parseHelperBody, validJevKey } from '../src/providers/jev.js';
 
 const helper = fileURLToPath(new URL('../scripts/jev-request.mjs', import.meta.url));
 
 // Reuse the Claude helper and its strict transport; secrets travel over stdin.
-export function classifyJev(state, apiKey) {
+export function classifyJev(routingInput, apiKey) {
   return new Promise(resolve => {
     const child = execFile(process.execPath, [helper], {
       env: PROCESS_ENV, timeout: PROCESS_TIMEOUT_MS, maxBuffer: HELPER_OUTPUT_LIMIT,
       killSignal: 'SIGKILL',
     }, (error, stdout) => resolve(parseHelperResult({ exitCode: error ? 1 : 0, stdout })));
     child.stdin.on('error', () => {});
-    child.stdin.end(JSON.stringify({ state, apiKey }));
+    child.stdin.end(JSON.stringify({ routingInput, apiKey }));
   });
 }
 
@@ -53,12 +54,21 @@ export function createShadow(config, classify = classifyJev) {
     if (!EFFORTS.includes(config.referenceEffort)) return message('Jev 생략: 참고 effort 설정 필요');
     if (config.referenceEffort === 'max') return message('Jev 생략: 참고 effort max 보호');
     if (busy) return message('Jev 생략: 이전 분류 진행 중');
+    const routingInput = {
+      host: 'codex', prompt: input.prompt, cloudConsent: config.consent,
+      target: { model: null, source: 'unknown', supportedEfforts: null },
+      effort: { value: config.referenceEffort, source: 'user-reference' },
+      event: { sessionId: input.session_id, turnId: input.turn_id, correlated: true },
+      context: { source: 'prompt-only', missingRequired: null },
+    };
+    const prepared = prepareRoutingRequest(routingInput);
+    if (prepared.status !== 'ready') return message('Jev 생략: invalid-input');
     busy = true;
     try {
-      const classified = await classify({ userPrompt: input.prompt, currentEffort: config.referenceEffort }, config.apiKey);
+      const classified = await classify(routingInput, config.apiKey);
       // Revalidate injected/provider output and whitelist every displayed value.
       const checked = parseHelperBody(classified?.decision
-        ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason });
+        ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason }, prepared.choices);
       if (!checked.decision) return message(`Jev 생략: ${checked.reason}`);
       return result(`[jet-router] Jev.shadow(): ${config.referenceEffort} → ${checked.decision.choice}`);
     } catch {

@@ -1,3 +1,4 @@
+import { prepareRoutingRequest } from '../src/harness.js';
 import { parseDecision, EFFORTS } from '../src/policy.js';
 import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
@@ -127,7 +128,14 @@ export function registerRouter(on, classify, options = {}) {
             if (!isActiveTurn(e.turnId, turn)) return null;
             const state = { userPrompt: turn.text, currentEffort: e.effort, taskContext: null };
             if (provider === 'jev') {
-              return classifyJev($, state, options, flight, () => isActiveTurn(e.turnId, turn));
+              const routingInput = {
+                host: 'claude-code', prompt: turn.text, cloudConsent: options.cloudConsent === true,
+                target: { model: e.model ?? null, source: e.model ? 'host' : 'unknown', supportedEfforts: null },
+                effort: { value: e.effort, source: 'host' },
+                event: { sessionId: null, turnId: e.turnId, correlated: true },
+                context: { source: 'prompt-only', missingRequired: null },
+              };
+              return classifyJev($, routingInput, options, flight, () => isActiveTurn(e.turnId, turn));
             }
             return classify(state);
           }).then(value => ({ value }), () => ({ reason: 'provider-error' })),
@@ -180,20 +188,22 @@ function publish($, text) {
   try { $.ui.log(text); } catch { /* Display is optional. */ }
 }
 
-async function classifyJev($, state, options, flight, active) {
+async function classifyJev($, routingInput, options, flight, active) {
   if (options.cloudConsent !== true) return { reason: 'no-consent' };
   if (!validJevKey(options.jevApiKey)) return { reason: 'missing-key' };
+  const prepared = prepareRoutingRequest(routingInput);
+  if (prepared.status !== 'ready') return { reason: 'invalid-input' };
   if (!active()) return { reason: 'cancelled' };
   if (flight.busy) return { reason: 'busy' };
   flight.busy = true;
   try {
     const result = await $.process.run(['node', `${$.plugin.root}/scripts/jev-request.mjs`], {
       cwd: $.plugin.root,
-      stdin: JSON.stringify({ apiKey: options.jevApiKey, state }),
+      stdin: JSON.stringify({ apiKey: options.jevApiKey, routingInput }),
       timeoutMs: PROCESS_TIMEOUT_MS,
       env: { ...PROCESS_ENV },
     });
-    return parseHelperResult(result);
+    return parseHelperResult(result, prepared.choices);
   } catch { return { reason: 'provider-error' }; }
   finally { flight.busy = false; }
 }

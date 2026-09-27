@@ -15,18 +15,18 @@ export function validJevKey(value) {
 const ERRORS = ['missing-key', 'invalid-input', 'redirect', 'http-error', 'timeout', 'response-too-large', 'invalid-response', 'provider-error'];
 
 // No raw stdout, stderr, exception, key or prompt is returned to the router.
-export function parseHelperResult(result) {
+export function parseHelperResult(result, choices = CHOICES) {
   if (result?.exitCode !== 0 || typeof result.stdout !== 'string' || result.stdout.length > HELPER_OUTPUT_LIMIT) return { reason: 'provider-error' };
   let body;
   try { body = JSON.parse(result.stdout); } catch { return { reason: 'invalid-response' }; }
-  return parseHelperBody(body);
+  return parseHelperBody(body, choices);
 }
 
 // Object validation is shared with MCP; process status/size/JSON checks stay above.
-export function parseHelperBody(body) {
+export function parseHelperBody(body, choices = CHOICES) {
   if (body?.ok === false && ERRORS.includes(body.reason)) return { reason: body.reason };
   const d = body?.decision;
-  if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) ||
+  if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) || !choices.includes(d.choice) ||
       !unit(d.confidence) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
   return { decision: { provider: 'jev', choice: d.choice, confidence: d.confidence,
     contextScore: d.contextScore, riskScore: d.riskScore } };

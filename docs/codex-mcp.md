@@ -164,3 +164,8 @@ npm run validate
 실제 적용은 별도의 [App Server](https://learn.chatgpt.com/docs/app-server) 제어 클라이언트가 필요하다.
 `turn/start.effort`는 이후 턴의 기본값에도 영향을 준다. 따라서 향후 enforce에서는 사용자 기본값과
 수동 변경을 따로 추적하고 매 턴 명시적으로 적용해야 하며, 이번 MCP 서버로 자동 복귀를 보장하지 않는다.
+
+
+공통 하네스 v2 연결: 현재 프롬프트와 effort 출처를 공통 입력으로 전달한다.
+모델 지원 범위·맥락 미확인은 `uncertainties`로 Jev에 전달하고 shadow 추천을 허용한다.
+동의·입력·응답 검사는 유지한다. 세부 정보와 검증 한계는 [하네스 가이드](harness.md)를 참고한다.

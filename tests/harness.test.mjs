@@ -39,15 +39,11 @@ test('reference effort and summary provenance are preserved and cannot become ob
 
 for (const [name, patch, reason] of [
   ['no consent', { cloudConsent: false }, 'no-consent'],
-  ['unknown model', { target: null }, 'unknown-model'],
   ['untrusted model facts', { target: { model: 'synthetic-model', source: 'model-summary', supportedEfforts: ['high'] } }, 'invalid-input'],
-  ['unknown capabilities', { target: { model: 'synthetic-model', source: 'host', supportedEfforts: null } }, 'unknown-support'],
   ['unknown effort', { effort: null }, 'unknown-effort'],
   ['max protection', { effort: { value: 'max', source: 'host' } }, 'protected-effort'],
   ['unsupported baseline', { effort: { value: 'low', source: 'host' } }, 'unsupported-effort'],
   ['none pending policy', { effort: { value: 'none', source: 'host' } }, 'unsupported-effort'],
-  ['missing context', { context: { source: 'prompt-only', missingRequired: true } }, 'missing-context'],
-  ['unknown context', { context: null }, 'unknown-context'],
   ['bad correlation', { event: { sessionId: 's1', turnId: 't1', correlated: false } }, 'correlation'],
   ['long prompt', { prompt: 'x'.repeat(6001) }, 'invalid-input'],
   ['empty prompt', { prompt: ' ' }, 'invalid-input'],
@@ -82,4 +78,21 @@ test('unknown fields cannot replace instructions, credentials or leak into prepa
   assert.equal(JSON.stringify(out).includes('CANARY'), false);
   assert.equal(out.request.state.userPrompt, raw.prompt);
   assert.equal(out.metadata.contractVersion, 'routing-input-v1');
+});
+
+test('shadow keeps unknown facts explicit instead of blocking experimental recommendations', () => {
+  const raw = input();
+  raw.target = null;
+  raw.effort.source = 'user-reference';
+  raw.event.sessionId = null;
+  raw.context.missingRequired = true;
+  const out = prepareRoutingRequest(raw);
+  assert.equal(out.status, 'ready');
+  assert.equal(out.enforceEligible, false);
+  assert.deepEqual(out.choices, ['low', 'medium', 'high', 'xhigh', 'keep']);
+  assert.deepEqual(out.uncertainties, ['unknown-session', 'unknown-model', 'unknown-support', 'reference-effort', 'missing-context']);
+  assert.deepEqual(out.request.state.uncertainties, out.uncertainties);
+  assert.equal(out.request.state.targetModel, null);
+  raw.context = null;
+  assert.ok(prepareRoutingRequest(raw).uncertainties.includes('unknown-context'));
 });

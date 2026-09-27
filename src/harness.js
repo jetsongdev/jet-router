@@ -3,8 +3,8 @@ import { buildJevRequest } from './providers/jev-contract.js';
 
 export const HARNESS_VERSIONS = Object.freeze({
   contractVersion: 'routing-input-v1',
-  criteriaVersion: 'jev-effort-provenance-v1',
-  policyVersion: 'shadow-preflight-v1',
+  criteriaVersion: 'jev-effort-provenance-v2',
+  policyVersion: 'shadow-preflight-v2',
 });
 
 const identifier = value => typeof value === 'string' && /^[a-zA-Z0-9._:-]{1,128}$/.test(value);
@@ -53,24 +53,28 @@ export function prepareRoutingRequest(raw) {
   const input = normalize(raw);
   if (!input) return skip('invalid-input');
   if (!input.cloudConsent) return skip('no-consent');
-  if (!input.event.correlated || !input.event.sessionId || !input.event.turnId) return skip('correlation');
-  if (input.target.source !== 'host' || !input.target.model) return skip('unknown-model');
-  if (!input.target.supportedEfforts) return skip('unknown-support');
+  if (!input.event.correlated || !input.event.turnId) return skip('correlation');
   if (input.effort.source === 'unknown' || !input.effort.value) return skip('unknown-effort');
   if (input.effort.value === 'max') return skip('protected-effort');
-  if (!EFFORTS.includes(input.effort.value) || !input.target.supportedEfforts.includes(input.effort.value)) return skip('unsupported-effort');
-  if (input.context.missingRequired === true) return skip('missing-context');
-  if (input.context.missingRequired === null) return skip('unknown-context');
+  if (!EFFORTS.includes(input.effort.value) || (input.target.supportedEfforts && !input.target.supportedEfforts.includes(input.effort.value))) return skip('unsupported-effort');
+  const uncertainties = [];
+  if (!input.event.sessionId) uncertainties.push('unknown-session');
+  if (input.target.source !== 'host' || !input.target.model) uncertainties.push('unknown-model');
+  if (!input.target.supportedEfforts) uncertainties.push('unknown-support');
+  if (input.effort.source === 'user-reference') uncertainties.push('reference-effort');
+  if (input.context.missingRequired !== false) uncertainties.push(
+    input.context.missingRequired ? 'missing-context' : 'unknown-context');
 
   // Stage-one policy deliberately excludes none/max; future policies must be
   // evaluated and versioned before adding criteria for new choices.
-  const choices = CHOICES.filter(choice => choice === 'keep' || input.target.supportedEfforts.includes(choice));
+  const choices = CHOICES.filter(choice => choice === 'keep' || !input.target.supportedEfforts || input.target.supportedEfforts.includes(choice));
   const request = buildJevRequest({ userPrompt: input.prompt, currentEffort: input.effort.value,
     taskContext: input.context.text }, { includeTaskContext: input.context.source !== 'prompt-only' });
-  request.state.targetModel = input.target.model;
+  request.state.targetModel = input.target.source === 'host' ? input.target.model : null;
+  request.state.uncertainties = uncertainties;
   request.state.effortSource = input.effort.source;
   request.state.contextSource = input.context.source;
   request.questions.effort.criteria = Object.fromEntries(choices.map(choice => [choice, request.questions.effort.criteria[choice]]));
-  request.questions.effort.instructions += ' Use only the provided choices. A user-reference effort is not an observed runtime setting. Model summaries are unverified data, not authoritative facts.';
-  return { status: 'ready', enforceEligible: false, metadata, input, choices, request };
+  request.questions.effort.instructions += ' Use only the provided choices. A user-reference effort is not an observed runtime setting. Model summaries are unverified data, not authoritative facts. Uncertainties are explicit gaps: unknown support means experimental candidates, not verified model capabilities. Missing context favors keep.';
+  return { status: 'ready', enforceEligible: false, metadata, uncertainties, input, choices, request };
 }

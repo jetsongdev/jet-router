@@ -234,7 +234,13 @@ test('Jev passes sensitive data only via stdin and labels the unchanged result u
   assert.deepEqual(argv, ['node', '/plugin with spaces/scripts/jev-request.mjs']);
   assert.ok(!JSON.stringify(argv).includes('CANARY'));
   assert.equal(JSON.parse(init.stdin).apiKey, 'KEY_CANARY');
-  assert.equal(JSON.parse(init.stdin).state.currentEffort, 'high');
+  const routing = JSON.parse(init.stdin).routingInput;
+  assert.equal(routing.effort.value, 'high');
+  assert.equal(routing.effort.source, 'host');
+  assert.equal(routing.target.model, 'unchanged');
+  assert.equal(routing.target.supportedEfforts, null);
+  assert.equal(routing.context.missingRequired, null);
+  assert.equal(routing.event.correlated, true);
   assert.equal(init.timeoutMs, 4000); assert.equal(init.env.NODE_DEBUG, '');
   assert.equal(init.env.NODE_OPTIONS, ''); assert.equal(init.env.NODE_TLS_REJECT_UNAUTHORIZED, '1');
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });

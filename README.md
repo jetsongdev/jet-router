@@ -128,7 +128,7 @@ npm run test:hooks
 `test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다. 별도 실호출 결과는 위 평가 기록을 참고하세요.
 
 - [실제 Claude 테스트 체크리스트](docs/test-checklist.md) — 설치·fake·Jev·off/lock 확인
-- [공통 요청 하네스 1단계](docs/harness.md) — 오프라인 입력 계약·요청 전 검사, 런타임 미연결
+- [공통 요청 하네스](docs/harness.md) — Claude/Codex shadow 연결·불확실성 표시·요청별 응답 검사
 - [구현 작업 목록](TASKS.md) — 모델별 추천 범위·품질 하네스·enforce 선행 조건
 - [향후 기능 후보](docs/planned/feature-candidates.md) — 미구현 후보와 선행 조건
 - [공식 계약·호환성 조사](docs/compatibility.md)

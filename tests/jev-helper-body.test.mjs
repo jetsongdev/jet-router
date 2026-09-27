@@ -23,3 +23,11 @@ test('process boundary still rejects failed, oversized and malformed output befo
   assert.deepEqual(parseHelperResult({ exitCode: 0, stdout: stdout + ' '.repeat(HELPER_OUTPUT_LIMIT) }), { reason: 'provider-error' });
   assert.deepEqual(parseHelperResult({ exitCode: 0, stdout: 'not-json' }), { reason: 'invalid-response' });
 });
+
+
+test('helper output remains bounded by the originating request choices', () => {
+  const body = { ok: true, decision: { provider: 'jev', choice: 'low', confidence: 0.8, contextScore: 0.9, riskScore: 0.1 } };
+  assert.deepEqual(parseHelperBody(body, ['medium', 'keep']), { reason: 'invalid-response' });
+  assert.deepEqual(parseHelperResult({ exitCode: 0, stdout: JSON.stringify(body) }, ['medium', 'keep']), { reason: 'invalid-response' });
+  assert.equal(parseHelperBody(body, ['low', 'keep']).decision.choice, 'low');
+});

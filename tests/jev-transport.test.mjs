@@ -4,6 +4,7 @@ import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { spawnSync } from 'node:child_process';
 import { requestJev } from '../scripts/jev-request.mjs';
+import { createShadow } from '../mcp/shadow.mjs';
 import { cases } from '../eval/harness-cases.mjs';
 import { prepareRoutingRequest } from '../src/harness.js';
 import { parseHelperResult } from '../src/providers/jev.js';
@@ -160,4 +161,23 @@ test('harness skips and ambiguous envelopes never fall back to legacy transport'
     assert.deepEqual(await requestJev({ ...input, ...extra }, forbidden),
       { ok: false, reason: 'invalid-input' });
   }
+});
+
+
+test('Codex shadow reaches shared preflight and transport with explicit unknown facts', async () => {
+  const t = transport();
+  const shadow = createShadow({ mode: 'shadow', provider: 'jev', consent: true, referenceEffort: 'medium', apiKey: input.apiKey },
+    async (routingInput, apiKey) => {
+      const out = await requestJev({ routingInput, apiKey }, t.request);
+      return out.ok ? { decision: out.decision } : { reason: out.reason };
+    });
+  const out = await shadow({ prompt: 'Synthetic typo', session_id: 's1', turn_id: 't1' });
+  assert.equal(out.systemMessage, '[jet-router] Jev.shadow(): medium → low');
+  const payload = JSON.parse(t.calls[0].data);
+  assert.equal(payload.state.effortSource, 'user-reference');
+  assert.equal(payload.state.targetModel, null);
+  assert.deepEqual(payload.state.uncertainties, ['unknown-model', 'unknown-support', 'reference-effort', 'unknown-context']);
+  assert.equal(payload.state.taskContext, null);
+  assert.equal(JSON.stringify(payload).includes('sessionId'), false);
+  assert.equal(out.continue, true);
 });
