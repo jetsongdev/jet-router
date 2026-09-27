@@ -1,0 +1,175 @@
+{
+  "pricing": {
+    "checkedAt": "2026-09-28 Asia/Seoul",
+    "model": "gpt-6-astra",
+    "scenario": "Standard speed, short context, text only; hypothetical rate-card estimate, not an invoice",
+    "apiPerMillion": {
+      "input": 10,
+      "cachedInput": 1,
+      "cacheWrite": 12.5,
+      "output": 50,
+      "unit": "USD"
+    },
+    "codexPerMillion": {
+      "input": 250,
+      "cachedInput": 25,
+      "output": 1250,
+      "unit": "credits"
+    },
+    "longContextThreshold": 272000,
+    "sources": [
+      "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "https://learn.chatgpt.com/docs/pricing",
+      "https://developers.openai.com/api/docs/guides/reasoning"
+    ]
+  },
+  "perTask": [
+    {
+      "task": "ranges",
+      "observed": {
+        "baselineUsd": 0.569588,
+        "recommendedUsd": 0.517238,
+        "savingPct": 9.190853739896209
+      },
+      "equalCache": {
+        "baselineUsd": 0.5908743612439515,
+        "recommendedUsd": 0.5385005643057246,
+        "savingPct": 8.863778896746485
+      }
+    },
+    {
+      "task": "ttl-lru",
+      "observed": {
+        "baselineUsd": 0.82098,
+        "recommendedUsd": 0.526728,
+        "savingPct": 35.84155521449975
+      },
+      "equalCache": {
+        "baselineUsd": 0.6737055087014346,
+        "recommendedUsd": 0.5476359899261439,
+        "savingPct": 18.712852596127547
+      }
+    },
+    {
+      "task": "ledger",
+      "observed": {
+        "baselineUsd": 0.5120359999999999,
+        "recommendedUsd": 0.75365,
+        "savingPct": -47.18691654493046
+      },
+      "equalCache": {
+        "baselineUsd": 0.7007314419762868,
+        "recommendedUsd": 0.6059662013639322,
+        "savingPct": 13.52376030752756
+      }
+    },
+    {
+      "task": "intervals",
+      "observed": {
+        "baselineUsd": 0.7786299999999999,
+        "recommendedUsd": 0.374116,
+        "savingPct": 51.952018288532415
+      },
+      "equalCache": {
+        "baselineUsd": 0.6318433459350858,
+        "recommendedUsd": 0.5637085865474405,
+        "savingPct": 10.783489266126633
+      }
+    }
+  ],
+  "pairs": 12,
+  "pooledCacheFraction": 0.2644104247432016,
+  "scenarios": [
+    {
+      "name": "observed-cache",
+      "cacheFraction": null,
+      "baselineUsd": {
+        "uncachedInput": 1.91302,
+        "cachedInput": 0.056064,
+        "output": 0.7121500000000001,
+        "total": 2.681234
+      },
+      "recommendedUsd": {
+        "uncachedInput": 1.7262799999999998,
+        "cachedInput": 0.074752,
+        "output": 0.3707,
+        "total": 2.1717319999999996
+      },
+      "savedUsd": 0.5095020000000003,
+      "savingPct": 19.002518989390722,
+      "baselineCredits": 67.03085,
+      "recommendedCredits": 54.293299999999995,
+      "savingPerTaskUsd": 0.04245850000000003,
+      "breakEvenRouterUsdPerTask": 0.04245850000000003
+    },
+    {
+      "name": "equal-cache-pooled",
+      "cacheFraction": 0.2644104247432016,
+      "baselineUsd": {
+        "uncachedInput": 1.8195985087297322,
+        "cachedInput": 0.0654061491270268,
+        "output": 0.7121500000000001,
+        "total": 2.597154657856759
+      },
+      "recommendedUsd": {
+        "uncachedInput": 1.8197014912702678,
+        "cachedInput": 0.06540985087297321,
+        "output": 0.3707,
+        "total": 2.255811342143241
+      },
+      "savedUsd": 0.34134331571351817,
+      "savingPct": 13.142972240059192,
+      "baselineCredits": 64.92886644641897,
+      "recommendedCredits": 56.395283553581024,
+      "savingPerTaskUsd": 0.02844527630945985,
+      "breakEvenRouterUsdPerTask": 0.02844527630945985
+    },
+    {
+      "name": "equal-cache-zero",
+      "cacheFraction": 0,
+      "baselineUsd": {
+        "uncachedInput": 2.4736599999999997,
+        "cachedInput": 0,
+        "output": 0.7121500000000001,
+        "total": 3.18581
+      },
+      "recommendedUsd": {
+        "uncachedInput": 2.4737999999999998,
+        "cachedInput": 0,
+        "output": 0.3707,
+        "total": 2.8444999999999996
+      },
+      "savedUsd": 0.34131000000000045,
+      "savingPct": 10.713444932372001,
+      "baselineCredits": 79.64525,
+      "recommendedCredits": 71.1125,
+      "savingPerTaskUsd": 0.028442500000000037,
+      "breakEvenRouterUsdPerTask": 0.028442500000000037
+    },
+    {
+      "name": "equal-cache-90pct",
+      "cacheFraction": 0.9,
+      "baselineUsd": {
+        "uncachedInput": 0.24736599999999992,
+        "cachedInput": 0.22262940000000003,
+        "output": 0.7121500000000001,
+        "total": 1.1821454
+      },
+      "recommendedUsd": {
+        "uncachedInput": 0.2473799999999999,
+        "cachedInput": 0.222642,
+        "output": 0.3707,
+        "total": 0.840722
+      },
+      "savedUsd": 0.34142340000000004,
+      "savingPct": 28.8816756382083,
+      "baselineCredits": 29.553634999999996,
+      "recommendedCredits": 21.01805,
+      "savingPerTaskUsd": 0.028451950000000004,
+      "breakEvenRouterUsdPerTask": 0.028451950000000004
+    }
+  ],
+  "actualBilledUsd": null,
+  "routerCostUsd": null,
+  "note": "Router break-even assumes all paired tests pass and one routing call per task. It is a ceiling, not measured Jev cost. No retries or repair included."
+}

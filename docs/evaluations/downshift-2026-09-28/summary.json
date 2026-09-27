@@ -1,0 +1,244 @@
+{
+  "baseline": {
+    "runs": 12,
+    "passes": 12,
+    "input": 247366,
+    "cachedInput": 56064,
+    "output": 14243,
+    "reasoning": 8553,
+    "latencyMs": 632386
+  },
+  "recommended": {
+    "runs": 12,
+    "passes": 12,
+    "input": 247380,
+    "cachedInput": 74752,
+    "output": 7414,
+    "reasoning": 1953,
+    "latencyMs": 389659
+  },
+  "perTask": [
+    {
+      "task": "ranges",
+      "effort": "medium",
+      "baseline": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61733,
+        "cachedInput": 18688,
+        "output": 2409,
+        "reasoning": 1459,
+        "latencyMs": 142652
+      },
+      "recommended": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61743,
+        "cachedInput": 18688,
+        "output": 1360,
+        "reasoning": 442,
+        "latencyMs": 104942
+      },
+      "outputSaved": 1049,
+      "outputReductionPct": 43.54503943545039
+    },
+    {
+      "task": "ttl-lru",
+      "effort": "medium",
+      "baseline": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61888,
+        "cachedInput": 0,
+        "output": 4042,
+        "reasoning": 2786,
+        "latencyMs": 160369
+      },
+      "recommended": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61892,
+        "cachedInput": 18688,
+        "output": 1520,
+        "reasoning": 336,
+        "latencyMs": 74659
+      },
+      "outputSaved": 2522,
+      "outputReductionPct": 62.3948540326571
+    },
+    {
+      "task": "ledger",
+      "effort": "high",
+      "baseline": {
+        "runs": 3,
+        "passes": 3,
+        "input": 62062,
+        "cachedInput": 37376,
+        "output": 4556,
+        "reasoning": 2604,
+        "latencyMs": 189097
+      },
+      "recommended": {
+        "runs": 3,
+        "passes": 3,
+        "input": 62060,
+        "cachedInput": 0,
+        "output": 2661,
+        "reasoning": 724,
+        "latencyMs": 118595
+      },
+      "outputSaved": 1895,
+      "outputReductionPct": 41.59350307287094
+    },
+    {
+      "task": "intervals",
+      "effort": "medium",
+      "baseline": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61683,
+        "cachedInput": 0,
+        "output": 3236,
+        "reasoning": 1704,
+        "latencyMs": 140268
+      },
+      "recommended": {
+        "runs": 3,
+        "passes": 3,
+        "input": 61685,
+        "cachedInput": 37376,
+        "output": 1873,
+        "reasoning": 451,
+        "latencyMs": 91463
+      },
+      "outputSaved": 1363,
+      "outputReductionPct": 42.11990111248455
+    }
+  ],
+  "pairs": [
+    {
+      "task": "ranges",
+      "round": 0,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 339,
+      "regression": false
+    },
+    {
+      "task": "ranges",
+      "round": 1,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 354,
+      "regression": false
+    },
+    {
+      "task": "ranges",
+      "round": 2,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 356,
+      "regression": false
+    },
+    {
+      "task": "ttl-lru",
+      "round": 0,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 519,
+      "regression": false
+    },
+    {
+      "task": "ttl-lru",
+      "round": 1,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 882,
+      "regression": false
+    },
+    {
+      "task": "ttl-lru",
+      "round": 2,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 1121,
+      "regression": false
+    },
+    {
+      "task": "ledger",
+      "round": 0,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 825,
+      "regression": false
+    },
+    {
+      "task": "ledger",
+      "round": 1,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 461,
+      "regression": false
+    },
+    {
+      "task": "ledger",
+      "round": 2,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 609,
+      "regression": false
+    },
+    {
+      "task": "intervals",
+      "round": 0,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 476,
+      "regression": false
+    },
+    {
+      "task": "intervals",
+      "round": 1,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 514,
+      "regression": false
+    },
+    {
+      "task": "intervals",
+      "round": 2,
+      "baselinePassed": true,
+      "recommendedPassed": true,
+      "outputSaved": 373,
+      "regression": false
+    }
+  ],
+  "regressions": 0,
+  "outputReductionPct": 47.9463596152496,
+  "nominalInputPlusOutputReductionPct": 2.6050327014743377,
+  "taskLevelOneSidedSignFlipP": 0.0625,
+  "positiveSavingPairs": 12,
+  "usefulPilotSignal": true,
+  "exclusions": [
+    {
+      "task": "async-memo",
+      "choice": "xhigh",
+      "reason": "not-a-strict-downshift"
+    },
+    {
+      "task": "keyed-queue",
+      "choice": "xhigh",
+      "reason": "not-a-strict-downshift"
+    }
+  ],
+  "routerLatencyMs": [
+    285,
+    268,
+    249,
+    290,
+    275,
+    278
+  ],
+  "routerTokens": null,
+  "actualBilledUsd": null
+}
