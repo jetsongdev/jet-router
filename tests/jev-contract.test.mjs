@@ -40,3 +40,17 @@ test('invalid enums, evidence, distributions and oversized output are rejected',
   for (const mutate of mutations) { const b = response(); mutate(b); assert.equal(parseJevResponse(JSON.stringify(b)), null); }
   for (const text of ['oops', 'null', '{}', 'x'.repeat(65537)]) assert.equal(parseJevResponse(text), null);
 });
+
+test('request-specific choices reject full distributions, outside winners and invalid candidate sets', () => {
+  const b = response();
+  b.answers.effort.probabilities = { medium: 0.2, keep: 0.8 };
+  const text = JSON.stringify(b);
+  assert.equal(parseJevResponse(text, ['medium', 'keep']).choice, 'keep');
+  assert.equal(parseJevResponse(text), null);
+  assert.equal(parseJevResponse(JSON.stringify(response()), ['medium', 'keep']), null);
+  for (const choices of [[], ['medium'], ['keep', 'keep'], ['max', 'keep'], null, 'keep']) {
+    assert.equal(parseJevResponse(text, choices), null);
+  }
+  b.answers.effort.choice = 'low';
+  assert.equal(parseJevResponse(JSON.stringify(b), ['medium', 'keep']), null);
+});

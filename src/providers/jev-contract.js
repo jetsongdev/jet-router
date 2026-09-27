@@ -28,7 +28,9 @@ export function buildJevRequest({ userPrompt, currentEffort, taskContext = null 
   };
 }
 
-export function parseJevResponse(text) {
+export function parseJevResponse(text, choices = CHOICES) {
+  if (!Array.isArray(choices) || !choices.includes('keep') ||
+      new Set(choices).size !== choices.length || choices.some(choice => !CHOICES.includes(choice))) return null;
   if (typeof text !== 'string' || text.length > 65536) return null;
   let body;
   try { body = JSON.parse(text); } catch { return null; }
@@ -37,12 +39,12 @@ export function parseJevResponse(text) {
   const context = answers?.contextSufficient;
   const risk = answers?.risky;
   if (typeof body?.model !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(body.model) ||
-      effort?.type !== 'choice' || !CHOICES.includes(effort.choice) || !unit(effort.confidence) ||
+      effort?.type !== 'choice' || !choices.includes(effort.choice) || !unit(effort.confidence) ||
       context?.type !== 'noul' || !unit(context.noul) || risk?.type !== 'noul' || !unit(risk.noul)) return null;
   const probabilities = effort.probabilities;
-  if (!probabilities || Object.keys(probabilities).length !== CHOICES.length ||
-      CHOICES.some(key => !unit(probabilities[key]))) return null;
-  const values = CHOICES.map(key => probabilities[key]);
+  if (!probabilities || Object.keys(probabilities).length !== choices.length ||
+      choices.some(key => !unit(probabilities[key]))) return null;
+  const values = choices.map(key => probabilities[key]);
   if (Math.abs(values.reduce((a, b) => a + b, 0) - 1) > 0.000001 ||
       probabilities[effort.choice] < Math.max(...values)) return null;
   // Keep numeric evidence; converting it to boolean policy evidence requires

@@ -240,3 +240,13 @@ Next: establish actual host capability/context provenance, validate dynamic
 response choices and transport, then wire adapters. Current helper rebuilds
 fixed-choice requests and cannot consume the new prepared payload as-is.
 See [harness guide](harness.md) and [TASKS](../TASKS.md) for boundaries.
+
+
+## 요청별 후보 응답 검사와 helper 연결 (2026-09-27)
+
+- `parseJevResponse`는 요청별 후보를 받아 선택값과 확률 분포의 정확한 후보 집합을 검사한다.
+  기본 호출의 고정 후보 동작은 유지하며, 잘못된 후보 집합·범위 밖 응답은 거부한다.
+- helper는 `routingInput`에서 공통 하네스로 질문을 재구성한다. 임의 질문을 수용하지 않으며,
+  `state`와 중복 입력하거나 하네스가 보류하면 네트워크 호출 없이 종료한다.
+- 새 회귀 테스트 3개는 구현 전 실패, 구현 후 통과했다. 모의 전송으로 본문과 응답 후보 일치를 확인했다.
+- 실제 Claude/Codex 훅은 아직 기존 `state` 경로를 사용한다. 실제 Jev 호출·모델별 품질·effort 변경 검증은 하지 않았다.
