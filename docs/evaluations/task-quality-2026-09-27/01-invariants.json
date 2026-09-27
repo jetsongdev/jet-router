@@ -1,0 +1,65 @@
+{
+  "split": "dev",
+  "rounds": 2,
+  "efforts": {
+    "ranges": "medium",
+    "ttl-lru": "high",
+    "async-memo": "xhigh",
+    "ledger": "high"
+  },
+  "routing": [
+    {
+      "id": "ranges",
+      "requestSha256": "1745a2713124418121f1a687134fd74216005715759206be4acf78d256e502da",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.6,
+        "contextScore": 0.4,
+        "riskScore": 0.02,
+        "selectedProbability": 0.68
+      }
+    },
+    {
+      "id": "ttl-lru",
+      "requestSha256": "7667522f79b96797e89eadd4ae2c681f4635c209f2677557351a3078beb9b023",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.83,
+        "contextScore": 0.45,
+        "riskScore": 0.02,
+        "selectedProbability": 0.87
+      }
+    },
+    {
+      "id": "async-memo",
+      "requestSha256": "0cbc9d33ccdf5964c60a9aa742524c85764c00b030f2f4fd574e24dcbfc65f98",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.51,
+        "contextScore": 0.41,
+        "riskScore": 0.03,
+        "selectedProbability": 0.61
+      }
+    },
+    {
+      "id": "ledger",
+      "requestSha256": "f3b016c3419d3b85de657f24fbc569eed0129328fa02171f9957567d54e77802",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.87,
+        "contextScore": 0.45,
+        "riskScore": 0.03,
+        "selectedProbability": 0.89
+      }
+    }
+  ],
+  "complete": true,
+  "config": {
+    "split": "dev",
+    "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. For implementation tasks that combine multiple state invariants, atomic rollback, expiry with eviction, or asynchronous generations, prefer high over medium even when the specification is complete. Complete context does not remove the need to reason about interacting edge cases."
+  }
+}

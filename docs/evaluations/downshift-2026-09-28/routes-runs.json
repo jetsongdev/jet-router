@@ -1,0 +1,1192 @@
+{
+  "startedAt": "2026-09-27T15:23:03.112Z",
+  "routes": {
+    "baseline": "xhigh",
+    "model": "gpt-6-astra",
+    "versions": {
+      "contractVersion": "routing-input-v1",
+      "criteriaVersion": "jev-effort-provenance-v3",
+      "policyVersion": "shadow-preflight-v2"
+    },
+    "taskSha256": "d64a4302dfc2bd73476a929fc4e6435365361a6a6cb626278c2dffd09908590f",
+    "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+    "routes": [
+      {
+        "task": "ranges",
+        "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+        "requestSha256": "5a10afd88d97a2d74602ca670a0941b687fcf409bf78e3ec368f9c0b0d9ea24d",
+        "latencyMs": 285,
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.68,
+          "contextScore": 0.41,
+          "riskScore": 0.03,
+          "selectedProbability": 0.75
+        },
+        "eligible": true
+      },
+      {
+        "task": "ttl-lru",
+        "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+        "requestSha256": "f464bc2f484014cf9705eaf9698066b8e25e3bbbe6a7bba75022767f3d9b82ae",
+        "latencyMs": 268,
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.75,
+          "contextScore": 0.43,
+          "riskScore": 0.02,
+          "selectedProbability": 0.81
+        },
+        "eligible": true
+      },
+      {
+        "task": "async-memo",
+        "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+        "requestSha256": "6125390b26fcbbda72b92c5c6a7e419c138dccfa9ed78766f82e0aeb29d25139",
+        "latencyMs": 249,
+        "decision": {
+          "provider": "jev",
+          "choice": "xhigh",
+          "confidence": 0.74,
+          "contextScore": 0.39,
+          "riskScore": 0.03,
+          "selectedProbability": 0.79
+        },
+        "warning": "probability-sum-tolerance",
+        "eligible": false
+      },
+      {
+        "task": "ledger",
+        "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+        "requestSha256": "f0bb5acf6d0d4929ebfd49027de1a1eb60aa14c83a914e8edc7e29074ef7720b",
+        "latencyMs": 290,
+        "decision": {
+          "provider": "jev",
+          "choice": "high",
+          "confidence": 0.29,
+          "contextScore": 0.43,
+          "riskScore": 0.03,
+          "selectedProbability": 0.44
+        },
+        "eligible": true
+      },
+      {
+        "task": "keyed-queue",
+        "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+        "requestSha256": "833e89d482367ccf5b40dc4c5fdf7a9745ce577c5e1fa2c84c1209aff4f15735",
+        "latencyMs": 275,
+        "decision": {
+          "provider": "jev",
+          "choice": "xhigh",
+          "confidence": 0.57,
+          "contextScore": 0.43,
+          "riskScore": 0.03,
+          "selectedProbability": 0.66
+        },
+        "eligible": false
+      },
+      {
+        "task": "intervals",
+        "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+        "requestSha256": "6da66ce9aa7f139535b751c3ee5ece7e752e6f17d6a913f38475e585759c8469",
+        "latencyMs": 278,
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.55,
+          "contextScore": 0.41,
+          "riskScore": 0.02,
+          "selectedProbability": 0.63
+        },
+        "eligible": true
+      }
+    ],
+    "complete": true
+  },
+  "results": [
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 0,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e376-6a8f-7491-ae0e-4bcf40bf01eb",
+      "usage": {
+        "input_tokens": 20577,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 785,
+        "reasoning_output_tokens": 479
+      },
+      "latencyMs": 53777,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid range syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    if (start > end) throw new RangeError('Descending range');\n\n    const count = end - start + 1;\n    if (count > 1000) throw new RangeError('Range exceeds 1000 members');\n    for (let offset = 0; offset < count; offset++) {\n      values.add(start + offset);\n    }\n  }\n\n  return Array.from(values).sort((a, b) => a - b);\n}",
+      "codeSha256": "e8cda960abd06898264d91fae0234a64fdcab4db918ddf72ba6539f2bb3f878b",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 1,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e377-3c80-7ae1-b42c-afe4c3ae4034",
+      "usage": {
+        "input_tokens": 20581,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 446,
+        "reasoning_output_tokens": 136
+      },
+      "latencyMs": 34823,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?[0-9]+)(?:\\s*\\.\\.\\s*([+-]?[0-9]+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    if (start > end) throw new RangeError('Descending range');\n    if (end - start >= 1000) throw new RangeError('Range exceeds 1000 members');\n\n    const count = end - start + 1;\n    for (let offset = 0; offset < count; offset++) {\n      values.add(start + offset);\n    }\n  }\n  return Array.from(values).sort((a, b) => a - b);\n}",
+      "codeSha256": "600e48bc06314a911b2f24ac8f5586d1f84ee4337584cdb793dae5ac2469fe75",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 2,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e377-c2e9-7a32-9788-425f9b1ec1a9",
+      "usage": {
+        "input_tokens": 20630,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 513,
+        "reasoning_output_tokens": 89
+      },
+      "latencyMs": 24548,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiration) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiration: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (time >= entry.expiration) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (time >= entry.expiration) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "0c1b9adc317a47d627431b84108fd229437f14b806f37d9c89b959a4486ad304",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 3,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e378-22eb-7113-9816-255d34748f2b",
+      "usage": {
+        "input_tokens": 20632,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1032,
+        "reasoning_output_tokens": 620
+      },
+      "latencyMs": 43982,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purgeExpired(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  function liveEntry(key) {\n    const entry = entries.get(key);\n    if (entry === undefined) return undefined;\n    if (now() >= entry.expiresAt) {\n      entries.delete(key);\n      return undefined;\n    }\n    return entry;\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purgeExpired(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiresAt: time + ttl });\n      if (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const entry = liveEntry(key);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      return liveEntry(key) !== undefined;\n    },\n\n    get size() {\n      purgeExpired(now());\n      return entries.size;\n    }\n  };\n}\n",
+      "codeSha256": "74d62fef3d2d884344a8d5d310bf549520fdede329088d20d06050c6cf338416",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 4,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e378-d0a2-7fc1-96ca-9e9ea10000b8",
+      "usage": {
+        "input_tokens": 20690,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1657,
+        "reasoning_output_tokens": 1005
+      },
+      "latencyMs": 58577,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial balances');\n  }\n\n  let balances = new Map();\n  let rememberedIds = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextIds = new Map(rememberedIds);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        const previous = nextIds.get(id);\n        if (previous !== undefined) {\n          if (\n            previous.from !== from ||\n            previous.to !== to ||\n            previous.amount !== amount\n          ) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const sourceBalance = nextBalances.get(from);\n        if (sourceBalance < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destinationBalance = nextBalances.get(to);\n          if (destinationBalance > Number.MAX_SAFE_INTEGER - amount) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, sourceBalance - amount);\n          nextBalances.set(to, destinationBalance + amount);\n        }\n\n        nextIds.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      rememberedIds = nextIds;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}\n",
+      "codeSha256": "aec54a69eb14c126cc592509b101ead1cfb505b7deb0ba35007907691099681c",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 5,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "high",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e379-b5ba-77b0-911c-554a6de66b70",
+      "usage": {
+        "input_tokens": 20688,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 832,
+        "reasoning_output_tokens": 194
+      },
+      "latencyMs": 34305,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial balances');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const account of Object.keys(initial)) {\n    const balance = initial[account];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(account, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (previous.from !== from || previous.to !== to || previous.amount !== amount) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const available = nextBalances.get(from);\n        if (available < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destination = nextBalances.get(to) + amount;\n          if (!Number.isSafeInteger(destination)) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, available - amount);\n          nextBalances.set(to, destination);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [account, balance] of balances) {\n        result[account] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "804734f6177d71aed5c1e63fa6d907041911c612094da575afeb2382f9695304",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 6,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e37a-3ba8-70b3-9d8c-7bfdf9ede8e5",
+      "usage": {
+        "input_tokens": 20561,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 558,
+        "reasoning_output_tokens": 82
+      },
+      "latencyMs": 27361,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2) {\n        throw new RangeError('Invalid interval');\n      }\n      const [start, end] = pair;\n      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n        throw new RangeError('Invalid interval');\n      }\n      if (start < end) sorted.push([start, end]);\n    }\n    sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const removals = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < removals.length && removals[j][1] <= cursor) j++;\n    while (j < removals.length && removals[j][0] < end) {\n      const [cutStart, cutEnd] = removals[j];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n    if (cursor < end) result.push([cursor, end]);\n  }\n  return result;\n}",
+      "codeSha256": "be8171376868bcafc99581db8ff2f75532d2c38954f194eac4a2c67b92352172",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 7,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e37a-a4eb-7ab0-98c9-3f15050327fc",
+      "usage": {
+        "input_tokens": 20561,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1034,
+        "reasoning_output_tokens": 516
+      },
+      "latencyMs": 44300,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) {\n      throw new RangeError('Expected an array of intervals');\n    }\n\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2) {\n        throw new RangeError('Expected a [start, end] pair');\n      }\n      const [start, end] = pair;\n      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n        throw new RangeError('Invalid interval endpoints');\n      }\n      if (start < end) sorted.push([start, end]);\n    }\n    sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let cutIndex = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (cutIndex < exclusions.length && exclusions[cutIndex][1] <= cursor) {\n      cutIndex++;\n    }\n\n    while (cutIndex < exclusions.length && exclusions[cutIndex][0] < end) {\n      const [cutStart, cutEnd] = exclusions[cutIndex];\n      if (cursor < cutStart) result.push([cursor, cutStart]);\n      if (cutEnd >= end) {\n        cursor = end;\n        break;\n      }\n      cursor = Math.max(cursor, cutEnd);\n      cutIndex++;\n    }\n\n    if (cursor < end) result.push([cursor, end]);\n  }\n\n  return result;\n}",
+      "codeSha256": "c46f21d29061e41850acb751e11dd53b42e3fff3c6b9283154a50cf31055fcbd",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 8,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e37b-5447-7112-8d7f-6396b847e520",
+      "usage": {
+        "input_tokens": 20581,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 476,
+        "reasoning_output_tokens": 172
+      },
+      "latencyMs": 35847,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid range syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    if (end < start) throw new RangeError('Descending range');\n\n    const count = end - start + 1;\n    if (count > 1000) throw new RangeError('Range exceeds 1000 members');\n    for (let offset = 0; offset < count; offset++) {\n      values.add(start + offset);\n    }\n  }\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "6e817e22bbae406b8b728f205c677e258f00eeb3cbeced20e6f09839c2cee252",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 9,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e37b-de61-7ad0-9c19-08f8b99c1d7c",
+      "usage": {
+        "input_tokens": 20577,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 830,
+        "reasoning_output_tokens": 516
+      },
+      "latencyMs": 51396,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const token of text.split(',')) {\n    const match = /^([+-]?[0-9]+)(?:\\s*\\.\\.\\s*([+-]?[0-9]+))?$/.exec(token.trim());\n    if (!match) throw new RangeError('Invalid integer or range');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Integers must be safe');\n    }\n    if (start > end) throw new RangeError('Descending range');\n    if (end - start > 999) throw new RangeError('Range exceeds 1000 members');\n\n    const count = end - start + 1;\n    for (let i = 0; i < count; i++) {\n      values.add(start + i);\n    }\n  }\n\n  return Array.from(values).sort((a, b) => a - b);\n}",
+      "codeSha256": "3d096c30fdd881bf4933f47df0697bfed06d2f20a2d3d89b5cb7a916976e63ea",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 10,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e37c-a8fe-7aa1-bc87-df8137440cf2",
+      "usage": {
+        "input_tokens": 20628,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1405,
+        "reasoning_output_tokens": 976
+      },
+      "latencyMs": 56030,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purgeExpired(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      const expiresAt = time + ttl;\n      purgeExpired(time);\n      entries.delete(key);\n\n      if (ttl === 0 || time >= expiresAt) return;\n\n      entries.set(key, { value, expiresAt });\n      if (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (now() >= entry.expiresAt) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (now() >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purgeExpired(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "032674beb964679cbebb4bd733f9f2e7c98ea0a4a15501e6ec47c1adf810c7be",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 11,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e37d-8407-72e0-9274-781a7fabd7bd",
+      "usage": {
+        "input_tokens": 20630,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 523,
+        "reasoning_output_tokens": 115
+      },
+      "latencyMs": 24319,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  function findLive(key) {\n    const entry = entries.get(key);\n    if (entry === undefined) return undefined;\n    if (now() >= entry.expiresAt) {\n      entries.delete(key);\n      return undefined;\n    }\n    return entry;\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiresAt: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const entry = findLive(key);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      return findLive(key) !== undefined;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "90ab6cb2dd3621c585033afc95031d387232b2b25dbe3eda979a399637b6ba35",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 12,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "high",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e37d-e291-75e0-8f4e-ab19c4c5810e",
+      "usage": {
+        "input_tokens": 20686,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 933,
+        "reasoning_output_tokens": 279
+      },
+      "latencyMs": 43906,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const account of Object.keys(initial)) {\n    const balance = initial[account];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(account, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (\n            previous.from !== from || previous.to !== to ||\n            previous.amount !== amount\n          ) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const sourceBalance = nextBalances.get(from);\n        if (sourceBalance < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destinationBalance = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destinationBalance) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, sourceBalance - amount);\n          nextBalances.set(to, destinationBalance + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [account, balance] of balances) {\n        result[account] = balance;\n      }\n      return result;\n    }\n  };\n}\n",
+      "codeSha256": "bde58df8bcb5dabcc61a00563340c95d5507a60803c6237055c817f85a1c38bd",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 13,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e37e-8ed7-7052-83cf-cd0e2164fd4a",
+      "usage": {
+        "input_tokens": 20686,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1394,
+        "reasoning_output_tokens": 738
+      },
+      "latencyMs": 66272,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n      if (batch.length === 0) return [];\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (previous.from !== from || previous.to !== to || previous.amount !== amount) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const sourceBalance = nextBalances.get(from);\n        if (sourceBalance < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destinationBalance = nextBalances.get(to);\n          if (destinationBalance > Number.MAX_SAFE_INTEGER - amount) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, sourceBalance - amount);\n          nextBalances.set(to, destinationBalance + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "17b6c555335a30cd78eab05d3a211599975f28f6d374587efe2cfd6cb5a24d69",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 14,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e37f-915a-7082-aa18-7554f1b6f907",
+      "usage": {
+        "input_tokens": 20559,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1183,
+        "reasoning_output_tokens": 672
+      },
+      "latencyMs": 58267,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) {\n      throw new RangeError('Expected an array of intervals');\n    }\n\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2) {\n        throw new RangeError('Expected a [start, end] pair');\n      }\n      const [start, end] = pair;\n      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n        throw new RangeError('Endpoints must be finite numbers with start <= end');\n      }\n      if (start < end) sorted.push([start, end]);\n    }\n\n    sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let cutIndex = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (cutIndex < exclusions.length && exclusions[cutIndex][1] <= cursor) {\n      cutIndex++;\n    }\n\n    while (cutIndex < exclusions.length && exclusions[cutIndex][0] < end) {\n      const [cutStart, cutEnd] = exclusions[cutIndex];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      cutIndex++;\n    }\n\n    if (cursor < end) result.push([cursor, end]);\n  }\n\n  return result;\n}",
+      "codeSha256": "1391792e2fcd2c6c191e6f1cde0f404704f9814d1220cf73fae6de47df8eb44b",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 15,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e380-7396-71f2-913e-b5b3e912da35",
+      "usage": {
+        "input_tokens": 20561,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 669,
+        "reasoning_output_tokens": 184
+      },
+      "latencyMs": 35071,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2 ||\n          !Number.isFinite(pair[0]) || !Number.isFinite(pair[1]) ||\n          pair[0] > pair[1]) {\n        throw new RangeError('Invalid interval');\n      }\n      if (pair[0] < pair[1]) sorted.push([pair[0], pair[1]]);\n    }\n    sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const removals = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < removals.length && removals[j][1] <= start) j++;\n    let k = j;\n    while (k < removals.length && removals[k][0] < end) {\n      const [cutStart, cutEnd] = removals[k];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      k++;\n    }\n    if (cursor < end) result.push([cursor, end]);\n    j = k;\n  }\n\n  return result;\n}",
+      "codeSha256": "f09b3c9cd94c337c27b4a7cbbaa40006a63983acf667d628ff17339767e6ad01",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 16,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e380-fe92-7882-a566-ce4da7593183",
+      "usage": {
+        "input_tokens": 20579,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 794,
+        "reasoning_output_tokens": 464
+      },
+      "latencyMs": 37479,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) {\n      throw new RangeError('Invalid integer or range syntax');\n    }\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Integers must be safe');\n    }\n    if (start > end) {\n      throw new RangeError('Descending ranges are not allowed');\n    }\n    const span = end - start;\n    if (span >= 1000) {\n      throw new RangeError('Ranges may contain at most 1000 members');\n    }\n\n    for (let offset = 0; offset <= span; offset++) {\n      values.add(start + offset);\n    }\n  }\n\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "f7dfdd76c5307d6aff65e12847ae1535645bd7f8f51f0a40b92f15a9118ff5c2",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 17,
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e381-911a-7661-be0e-a89d633d6a1e",
+      "usage": {
+        "input_tokens": 20581,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 438,
+        "reasoning_output_tokens": 134
+      },
+      "latencyMs": 34272,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?[0-9]+)(?:\\s*\\.\\.\\s*([+-]?[0-9]+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid range syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Endpoints must be safe integers');\n    }\n    if (start > end) throw new RangeError('Descending range');\n    const count = end - start + 1;\n    if (count > 1000) throw new RangeError('Range exceeds 1000 members');\n\n    for (let i = 0; i < count; i++) values.add(start + i);\n  }\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "f62f43b693190feb82904cf2e36f1969a6cd95143dc56a82a2105df124d117ae",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 18,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e382-170e-78d0-b1f1-114dc72b4690",
+      "usage": {
+        "input_tokens": 20632,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 484,
+        "reasoning_output_tokens": 132
+      },
+      "latencyMs": 25792,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiresAt: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      purge(now());\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      purge(now());\n      return entries.has(key);\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "b4f041c2f1ed3d3afef69a641b00008bf5f68e77e6c9675623a0b097b24513d1",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 19,
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e382-7bdc-76f1-b2d3-982827fe66a6",
+      "usage": {
+        "input_tokens": 20628,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1605,
+        "reasoning_output_tokens": 1190
+      },
+      "latencyMs": 60357,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  function findLive(key) {\n    const entry = entries.get(key);\n    if (entry === undefined) return undefined;\n    if (now() >= entry.expiresAt) {\n      entries.delete(key);\n      return undefined;\n    }\n    return entry;\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n\n      const expiresAt = time + ttl;\n      if (time >= expiresAt) return;\n\n      entries.set(key, { value, expiresAt });\n      if (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const entry = findLive(key);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      return findLive(key) !== undefined;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "bb1518788c281ba1296cb204683a241c001d88bbd6155fa2ce97dedc187639dd",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 20,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e383-6753-7542-91a7-522f22e8d851",
+      "usage": {
+        "input_tokens": 20686,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1505,
+        "reasoning_output_tokens": 861
+      },
+      "latencyMs": 64248,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial balances');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (previous.from !== from || previous.to !== to || previous.amount !== amount) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const sourceBalance = nextBalances.get(from);\n        if (sourceBalance < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destinationBalance = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destinationBalance) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, sourceBalance - amount);\n          nextBalances.set(to, destinationBalance + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "177d9c304fdf441896541c0b7af35f67fdc9d5e43e597222e06e9c49d6afa8ea",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 21,
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "high",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e384-6132-76f0-8b40-f3752c97e390",
+      "usage": {
+        "input_tokens": 20686,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 896,
+        "reasoning_output_tokens": 251
+      },
+      "latencyMs": 40384,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) throw new RangeError('Invalid batch');\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (\n            previous.from !== from || previous.to !== to ||\n            previous.amount !== amount\n          ) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const sourceBalance = nextBalances.get(from);\n        if (sourceBalance < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destinationBalance = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destinationBalance) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, sourceBalance - amount);\n          nextBalances.set(to, destinationBalance + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "2a803b30ac594ba01b9ed58b4cc873f8e00deab31aee7948bfc52caa2a4537e2",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 22,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e385-00db-7830-9c13-f464d7a99965",
+      "usage": {
+        "input_tokens": 20563,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 646,
+        "reasoning_output_tokens": 185
+      },
+      "latencyMs": 29031,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2 ||\n          !Number.isFinite(pair[0]) || !Number.isFinite(pair[1]) ||\n          pair[0] > pair[1]) {\n        throw new RangeError('Invalid interval');\n      }\n      if (pair[0] < pair[1]) sorted.push([pair[0], pair[1]]);\n    }\n    sorted.sort((a, b) => a[0] - b[0]);\n    const merged = [];\n    for (const pair of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && pair[0] <= last[1]) {\n        last[1] = Math.max(last[1], pair[1]);\n      } else {\n        merged.push(pair);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const removals = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < removals.length && removals[j][1] <= start) j++;\n    while (j < removals.length && removals[j][0] < end) {\n      const [cutStart, cutEnd] = removals[j];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n    if (cursor < end) result.push([cursor, end]);\n  }\n  return result;\n}",
+      "codeSha256": "a06ed5243894c69607b08cb65093989e1fbe017515f760c7a7cfd831a72d5031",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 23,
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e385-725e-7e52-b962-9d83063d065f",
+      "usage": {
+        "input_tokens": 20563,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1019,
+        "reasoning_output_tokens": 516
+      },
+      "latencyMs": 37701,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) {\n      throw new RangeError('Expected an array of interval pairs');\n    }\n\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2) {\n        throw new RangeError('Expected a [start, end] pair');\n      }\n      const [start, end] = pair;\n      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n        throw new RangeError('Endpoints must be finite numbers with start <= end');\n      }\n      if (start < end) sorted.push([start, end]);\n    }\n\n    sorted.sort((a, b) => a[0] - b[0]);\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let cutIndex = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (cutIndex < exclusions.length && exclusions[cutIndex][1] <= cursor) {\n      cutIndex++;\n    }\n\n    while (cutIndex < exclusions.length && exclusions[cutIndex][0] < end) {\n      const [cutStart, cutEnd] = exclusions[cutIndex];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      cutIndex++;\n    }\n\n    if (cursor < end) result.push([cursor, end]);\n  }\n\n  return result;\n}\n",
+      "codeSha256": "f37d9f5276e641688e4ea17ab27f9477e584d39230058d8e6b0a71335379927e",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    }
+  ],
+  "complete": true,
+  "finishedAt": "2026-09-27T15:40:05.930Z"
+}

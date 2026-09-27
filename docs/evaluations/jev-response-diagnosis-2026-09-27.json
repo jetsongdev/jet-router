@@ -1,0 +1,163 @@
+{
+  "kind": "live-synthetic-response-diagnosis",
+  "attempts": [
+    {
+      "attempt": 1,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.73,
+        "contextScore": 0.38,
+        "riskScore": 0.05
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.79,
+          0.02,
+          0,
+          0.18
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.73
+      }
+    },
+    {
+      "attempt": 2,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.75,
+        "contextScore": 0.38,
+        "riskScore": 0.05
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.8,
+          0.02,
+          0,
+          0.17
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.75
+      }
+    },
+    {
+      "attempt": 3,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.77,
+        "contextScore": 0.39,
+        "riskScore": 0.05
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.82,
+          0.02,
+          0,
+          0.15
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.77
+      }
+    },
+    {
+      "attempt": 4,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.7,
+        "contextScore": 0.4,
+        "riskScore": 0.05
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.76,
+          0.02,
+          0,
+          0.21
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.7
+      }
+    },
+    {
+      "attempt": 5,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.71,
+        "contextScore": 0.38,
+        "riskScore": 0.06
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.77,
+          0.02,
+          0,
+          0.2
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.71
+      }
+    },
+    {
+      "attempt": 6,
+      "ok": true,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.74,
+        "contextScore": 0.4,
+        "riskScore": 0.05
+      },
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.79,
+          0.02,
+          0,
+          0.18
+        ],
+        "sum": 1,
+        "winnerIndex": 1,
+        "confidence": 0.74
+      }
+    },
+    {
+      "attempt": 7,
+      "ok": false,
+      "reason": "invalid-response",
+      "diagnostic": "probability-sum",
+      "stats": {
+        "probabilities": [
+          0.01,
+          0.8,
+          0.02,
+          0,
+          0.16
+        ],
+        "sum": 0.9900000000000001,
+        "winnerIndex": 1,
+        "confidence": 0.75
+      }
+    }
+  ],
+  "rawResponsesStored": false,
+  "historicalFailureCauseConfirmed": false
+}

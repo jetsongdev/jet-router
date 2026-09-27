@@ -1,0 +1,7 @@
+{
+  "model": "claude-opus-5-5",
+  "baseline": "xhigh",
+  "tasks": ["ranges", "ttl-lru", "async-memo", "ledger", "keyed-queue", "intervals"],
+  "rounds": 3,
+  "maxBudgetUsdPerRun": 1
+}

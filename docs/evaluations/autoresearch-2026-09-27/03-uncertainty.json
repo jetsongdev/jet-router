@@ -1,0 +1,5 @@
+{
+  "set": "dev",
+  "baseline": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear.",
+  "candidate": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Explicit uncertainty about the host model, its supported effort list, or a user-reference setting is capability uncertainty, not evidence that the described task itself is complex or incomplete. Base the task effort on its stated reasoning requirements while respecting the provided choices."
+}

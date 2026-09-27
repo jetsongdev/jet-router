@@ -1,0 +1,178 @@
+{
+  "config": {
+    "split": "holdout",
+    "rounds": 2,
+    "efforts": {
+      "keyed-queue": "medium",
+      "intervals": "medium"
+    }
+  },
+  "startedAt": "2026-09-27T15:08:28.387Z",
+  "taskSha256": "d38cfc3f12031c9c3c420ef992b6aff6b0b2ec447c6e50a001dd7b0f2e33f9de",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "results": [
+    {
+      "task": "keyed-queue",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+      "threadId": "01a0e369-1133-7081-8460-657124f4fff4",
+      "usage": {
+        "input_tokens": 20568,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 259,
+        "reasoning_output_tokens": 121
+      },
+      "latencyMs": 18130,
+      "usedTools": false,
+      "code": "export function createKeyedQueue() {\n  const tails = new Map();\n\n  return function enqueue(key, task) {\n    const previous = tails.get(key) || Promise.resolve();\n    const result = previous.then(() => task());\n    const tail = result.then(() => undefined, () => undefined);\n\n    tails.set(key, tail);\n    tail.then(() => {\n      if (tails.get(key) === tail) {\n        tails.delete(key);\n      }\n    });\n\n    return result;\n  };\n}",
+      "codeSha256": "a93c43ba77fb4887f371dc00999ae26cd2f7763e4af6b08e9bf8b8e1a9d635e7",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e369-583c-7421-8102-6f8cbeeae484",
+      "usage": {
+        "input_tokens": 20561,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 681,
+        "reasoning_output_tokens": 204
+      },
+      "latencyMs": 34218,
+      "usedTools": false,
+      "code": "function normalize(intervals) {\n  if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n  const sorted = [];\n  for (const pair of intervals) {\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError('Expected a [start, end] pair');\n    }\n    const [start, end] = pair;\n    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n      throw new RangeError('Invalid interval endpoints');\n    }\n    if (start < end) sorted.push([start, end]);\n  }\n  sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const pair of sorted) {\n    const last = merged[merged.length - 1];\n    if (last && pair[0] <= last[1]) {\n      last[1] = Math.max(last[1], pair[1]);\n    } else {\n      merged.push(pair);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < exclusions.length && exclusions[j][1] <= cursor) j++;\n\n    while (j < exclusions.length && exclusions[j][0] < end) {\n      const [cutStart, cutEnd] = exclusions[j];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n\n    if (cursor < end) result.push([cursor, end]);\n  }\n  return result;\n}",
+      "codeSha256": "e74b8b866e616ccb9891a29afe9b727fe8a063ff628c69d0ce08fd2e372b9104",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "keyed-queue",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+      "threadId": "01a0e369-dc6e-7672-a325-b8438685d9a5",
+      "usage": {
+        "input_tokens": 20570,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 363,
+        "reasoning_output_tokens": 226
+      },
+      "latencyMs": 20439,
+      "usedTools": false,
+      "code": "export function createKeyedQueue() {\n  const tails = new Map();\n\n  return function enqueue(key, task) {\n    const previous = tails.get(key) ?? Promise.resolve();\n    const result = previous.then(() => task());\n\n    const release = () => {\n      if (tails.get(key) === tail) {\n        tails.delete(key);\n      }\n    };\n    const tail = result.then(release, release);\n    tails.set(key, tail);\n\n    return result;\n  };\n}\n",
+      "codeSha256": "8722b73779cb906c07be987d6c4d9181f50b4964be40b65203a5ea537c50fd94",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    },
+    {
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e36a-2c5d-74c2-92e1-d2c18487e71c",
+      "usage": {
+        "input_tokens": 20565,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 645,
+        "reasoning_output_tokens": 165
+      },
+      "latencyMs": 37174,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2) {\n        throw new RangeError('Expected a [start, end] pair');\n      }\n      const [start, end] = pair;\n      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {\n        throw new RangeError('Invalid interval endpoints');\n      }\n      if (start < end) sorted.push([start, end]);\n    }\n    sorted.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n    const merged = [];\n    for (const interval of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && interval[0] <= last[1]) {\n        last[1] = Math.max(last[1], interval[1]);\n      } else {\n        merged.push(interval);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < exclusions.length && exclusions[j][0] < end) {\n      const [cutStart, cutEnd] = exclusions[j];\n      if (cutEnd <= cursor) {\n        j++;\n        continue;\n      }\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n    if (cursor < end) result.push([cursor, end]);\n  }\n\n  return result;\n}",
+      "codeSha256": "e70c5c39661de561c655427b3110f4d57852af83e0e6571208dbe6c5c214c0c2",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    }
+  ],
+  "complete": true,
+  "successes": 4,
+  "finishedAt": "2026-09-27T15:10:18.477Z"
+}

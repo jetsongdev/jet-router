@@ -1,0 +1,161 @@
+{
+  "kind": "offline-contract-evaluation",
+  "contractVersion": "routing-input-v1",
+  "criteriaVersion": "jev-effort-provenance-v1",
+  "policyVersion": "shadow-preflight-v1",
+  "corpusVersion": "routing-contract-fixtures-v1",
+  "corpusSha256": "91480e751c5bcbc4f9319e1d8871d0a8178dbd1b3d4bfd7a0e319daf65cd8f4d",
+  "providerCalls": 0,
+  "providerModelReturned": null,
+  "enforceApproved": false,
+  "equivalentHostRequests": true,
+  "passed": true,
+  "items": [
+    {
+      "id": "codex-observed",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1503,
+      "requestSha256": "eee814aa71ece43c0d96745dcb86e351f112b357c15cd7432119dbab72497ecb"
+    },
+    {
+      "id": "claude-observed",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1503,
+      "requestSha256": "eee814aa71ece43c0d96745dcb86e351f112b357c15cd7432119dbab72497ecb"
+    },
+    {
+      "id": "reference-effort",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1515,
+      "requestSha256": "9da5d15c4e965a52a1dae07d4f60b906f26a8248097617dc3584e01bc5abd258"
+    },
+    {
+      "id": "limited-support",
+      "status": "ready",
+      "choices": [
+        "medium",
+        "high",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1317,
+      "requestSha256": "8b8f6d04c2829cfb5912c8bbeb1597ee08e6e7f50ac7e8af51cb42dd6b2d3b1b"
+    },
+    {
+      "id": "unknown-model",
+      "status": "skip",
+      "reason": "unknown-model",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "unknown-support",
+      "status": "skip",
+      "reason": "unknown-support",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "no-consent",
+      "status": "skip",
+      "reason": "no-consent",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "uncorrelated",
+      "status": "skip",
+      "reason": "correlation",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "missing-context",
+      "status": "skip",
+      "reason": "missing-context",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "unknown-context",
+      "status": "skip",
+      "reason": "unknown-context",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "summary-provenance",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1539,
+      "requestSha256": "5c1eb4d99cd6d07126ff06f1522b13c7083cdf7e60f319e6a9548c2a7822b217"
+    },
+    {
+      "id": "injected-instructions",
+      "status": "ready",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "passed": true,
+      "requestBytes": 1508,
+      "requestSha256": "b11a96d7adad92b4b15620f99883b35e19bfb45144726eb5c2b699525d43779e"
+    },
+    {
+      "id": "max-protected",
+      "status": "skip",
+      "reason": "protected-effort",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    },
+    {
+      "id": "oversized",
+      "status": "skip",
+      "reason": "invalid-input",
+      "passed": true,
+      "requestBytes": 0,
+      "requestSha256": null
+    }
+  ]
+}

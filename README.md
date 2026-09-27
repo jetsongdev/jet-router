@@ -4,7 +4,17 @@
 
 **현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. [합성 입력 12건 실호출](docs/evaluations/jev-smoke-2026-09-27.md)을 마쳤으며, 본격 품질 평가가 남아 있습니다. 로컬 모델 연결과 effort 자동 변경(enforce)은 미지원입니다.
 
+## Codex MCP shadow — 별도 실험
+
+Codex용 로컬 MCP 서버와 `UserPromptSubmit` hook 설정 예시를 추가했습니다.
+자동 추천 관찰용이며 실제 effort는 변경하지 않습니다. MCP 오프라인 연결 테스트는 통과했고,
+실제 Codex hook 실행·화면 표시는 수동 검증 전입니다.
+**[설치·Jev 설정·중지·테스트 방법](docs/codex-mcp.md)**을 참고하세요.
+Claude 플러그인 설정과 키를 자동 공유하지 않습니다.
+
 ## 동작 원리
+
+**[Claude Code·Codex 작동 다이어그램](docs/architecture.md)**: 호출 시점, Jev 판정 경로, 메시지 표시와 effort 유지 방식.
 
 목표 흐름은 **사용자 입력 → Jev 추천 → 정책 검사 → 해당 턴의 요청 effort 적용**입니다.
 
@@ -118,8 +128,22 @@ npm run test:hooks
 `test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다. 별도 실호출 결과는 위 평가 기록을 참고하세요.
 
 - [실제 Claude 테스트 체크리스트](docs/test-checklist.md) — 설치·fake·Jev·off/lock 확인
+- [공통 요청 하네스](docs/harness.md) — Claude/Codex shadow 연결·불확실성 표시·요청별 응답 검사
+- [구현 작업 목록](TASKS.md) — 모델별 추천 범위·품질 하네스·enforce 선행 조건
 - [향후 기능 후보](docs/planned/feature-candidates.md) — 미구현 후보와 선행 조건
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)
 
 코드는 [공개 저장소](https://github.com/jetsongdev/jet-router)에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`이며 정식 release/tag는 없습니다. 배포 라이선스는 아직 선택하지 않았습니다.
+
+Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했고 선택적 모델 지원 목록 조회를 연결했습니다. Claude 실제 UI 검증은 토큰 부족으로 보류했습니다. [검증 범위·남은 작업](docs/evaluations/shadow-closeout-2026-09-27.md), [모델 조회 설정](docs/codex-mcp.md#모델별-추천-후보-조회-선택)을 참고하세요.
+
+추천 품질 평가 준비: [파일럿 평가셋·채점 방법](docs/quality-evaluation.md). 조정용/검증용 사례를 분리했고 [첫 12건 실호출](docs/evaluations/quality-pilot-v1-live-2026-09-27.md)을 기록했습니다. 기대 범위 일치는 실제 작업 성공률과 다릅니다.
+
+[판정 지침 개선 실험](docs/evaluations/autoresearch-2026-09-27/README.md): 4개 변경안·336건 호출 후 첫 변경안만 채택했습니다. 이후 3회 연속 추가 개선이 없어 중단했으며, 새 holdout에서 회귀는 없었습니다.
+
+[실제 코드 품질 비교·그래프](docs/evaluations/task-quality-2026-09-27/README.md): Codex gpt-6-astra의 48개 독립 실행을 저장·재검사했습니다. 세 지침 변경안은 모두 기준선과 동률이라 폐기했습니다. 작은 합성 과제군에서 품질 향상은 확인하지 못했으며, enforce 활성화 근거로 사용하지 않습니다.
+
+[하향 추천 적용 시 토큰·예상 비용 비교](docs/evaluations/downshift-2026-09-28/README.md): 기본 xhigh와 Jev 추천 medium/high를 24회 실제 실행했습니다. 하향 추천된 4과제에서 검사 통과를 유지하며 출력 토큰 47.9% 감소를 관측했습니다. 공식 단가 예상 비용은 관측 캐시 기준 19.0%, 동일 캐시 비율 가정에서 13.1% 감소했으며 Jev 비용은 제외했습니다.
+
+[Claude Code 동일 과제 비교 체크리스트·스크립트](docs/claude-quality-checklist.md): shadow 설치 확인과 CLI 명시적 effort 비교를 구분합니다. `node scripts/claude-quality.mjs plan eval/claude-quality/smoke.json`은 모델 호출 없이 실행 계획을 확인합니다. 실제 Claude 생성 검증은 아직 보류이며 enforce 구현을 의미하지 않습니다.

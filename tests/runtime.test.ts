@@ -15,7 +15,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
       expect(e.argv[1].endsWith('/scripts/jev-request.mjs')).toBe(true);
       expect(JSON.stringify(e.argv)).not.toContain('CANARY');
       expect(e.init?.timeoutMs).toBe(4000);
-      expect(JSON.parse(e.init?.stdin ?? '{}').state.userPrompt).toBe('RUNTIME_CANARY');
+      expect(JSON.parse(e.init?.stdin ?? '{}').routingInput.prompt).toBe('RUNTIME_CANARY');
       return { value: { exitCode: 0, stdout: JSON.stringify({ ok: true, decision: {
         provider: 'jev', choice: 'low', confidence: 0.8, contextScore: 0.9, riskScore: 0.1,
       } }), stderr: '' } };

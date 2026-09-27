@@ -1,0 +1,220 @@
+{
+  "config": {
+    "split": "dev",
+    "rounds": 2,
+    "efforts": {
+      "ranges": "medium",
+      "ttl-lru": "medium",
+      "async-memo": "medium",
+      "ledger": "medium"
+    }
+  },
+  "startedAt": "2026-09-27T14:39:52.749Z",
+  "taskSha256": "2c5b236680db7b4119c39e587f0ec9e3e2c393a378c34b40d65f022764699272",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "results": [
+    {
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e34e-e21b-7710-b697-635beb99c997",
+      "usage": {
+        "input_tokens": 20577,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 386,
+        "reasoning_output_tokens": 64
+      },
+      "latencyMs": 22311,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?[0-9]+)(?:\\s*\\.\\.\\s*([+-]?[0-9]+))$/.exec(item.trim())\n      || /^([+-]?[0-9]+)$/.exec(item.trim());\n    if (!match) throw new RangeError('Malformed range item');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    const span = end - start;\n    if (span < 0 || span > 999) {\n      throw new RangeError('Range must be ascending and contain at most 1000 members');\n    }\n    for (let offset = 0; offset <= span; offset++) {\n      values.add(start + offset);\n    }\n  }\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "4465f186f068a97647ca7c84d9abceb7de9579cb8f4973ca9f9bdda105ceff5b",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 0
+    },
+    {
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e34f-3acd-7bd2-8733-45c40d0b03b0",
+      "usage": {
+        "input_tokens": 20626,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 530,
+        "reasoning_output_tokens": 102
+      },
+      "latencyMs": 35623,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiresAt: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "75c31ecd8b15d85ba209e9fd1198a91157aa3847b6f1e32d4d781af3c83ece4f",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 0
+    },
+    {
+      "task": "async-memo",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+      "threadId": "01a0e34f-c664-7382-b10f-8e9ef57d1129",
+      "usage": {
+        "input_tokens": 20627,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 356,
+        "reasoning_output_tokens": 135
+      },
+      "latencyMs": 23896,
+      "usedTools": false,
+      "code": "export function memoizeAsync(fn) {\n  const cache = new Map();\n\n  function get(key) {\n    if (cache.has(key)) return cache.get(key);\n\n    let resolve;\n    let reject;\n    const promise = new Promise((res, rej) => {\n      resolve = res;\n      reject = rej;\n    });\n    cache.set(key, promise);\n\n    function fail(error) {\n      if (cache.get(key) === promise) cache.delete(key);\n      reject(error);\n    }\n\n    try {\n      Promise.resolve(fn(key)).then(resolve, fail);\n    } catch (error) {\n      fail(error);\n    }\n\n    return promise;\n  }\n\n  return {\n    get,\n    invalidate(key) {\n      cache.delete(key);\n    },\n    clear() {\n      cache.clear();\n    }\n  };\n}",
+      "codeSha256": "59d594f9952e09a454de6e5f9d4f3e73feb3d73fc77045c3dea15322651de425",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 0
+    },
+    {
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e350-2340-7720-aee9-95cf3a5542df",
+      "usage": {
+        "input_tokens": 20684,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 723,
+        "reasoning_output_tokens": 85
+      },
+      "latencyMs": 35771,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (previous.from !== from || previous.to !== to || previous.amount !== amount) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const source = nextBalances.get(from);\n        if (source < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destination = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destination) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, source - amount);\n          nextBalances.set(to, destination + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "0482bbc3cc84b8e726fdfcc66227416f891f63b14ff077d9ac7e7998f60f6ada",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 0
+    },
+    {
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e350-af48-7eb2-a958-bc1568df4241",
+      "usage": {
+        "input_tokens": 20573,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 431,
+        "reasoning_output_tokens": 128
+      },
+      "latencyMs": 29353,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Malformed integer or range');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Endpoints must be safe integers');\n    }\n    if (start > end) throw new RangeError('Descending range');\n    const span = end - start;\n    if (span > 999) throw new RangeError('Range exceeds 1000 members');\n\n    for (let offset = 0; offset <= span; offset++) {\n      values.add(start + offset);\n    }\n  }\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "27f4c213936e525c83f04d62e849e237df9478693dfa14e87da118920eb4d39c",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 1
+    },
+    {
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e351-2081-7701-83bf-e1f8476a1d3d",
+      "usage": {
+        "input_tokens": 20630,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 524,
+        "reasoning_output_tokens": 78
+      },
+      "latencyMs": 31664,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      const expiresAt = time + ttl;\n      if (time >= expiresAt) return;\n      entries.set(key, { value, expiresAt });\n\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "998240baeaa262880dfdf953c39da1bab71dd78503cdaca31c4372f1c7ced53a",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 1
+    },
+    {
+      "task": "async-memo",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+      "threadId": "01a0e351-9edc-7082-9522-7bd4b76a690e",
+      "usage": {
+        "input_tokens": 20629,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 312,
+        "reasoning_output_tokens": 91
+      },
+      "latencyMs": 21215,
+      "usedTools": false,
+      "code": "export function memoizeAsync(fn) {\n  const cache = new Map();\n\n  function get(key) {\n    if (cache.has(key)) return cache.get(key);\n\n    let resolve;\n    let reject;\n    const promise = new Promise((res, rej) => {\n      resolve = res;\n      reject = rej;\n    });\n    cache.set(key, promise);\n\n    function fail(error) {\n      if (cache.get(key) === promise) cache.delete(key);\n      reject(error);\n    }\n\n    try {\n      Promise.resolve(fn(key)).then(resolve, fail);\n    } catch (error) {\n      fail(error);\n    }\n\n    return promise;\n  }\n\n  return {\n    get,\n    invalidate(key) {\n      cache.delete(key);\n    },\n    clear() {\n      cache.clear();\n    }\n  };\n}",
+      "codeSha256": "59d594f9952e09a454de6e5f9d4f3e73feb3d73fc77045c3dea15322651de425",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 1
+    },
+    {
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e351-f0ff-75e2-b0e0-d048e4cbb1a3",
+      "usage": {
+        "input_tokens": 20682,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 723,
+        "reasoning_output_tokens": 75
+      },
+      "latencyMs": 33794,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) {\n        throw new RangeError('Invalid batch');\n      }\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        if (nextRemembered.has(id)) {\n          const previous = nextRemembered.get(id);\n          if (\n            previous.from !== from ||\n            previous.to !== to ||\n            previous.amount !== amount\n          ) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const source = nextBalances.get(from);\n        if (source < amount) {\n          throw new RangeError('Insufficient balance');\n        }\n\n        if (from !== to) {\n          const destination = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destination) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, source - amount);\n          nextBalances.set(to, destination + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [name, balance] of balances) {\n        result[name] = balance;\n      }\n      return result;\n    }\n  };\n}",
+      "codeSha256": "2e5af782d4860407a67f01011b6245bb180d0d5d999025504302a2acb5aa9dfa",
+      "grade": {
+        "passed": false,
+        "error": "load-failed"
+      },
+      "passed": false,
+      "round": 1
+    }
+  ],
+  "complete": true,
+  "successes": 0,
+  "finishedAt": "2026-09-27T14:43:46.606Z"
+}

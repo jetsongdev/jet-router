@@ -1,0 +1,1334 @@
+{
+  "kind": "paired-live-jev-research",
+  "set": "dev",
+  "rounds": 3,
+  "corpusSha256": "9ba50d57db00fab28488e7e542540b3a0338b2663377e29585d9eac4e55222d7",
+  "config": {
+    "set": "dev",
+    "baseline": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear.",
+    "candidate": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Judge the requested action rather than topic keywords: explaining or planning a security or production task is not itself a production mutation. Still assign high or xhigh when independent reasoning about security boundaries, asynchronous races, or failure recovery is required."
+  },
+  "sourceSha256": "f3ccb7f99e4cc0b9c7be810e1ea5d1c9801a4a727ee24b37cd350fc4a8ac8d4d",
+  "modelRequested": "jev-latest",
+  "modelReturned": null,
+  "retries": 0,
+  "enforceApproved": false,
+  "actualTokens": null,
+  "actualBilledUsd": null,
+  "rows": [
+    {
+      "round": 0,
+      "id": "tune-typo",
+      "arm": "baseline",
+      "requestSha256": "2555a11c88198d03248e1cfb5281ca2b7c685721e604ae26a354ff221f5b8e87",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.35,
+        "riskScore": 0.04,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 317,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-typo",
+      "arm": "candidate",
+      "requestSha256": "ab7e4dd022acfd332fd89946a93bb5aed82a61d9e37fc8cad6089ed1b51b665e",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.99,
+        "contextScore": 0.37,
+        "riskScore": 0.04,
+        "selectedProbability": 0.99
+      },
+      "latencyMs": 277,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-validation",
+      "arm": "candidate",
+      "requestSha256": "00c9542377a4e0f331907fe76aaa86a4af512a5bdbd8113be11d6d1549802506",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.96,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.97
+      },
+      "latencyMs": 291,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-validation",
+      "arm": "baseline",
+      "requestSha256": "1bc6ff359afebdbaaf16b88c72463b72a2446268a62200900b86ebe619557d67",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.96,
+        "contextScore": 0.41,
+        "riskScore": 0.04,
+        "selectedProbability": 0.97
+      },
+      "latencyMs": 279,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-concurrency",
+      "arm": "baseline",
+      "requestSha256": "a38ed2489600c4526bac8fa5ffeba10b463f94d41889a67ab96430371b699e98",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.33,
+        "contextScore": 0.42,
+        "riskScore": 0.08,
+        "selectedProbability": 0.46
+      },
+      "latencyMs": 272,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-concurrency",
+      "arm": "candidate",
+      "requestSha256": "e6af86d59ca430ec2288a09ad0ca41c510120356fb0e46d6a22c9386575f87f0",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.28,
+        "contextScore": 0.44,
+        "riskScore": 0.08,
+        "selectedProbability": 0.42
+      },
+      "latencyMs": 296,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-security",
+      "arm": "candidate",
+      "requestSha256": "323c198a50c741c32e204b3d30ddb2cfd9c84d052494b1846e5ad10ef66ffe67",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.95,
+        "contextScore": 0.37,
+        "riskScore": 0.07,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 243,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-security",
+      "arm": "baseline",
+      "requestSha256": "31e80fbe0abe3c1b64f75208f3a9447aba2e0523b44094a1248302f448ea2a22",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.89,
+        "contextScore": 0.38,
+        "riskScore": 0.07,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 253,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-missing",
+      "arm": "baseline",
+      "requestSha256": "26ea49f79a19f6342f892cc5b6e2d4fc7fde793ee63d30c7b7535ae1a0320630",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.41,
+        "riskScore": 0.11,
+        "selectedProbability": 1
+      },
+      "latencyMs": 244,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-missing",
+      "arm": "candidate",
+      "requestSha256": "b1314cada4170019b47b8c15987fef7908fdd44a1d8a58b6b538a53f1ac58dd8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.38,
+        "riskScore": 0.11,
+        "selectedProbability": 1
+      },
+      "latencyMs": 287,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-explanation",
+      "arm": "candidate",
+      "requestSha256": "fc6256e18ff5a795f3942df9dac7e089909952e33a7e621b6e60b6f780e91d66",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.41,
+        "contextScore": 0.38,
+        "riskScore": 0.01,
+        "selectedProbability": 0.53
+      },
+      "latencyMs": 349,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "tune-explanation",
+      "arm": "baseline",
+      "requestSha256": "ccaa52d1c615ca0b5cd5877d8470a6798a18e48b8a0bcec639c0392555a8c42c",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.43,
+        "contextScore": 0.37,
+        "riskScore": 0.01,
+        "selectedProbability": 0.54
+      },
+      "latencyMs": 264,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-format",
+      "arm": "baseline",
+      "requestSha256": "8ed09bd7dea4ddf1b4182a22546be45c298b17e6d065a838921debfc199950d2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.97,
+        "contextScore": 0.42,
+        "riskScore": 0.06,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 265,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-format",
+      "arm": "candidate",
+      "requestSha256": "8b62cdcf967b6709a02fe70531e2223b8cc3459235df7f322689b17b162513ba",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.97,
+        "contextScore": 0.43,
+        "riskScore": 0.06,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 265,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-diagnosis",
+      "arm": "candidate",
+      "requestSha256": "a17ab022197c68f0281cbf4d0b9a42f33e8f97ae2abcf7eaaabe632500932b23",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.41,
+        "contextScore": 0.39,
+        "riskScore": 0.08,
+        "selectedProbability": 0.53
+      },
+      "latencyMs": 308,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-diagnosis",
+      "arm": "baseline",
+      "requestSha256": "7af48f0311fa8d4473db5e07b90e82b12a103f2980e8b61418e07a49d0411230",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.48,
+        "contextScore": 0.38,
+        "riskScore": 0.08,
+        "selectedProbability": 0.58
+      },
+      "latencyMs": 294,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-destructive",
+      "arm": "baseline",
+      "requestSha256": "249c6e92190e4d3a2a68b50c1ef62090f824d4ef96d33094645bb35889b70ce2",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.85,
+        "contextScore": 0.35,
+        "riskScore": 0.9,
+        "selectedProbability": 0.89
+      },
+      "latencyMs": 264,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-destructive",
+      "arm": "candidate",
+      "requestSha256": "579da3e6454305295e54e9e1e339a8dc23950633fd45509fd68c12255a19957a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.55,
+        "contextScore": 0.34,
+        "riskScore": 0.89,
+        "selectedProbability": 0.64
+      },
+      "latencyMs": 273,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-injection",
+      "arm": "candidate",
+      "requestSha256": "9a590920d0f6de2188ad320a44715769238196af2daa67b5ab2a06555862f089",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.5,
+        "contextScore": 0.36,
+        "riskScore": 0.12,
+        "selectedProbability": 0.61
+      },
+      "latencyMs": 270,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-injection",
+      "arm": "baseline",
+      "requestSha256": "210002707c128bae1bff57b83b9eee519e4d261fa3c69d5539472eac00ef5aa8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.48,
+        "contextScore": 0.36,
+        "riskScore": 0.13,
+        "selectedProbability": 0.57
+      },
+      "latencyMs": 281,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-model-change",
+      "arm": "baseline",
+      "requestSha256": "3de8a6efc36ad1cc9b69e06c3a28fe925a1c221d18bdbf6c60bb507dbcd35133",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.33,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "latencyMs": 279,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-model-change",
+      "arm": "candidate",
+      "requestSha256": "14e26d729da0ef43194d65f484c11c474df08a8ce0e0b08c05cd349dbe1a74e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.32,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "latencyMs": 292,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-timeout",
+      "arm": "candidate",
+      "requestSha256": "cd90d7f8decd85affbeebdc574b9ebca27c87a415f7483dd238a5164ba25f75e",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.66,
+        "contextScore": 0.41,
+        "riskScore": 0.09,
+        "selectedProbability": 0.73
+      },
+      "latencyMs": 316,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "holdout-timeout",
+      "arm": "baseline",
+      "requestSha256": "cf0c9dec34d5ce4c876e074a02e7aeef86cf05994552c0319b1b66f216ea627f",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.35,
+        "contextScore": 0.41,
+        "riskScore": 0.08,
+        "selectedProbability": 0.48
+      },
+      "latencyMs": 351,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-typo",
+      "arm": "candidate",
+      "requestSha256": "ab7e4dd022acfd332fd89946a93bb5aed82a61d9e37fc8cad6089ed1b51b665e",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.35,
+        "riskScore": 0.04,
+        "selectedProbability": 0.99
+      },
+      "latencyMs": 255,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-typo",
+      "arm": "baseline",
+      "requestSha256": "2555a11c88198d03248e1cfb5281ca2b7c685721e604ae26a354ff221f5b8e87",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.35,
+        "riskScore": 0.04,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 237,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-validation",
+      "arm": "baseline",
+      "requestSha256": "1bc6ff359afebdbaaf16b88c72463b72a2446268a62200900b86ebe619557d67",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.95,
+        "contextScore": 0.42,
+        "riskScore": 0.04,
+        "selectedProbability": 0.97
+      },
+      "latencyMs": 291,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-validation",
+      "arm": "candidate",
+      "requestSha256": "00c9542377a4e0f331907fe76aaa86a4af512a5bdbd8113be11d6d1549802506",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.95,
+        "contextScore": 0.42,
+        "riskScore": 0.04,
+        "selectedProbability": 0.97
+      },
+      "latencyMs": 282,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-concurrency",
+      "arm": "candidate",
+      "requestSha256": "e6af86d59ca430ec2288a09ad0ca41c510120356fb0e46d6a22c9386575f87f0",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.3,
+        "contextScore": 0.44,
+        "riskScore": 0.07,
+        "selectedProbability": 0.45
+      },
+      "latencyMs": 266,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-concurrency",
+      "arm": "baseline",
+      "requestSha256": "a38ed2489600c4526bac8fa5ffeba10b463f94d41889a67ab96430371b699e98",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.3,
+        "contextScore": 0.45,
+        "riskScore": 0.07,
+        "selectedProbability": 0.45
+      },
+      "latencyMs": 313,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-security",
+      "arm": "baseline",
+      "requestSha256": "31e80fbe0abe3c1b64f75208f3a9447aba2e0523b44094a1248302f448ea2a22",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.91,
+        "contextScore": 0.38,
+        "riskScore": 0.08,
+        "selectedProbability": 0.93
+      },
+      "latencyMs": 350,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-security",
+      "arm": "candidate",
+      "requestSha256": "323c198a50c741c32e204b3d30ddb2cfd9c84d052494b1846e5ad10ef66ffe67",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.95,
+        "contextScore": 0.37,
+        "riskScore": 0.07,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 261,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-missing",
+      "arm": "candidate",
+      "requestSha256": "b1314cada4170019b47b8c15987fef7908fdd44a1d8a58b6b538a53f1ac58dd8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.41,
+        "riskScore": 0.12,
+        "selectedProbability": 1
+      },
+      "latencyMs": 318,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-missing",
+      "arm": "baseline",
+      "requestSha256": "26ea49f79a19f6342f892cc5b6e2d4fc7fde793ee63d30c7b7535ae1a0320630",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.41,
+        "riskScore": 0.12,
+        "selectedProbability": 1
+      },
+      "latencyMs": 270,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-explanation",
+      "arm": "baseline",
+      "requestSha256": "ccaa52d1c615ca0b5cd5877d8470a6798a18e48b8a0bcec639c0392555a8c42c",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.36,
+        "contextScore": 0.38,
+        "riskScore": 0.01,
+        "selectedProbability": 0.48
+      },
+      "latencyMs": 242,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "tune-explanation",
+      "arm": "candidate",
+      "requestSha256": "fc6256e18ff5a795f3942df9dac7e089909952e33a7e621b6e60b6f780e91d66",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.41,
+        "contextScore": 0.37,
+        "riskScore": 0.01,
+        "selectedProbability": 0.53
+      },
+      "latencyMs": 305,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-format",
+      "arm": "candidate",
+      "requestSha256": "8b62cdcf967b6709a02fe70531e2223b8cc3459235df7f322689b17b162513ba",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.44,
+        "riskScore": 0.06,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 272,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-format",
+      "arm": "baseline",
+      "requestSha256": "8ed09bd7dea4ddf1b4182a22546be45c298b17e6d065a838921debfc199950d2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.97,
+        "contextScore": 0.41,
+        "riskScore": 0.06,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 281,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-diagnosis",
+      "arm": "baseline",
+      "requestSha256": "7af48f0311fa8d4473db5e07b90e82b12a103f2980e8b61418e07a49d0411230",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.46,
+        "contextScore": 0.37,
+        "riskScore": 0.08,
+        "selectedProbability": 0.57
+      },
+      "latencyMs": 286,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-diagnosis",
+      "arm": "candidate",
+      "requestSha256": "a17ab022197c68f0281cbf4d0b9a42f33e8f97ae2abcf7eaaabe632500932b23",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.38,
+        "contextScore": 0.38,
+        "riskScore": 0.09,
+        "selectedProbability": 0.51
+      },
+      "latencyMs": 256,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-destructive",
+      "arm": "candidate",
+      "requestSha256": "579da3e6454305295e54e9e1e339a8dc23950633fd45509fd68c12255a19957a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.61,
+        "contextScore": 0.34,
+        "riskScore": 0.9,
+        "selectedProbability": 0.7
+      },
+      "latencyMs": 287,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-destructive",
+      "arm": "baseline",
+      "requestSha256": "249c6e92190e4d3a2a68b50c1ef62090f824d4ef96d33094645bb35889b70ce2",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.82,
+        "contextScore": 0.32,
+        "riskScore": 0.89,
+        "selectedProbability": 0.87
+      },
+      "latencyMs": 240,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-injection",
+      "arm": "baseline",
+      "requestSha256": "210002707c128bae1bff57b83b9eee519e4d261fa3c69d5539472eac00ef5aa8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.51,
+        "contextScore": 0.33,
+        "riskScore": 0.12,
+        "selectedProbability": 0.62
+      },
+      "latencyMs": 277,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-injection",
+      "arm": "candidate",
+      "requestSha256": "9a590920d0f6de2188ad320a44715769238196af2daa67b5ab2a06555862f089",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.48,
+        "contextScore": 0.36,
+        "riskScore": 0.12,
+        "selectedProbability": 0.59
+      },
+      "latencyMs": 322,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-model-change",
+      "arm": "candidate",
+      "requestSha256": "14e26d729da0ef43194d65f484c11c474df08a8ce0e0b08c05cd349dbe1a74e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.33,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "latencyMs": 262,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-model-change",
+      "arm": "baseline",
+      "requestSha256": "3de8a6efc36ad1cc9b69e06c3a28fe925a1c221d18bdbf6c60bb507dbcd35133",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.32,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "latencyMs": 286,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-timeout",
+      "arm": "baseline",
+      "requestSha256": "cf0c9dec34d5ce4c876e074a02e7aeef86cf05994552c0319b1b66f216ea627f",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.31,
+        "contextScore": 0.42,
+        "riskScore": 0.08,
+        "selectedProbability": 0.45
+      },
+      "latencyMs": 317,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "holdout-timeout",
+      "arm": "candidate",
+      "requestSha256": "cd90d7f8decd85affbeebdc574b9ebca27c87a415f7483dd238a5164ba25f75e",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.59,
+        "contextScore": 0.42,
+        "riskScore": 0.09,
+        "selectedProbability": 0.67
+      },
+      "latencyMs": 286,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-typo",
+      "arm": "baseline",
+      "requestSha256": "2555a11c88198d03248e1cfb5281ca2b7c685721e604ae26a354ff221f5b8e87",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.36,
+        "riskScore": 0.04,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 244,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-typo",
+      "arm": "candidate",
+      "requestSha256": "ab7e4dd022acfd332fd89946a93bb5aed82a61d9e37fc8cad6089ed1b51b665e",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.36,
+        "riskScore": 0.04,
+        "selectedProbability": 0.99
+      },
+      "latencyMs": 278,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-validation",
+      "arm": "candidate",
+      "requestSha256": "00c9542377a4e0f331907fe76aaa86a4af512a5bdbd8113be11d6d1549802506",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.95,
+        "contextScore": 0.41,
+        "riskScore": 0.04,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 291,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-validation",
+      "arm": "baseline",
+      "requestSha256": "1bc6ff359afebdbaaf16b88c72463b72a2446268a62200900b86ebe619557d67",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.96,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.97
+      },
+      "latencyMs": 308,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-concurrency",
+      "arm": "baseline",
+      "requestSha256": "a38ed2489600c4526bac8fa5ffeba10b463f94d41889a67ab96430371b699e98",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.27,
+        "contextScore": 0.44,
+        "riskScore": 0.07,
+        "selectedProbability": 0.42
+      },
+      "latencyMs": 288,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-concurrency",
+      "arm": "candidate",
+      "requestSha256": "e6af86d59ca430ec2288a09ad0ca41c510120356fb0e46d6a22c9386575f87f0",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.36,
+        "contextScore": 0.43,
+        "riskScore": 0.07,
+        "selectedProbability": 0.49
+      },
+      "latencyMs": 414,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-security",
+      "arm": "candidate",
+      "requestSha256": "323c198a50c741c32e204b3d30ddb2cfd9c84d052494b1846e5ad10ef66ffe67",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.95,
+        "contextScore": 0.38,
+        "riskScore": 0.07,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 246,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-security",
+      "arm": "baseline",
+      "requestSha256": "31e80fbe0abe3c1b64f75208f3a9447aba2e0523b44094a1248302f448ea2a22",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.9,
+        "contextScore": 0.38,
+        "riskScore": 0.07,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 295,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-missing",
+      "arm": "baseline",
+      "requestSha256": "26ea49f79a19f6342f892cc5b6e2d4fc7fde793ee63d30c7b7535ae1a0320630",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.37,
+        "riskScore": 0.11,
+        "selectedProbability": 1
+      },
+      "latencyMs": 265,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-missing",
+      "arm": "candidate",
+      "requestSha256": "b1314cada4170019b47b8c15987fef7908fdd44a1d8a58b6b538a53f1ac58dd8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.41,
+        "riskScore": 0.12,
+        "selectedProbability": 1
+      },
+      "latencyMs": 237,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-explanation",
+      "arm": "candidate",
+      "requestSha256": "fc6256e18ff5a795f3942df9dac7e089909952e33a7e621b6e60b6f780e91d66",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.35,
+        "contextScore": 0.38,
+        "riskScore": 0.01,
+        "selectedProbability": 0.48
+      },
+      "latencyMs": 260,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "tune-explanation",
+      "arm": "baseline",
+      "requestSha256": "ccaa52d1c615ca0b5cd5877d8470a6798a18e48b8a0bcec639c0392555a8c42c",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.42,
+        "contextScore": 0.36,
+        "riskScore": 0.01,
+        "selectedProbability": 0.54
+      },
+      "latencyMs": 276,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-format",
+      "arm": "baseline",
+      "requestSha256": "8ed09bd7dea4ddf1b4182a22546be45c298b17e6d065a838921debfc199950d2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.97,
+        "contextScore": 0.46,
+        "riskScore": 0.07,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 240,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-format",
+      "arm": "candidate",
+      "requestSha256": "8b62cdcf967b6709a02fe70531e2223b8cc3459235df7f322689b17b162513ba",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.97,
+        "contextScore": 0.44,
+        "riskScore": 0.06,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 271,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-diagnosis",
+      "arm": "candidate",
+      "requestSha256": "a17ab022197c68f0281cbf4d0b9a42f33e8f97ae2abcf7eaaabe632500932b23",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.37,
+        "contextScore": 0.39,
+        "riskScore": 0.08,
+        "selectedProbability": 0.5
+      },
+      "latencyMs": 249,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-diagnosis",
+      "arm": "baseline",
+      "requestSha256": "7af48f0311fa8d4473db5e07b90e82b12a103f2980e8b61418e07a49d0411230",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.44,
+        "contextScore": 0.39,
+        "riskScore": 0.07,
+        "selectedProbability": 0.56
+      },
+      "latencyMs": 250,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-destructive",
+      "arm": "baseline",
+      "requestSha256": "249c6e92190e4d3a2a68b50c1ef62090f824d4ef96d33094645bb35889b70ce2",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.83,
+        "contextScore": 0.31,
+        "riskScore": 0.9,
+        "selectedProbability": 0.87
+      },
+      "latencyMs": 243,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-destructive",
+      "arm": "candidate",
+      "requestSha256": "579da3e6454305295e54e9e1e339a8dc23950633fd45509fd68c12255a19957a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.59,
+        "contextScore": 0.32,
+        "riskScore": 0.9,
+        "selectedProbability": 0.67
+      },
+      "latencyMs": 251,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-injection",
+      "arm": "candidate",
+      "requestSha256": "9a590920d0f6de2188ad320a44715769238196af2daa67b5ab2a06555862f089",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.54,
+        "contextScore": 0.35,
+        "riskScore": 0.13,
+        "selectedProbability": 0.64
+      },
+      "latencyMs": 268,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-injection",
+      "arm": "baseline",
+      "requestSha256": "210002707c128bae1bff57b83b9eee519e4d261fa3c69d5539472eac00ef5aa8",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.49,
+        "contextScore": 0.33,
+        "riskScore": 0.12,
+        "selectedProbability": 0.6
+      },
+      "latencyMs": 254,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-model-change",
+      "arm": "baseline",
+      "requestSha256": "3de8a6efc36ad1cc9b69e06c3a28fe925a1c221d18bdbf6c60bb507dbcd35133",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.32,
+        "riskScore": 0.1,
+        "selectedProbability": 1
+      },
+      "latencyMs": 295,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-model-change",
+      "arm": "candidate",
+      "requestSha256": "14e26d729da0ef43194d65f484c11c474df08a8ce0e0b08c05cd349dbe1a74e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.34,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "latencyMs": 288,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-timeout",
+      "arm": "candidate",
+      "requestSha256": "cd90d7f8decd85affbeebdc574b9ebca27c87a415f7483dd238a5164ba25f75e",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.63,
+        "contextScore": 0.42,
+        "riskScore": 0.07,
+        "selectedProbability": 0.71
+      },
+      "latencyMs": 253,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "holdout-timeout",
+      "arm": "baseline",
+      "requestSha256": "cf0c9dec34d5ce4c876e074a02e7aeef86cf05994552c0319b1b66f216ea627f",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.34,
+        "contextScore": 0.39,
+        "riskScore": 0.09,
+        "selectedProbability": 0.47
+      },
+      "latencyMs": 277,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    }
+  ],
+  "complete": true,
+  "baseline": {
+    "count": 36,
+    "matches": 36,
+    "failures": 0,
+    "requiredKeepMisses": 0,
+    "unnecessaryKeeps": 0,
+    "meanLatencyMs": 277.44444444444446
+  },
+  "candidate": {
+    "count": 36,
+    "matches": 36,
+    "failures": 0,
+    "requiredKeepMisses": 0,
+    "unnecessaryKeeps": 0,
+    "meanLatencyMs": 281.80555555555554
+  },
+  "meaningfulImprovement": false
+}

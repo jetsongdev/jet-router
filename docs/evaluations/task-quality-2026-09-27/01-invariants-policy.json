@@ -1,0 +1,4 @@
+{
+  "split": "dev",
+  "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. For implementation tasks that combine multiple state invariants, atomic rollback, expiry with eviction, or asynchronous generations, prefer high over medium even when the specification is complete. Complete context does not remove the need to reason about interacting edge cases."
+}

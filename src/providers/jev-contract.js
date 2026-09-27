@@ -28,25 +28,46 @@ export function buildJevRequest({ userPrompt, currentEffort, taskContext = null 
   };
 }
 
-export function parseJevResponse(text) {
-  if (typeof text !== 'string' || text.length > 65536) return null;
+export const RESPONSE_ERRORS = Object.freeze([
+  'choices', 'size', 'json', 'model', 'effort', 'context', 'risk',
+  'probability-keys', 'probability-values', 'probability-sum', 'probability-winner',
+]);
+
+// Fixed codes only: never return provider text, unknown keys or raw values.
+export function inspectJevResponse(text, choices = CHOICES, { allowRoundedSum = false } = {}) {
+  const fail = error => ({ error });
+  if (!Array.isArray(choices) || !choices.includes('keep') ||
+      new Set(choices).size !== choices.length || choices.some(choice => !CHOICES.includes(choice))) return fail('choices');
+  if (typeof text !== 'string' || text.length > 65536) return fail('size');
   let body;
-  try { body = JSON.parse(text); } catch { return null; }
+  try { body = JSON.parse(text); } catch { return fail('json'); }
   const answers = body?.answers;
   const effort = answers?.effort;
   const context = answers?.contextSufficient;
   const risk = answers?.risky;
-  if (typeof body?.model !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(body.model) ||
-      effort?.type !== 'choice' || !CHOICES.includes(effort.choice) || !unit(effort.confidence) ||
-      context?.type !== 'noul' || !unit(context.noul) || risk?.type !== 'noul' || !unit(risk.noul)) return null;
+  if (typeof body?.model !== 'string' || !/^[a-zA-Z0-9._-]{1,100}$/.test(body.model)) return fail('model');
+  if (effort?.type !== 'choice' || !choices.includes(effort.choice) || !unit(effort.confidence)) return fail('effort');
+  if (context?.type !== 'noul' || !unit(context.noul)) return fail('context');
+  if (risk?.type !== 'noul' || !unit(risk.noul)) return fail('risk');
   const probabilities = effort.probabilities;
-  if (!probabilities || Object.keys(probabilities).length !== CHOICES.length ||
-      CHOICES.some(key => !unit(probabilities[key]))) return null;
-  const values = CHOICES.map(key => probabilities[key]);
-  if (Math.abs(values.reduce((a, b) => a + b, 0) - 1) > 0.000001 ||
-      probabilities[effort.choice] < Math.max(...values)) return null;
-  // Keep numeric evidence; converting it to boolean policy evidence requires
-  // provider-specific evaluation and approved thresholds, not an arbitrary 0.5.
-  return { provider: 'jev', providerModel: body.model, choice: effort.choice,
-    confidence: effort.confidence, contextScore: context.noul, riskScore: risk.noul };
+  if (!probabilities || Object.keys(probabilities).length !== choices.length ||
+      choices.some(key => !Object.hasOwn(probabilities, key))) return fail('probability-keys');
+  if (choices.some(key => !unit(probabilities[key]))) return fail('probability-values');
+  const values = choices.map(key => probabilities[key]);
+  const sumError = Math.abs(values.reduce((a, b) => a + b, 0) - 1);
+  const sumWarning = sumError > 0.000001;
+  // Observed Jev response summed to 0.99. Shadow compatibility only, not a
+  // documented precision guarantee. Never normalize scores or widen candidates.
+  const hundredthGrid = values.every(value => Math.abs(value * 100 - Math.round(value * 100)) < 1e-9);
+  if (sumWarning && !(allowRoundedSum && hundredthGrid && sumError <= 0.01 + 1e-9)) return fail('probability-sum');
+  if (probabilities[effort.choice] < Math.max(...values)) return fail('probability-winner');
+  // Numeric evidence is not a calibrated policy threshold.
+  return { decision: { provider: 'jev', providerModel: body.model, choice: effort.choice,
+    confidence: effort.confidence, selectedProbability: probabilities[effort.choice],
+    contextScore: context.noul, riskScore: risk.noul },
+    ...(sumWarning ? { warning: 'probability-sum-tolerance' } : {}) };
+}
+
+export function parseJevResponse(text, choices = CHOICES) {
+  return inspectJevResponse(text, choices).decision ?? null;
 }

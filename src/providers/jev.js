@@ -1,3 +1,4 @@
+import { RESPONSE_ERRORS } from './jev-contract.js';
 import { CHOICES, unit } from '../policy.js';
 
 // Shared process contract for the hook, helper and development evaluator.
@@ -15,15 +16,25 @@ export function validJevKey(value) {
 const ERRORS = ['missing-key', 'invalid-input', 'redirect', 'http-error', 'timeout', 'response-too-large', 'invalid-response', 'provider-error'];
 
 // No raw stdout, stderr, exception, key or prompt is returned to the router.
-export function parseHelperResult(result) {
+export function parseHelperResult(result, choices = CHOICES) {
   if (result?.exitCode !== 0 || typeof result.stdout !== 'string' || result.stdout.length > HELPER_OUTPUT_LIMIT) return { reason: 'provider-error' };
   let body;
   try { body = JSON.parse(result.stdout); } catch { return { reason: 'invalid-response' }; }
-  if (body?.ok === false && ERRORS.includes(body.reason)) return { reason: body.reason };
+  return parseHelperBody(body, choices);
+}
+
+// Object validation is shared with MCP; process status/size/JSON checks stay above.
+export function parseHelperBody(body, choices = CHOICES) {
+  if (body?.ok === false && ERRORS.includes(body.reason)) return {
+    reason: body.reason,
+    ...(body.reason === 'invalid-response' && RESPONSE_ERRORS.includes(body.diagnostic) ? { diagnostic: body.diagnostic } : {}),
+  };
   const d = body?.decision;
-  if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) ||
-      !unit(d.confidence) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
+  if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) || !choices.includes(d.choice) ||
+      !unit(d.confidence) || (d.selectedProbability !== undefined && !unit(d.selectedProbability)) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
   return { decision: { provider: 'jev', choice: d.choice, confidence: d.confidence,
-    contextScore: d.contextScore, riskScore: d.riskScore } };
+    contextScore: d.contextScore, riskScore: d.riskScore,
+    ...(d.selectedProbability !== undefined ? { selectedProbability: d.selectedProbability } : {}) },
+    ...(body.warning === 'probability-sum-tolerance' ? { warning: body.warning } : {}) };
 }
 

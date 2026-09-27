@@ -1,5 +1,7 @@
 # jet-router 사용 가이드
 
+[Claude Code·Codex 작동 다이어그램](architecture.md)에서 판정과 표시 시점을 비교할 수 있습니다.
+
 ## 1. 현재 가능한 것
 
 현재는 **fake 또는 선택적 Jev의 off/shadow 관찰**을 지원합니다. 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.

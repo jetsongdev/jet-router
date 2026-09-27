@@ -1,0 +1,8 @@
+{
+  "split": "holdout",
+  "rounds": 2,
+  "efforts": {
+    "keyed-queue": "medium",
+    "intervals": "medium"
+  }
+}

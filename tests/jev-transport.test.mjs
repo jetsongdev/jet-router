@@ -4,6 +4,9 @@ import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { spawnSync } from 'node:child_process';
 import { requestJev } from '../scripts/jev-request.mjs';
+import { createShadow } from '../mcp/shadow.mjs';
+import { cases } from '../eval/harness-cases.mjs';
+import { prepareRoutingRequest } from '../src/harness.js';
 import { parseHelperResult } from '../src/providers/jev.js';
 
 const input = { apiKey: 'KEY_CANARY', state: { userPrompt: 'PROMPT_CANARY', currentEffort: 'medium', taskContext: 'CONTEXT_CANARY' } };
@@ -70,7 +73,10 @@ test('HTTP, malformed, numeric, stream and size errors fail closed with fixed co
     [{ error: true }, 'provider-error'],
   ]) {
     const t = transport(config);
-    assert.deepEqual(await requestJev(input, t.request), { ok: false, reason });
+    const result = await requestJev(input, t.request);
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, reason);
+    if (reason === 'invalid-response') assert.ok(['json', 'risk'].includes(result.diagnostic));
   }
 });
 
@@ -129,4 +135,66 @@ test('a model name containing a canary never crosses the helper output boundary'
   const response = body(); response.model = 'PROMPT_CANARY';
   const result = await requestJev(input, transport({ chunks: [JSON.stringify(response)] }).request);
   assert.equal(result.ok, true); assert.ok(!JSON.stringify(result).includes('CANARY'));
+});
+
+
+test('harness transport sends prepared criteria and validates the same narrowed choices', async () => {
+  const routingInput = cases.find(item => item.id === 'limited-support').input;
+  const response = body();
+  response.answers.effort.choice = 'medium';
+  response.answers.effort.probabilities = { medium: 0.8, high: 0.1, keep: 0.1 };
+  const t = transport({ chunks: [JSON.stringify(response)] });
+  const out = await requestJev({ apiKey: input.apiKey, routingInput }, t.request);
+  assert.equal(out.ok, true);
+  assert.equal(out.decision.choice, 'medium');
+  assert.deepEqual(JSON.parse(t.calls[0].data), prepareRoutingRequest(routingInput).request);
+  assert.equal(JSON.stringify(out).includes('CANARY'), false);
+  // A valid legacy response is invalid for this request's narrower range.
+  assert.deepEqual(await requestJev({ apiKey: input.apiKey, routingInput }, transport().request),
+    { ok: false, reason: 'invalid-response', diagnostic: 'effort' });
+});
+
+test('harness skips and ambiguous envelopes never fall back to legacy transport', async () => {
+  const forbidden = () => assert.fail('transport must not start');
+  for (const fixture of cases.filter(item => item.expected.status === 'skip')) {
+    assert.deepEqual(await requestJev({ apiKey: input.apiKey, routingInput: fixture.input }, forbidden),
+      { ok: false, reason: 'invalid-input' });
+  }
+  for (const extra of [{ routingInput: null }, { routingInput: cases[0].input }]) {
+    assert.deepEqual(await requestJev({ ...input, ...extra }, forbidden),
+      { ok: false, reason: 'invalid-input' });
+  }
+});
+
+
+test('Codex shadow reaches shared preflight and transport with explicit unknown facts', async () => {
+  const t = transport();
+  const shadow = createShadow({ mode: 'shadow', provider: 'jev', consent: true, referenceEffort: 'medium', apiKey: input.apiKey },
+    async (routingInput, apiKey) => {
+      const out = await requestJev({ routingInput, apiKey }, t.request);
+      return out.ok ? { decision: out.decision } : { reason: out.reason };
+    });
+  const out = await shadow({ prompt: 'Synthetic typo', session_id: 's1', turn_id: 't1' });
+  assert.equal(out.systemMessage, '[jet-router] Jev.shadow(): medium → low (80%)');
+  const payload = JSON.parse(t.calls[0].data);
+  assert.equal(payload.state.effortSource, 'user-reference');
+  assert.equal(payload.state.targetModel, null);
+  assert.deepEqual(payload.state.uncertainties, ['unknown-model', 'unknown-support', 'reference-effort', 'unknown-context']);
+  assert.equal(payload.state.taskContext, null);
+  assert.equal(JSON.stringify(payload).includes('sessionId'), false);
+  assert.equal(out.continue, true);
+});
+
+
+test('observed 0.99 sum passes shadow with warning but stays invalid for legacy evaluation', async () => {
+  const response = body();
+  response.answers.effort.choice = 'medium';
+  response.answers.effort.probabilities = { low: 0.01, medium: 0.8, high: 0.02, xhigh: 0, keep: 0.16 };
+  const makeTransport = () => transport({ chunks: [JSON.stringify(response)] }).request;
+  assert.deepEqual(await requestJev(input, makeTransport()),
+    { ok: false, reason: 'invalid-response', diagnostic: 'probability-sum' });
+  const out = await requestJev({ apiKey: input.apiKey, routingInput: cases[0].input }, makeTransport());
+  assert.equal(out.ok, true);
+  assert.equal(out.warning, 'probability-sum-tolerance');
+  assert.equal(parseHelperResult({ exitCode: 0, stdout: JSON.stringify(out) }).warning, out.warning);
 });

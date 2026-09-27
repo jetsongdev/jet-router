@@ -1,0 +1,105 @@
+{
+  "baseline": "xhigh",
+  "model": "gpt-6-astra",
+  "versions": {
+    "contractVersion": "routing-input-v1",
+    "criteriaVersion": "jev-effort-provenance-v3",
+    "policyVersion": "shadow-preflight-v2"
+  },
+  "taskSha256": "d64a4302dfc2bd73476a929fc4e6435365361a6a6cb626278c2dffd09908590f",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "routes": [
+    {
+      "task": "ranges",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "requestSha256": "5a10afd88d97a2d74602ca670a0941b687fcf409bf78e3ec368f9c0b0d9ea24d",
+      "latencyMs": 285,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.68,
+        "contextScore": 0.41,
+        "riskScore": 0.03,
+        "selectedProbability": 0.75
+      },
+      "eligible": true
+    },
+    {
+      "task": "ttl-lru",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "requestSha256": "f464bc2f484014cf9705eaf9698066b8e25e3bbbe6a7bba75022767f3d9b82ae",
+      "latencyMs": 268,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.75,
+        "contextScore": 0.43,
+        "riskScore": 0.02,
+        "selectedProbability": 0.81
+      },
+      "eligible": true
+    },
+    {
+      "task": "async-memo",
+      "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+      "requestSha256": "6125390b26fcbbda72b92c5c6a7e419c138dccfa9ed78766f82e0aeb29d25139",
+      "latencyMs": 249,
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.74,
+        "contextScore": 0.39,
+        "riskScore": 0.03,
+        "selectedProbability": 0.79
+      },
+      "warning": "probability-sum-tolerance",
+      "eligible": false
+    },
+    {
+      "task": "ledger",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "requestSha256": "f0bb5acf6d0d4929ebfd49027de1a1eb60aa14c83a914e8edc7e29074ef7720b",
+      "latencyMs": 290,
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.29,
+        "contextScore": 0.43,
+        "riskScore": 0.03,
+        "selectedProbability": 0.44
+      },
+      "eligible": true
+    },
+    {
+      "task": "keyed-queue",
+      "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+      "requestSha256": "833e89d482367ccf5b40dc4c5fdf7a9745ce577c5e1fa2c84c1209aff4f15735",
+      "latencyMs": 275,
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.57,
+        "contextScore": 0.43,
+        "riskScore": 0.03,
+        "selectedProbability": 0.66
+      },
+      "eligible": false
+    },
+    {
+      "task": "intervals",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "requestSha256": "6da66ce9aa7f139535b751c3ee5ece7e752e6f17d6a913f38475e585759c8469",
+      "latencyMs": 278,
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.55,
+        "contextScore": 0.41,
+        "riskScore": 0.02,
+        "selectedProbability": 0.63
+      },
+      "eligible": true
+    }
+  ],
+  "complete": true
+}

@@ -150,3 +150,127 @@ files and offline runtime loading, not marketplace installation, secure-storage
 configuration or an interactive Claude session. README/usage now reflect the
 published repository and include the remote installation commands. The old
 no-push statements above describe earlier stages.
+
+## Codex MCP shadow adapter — local implementation
+
+User-authorized follow-up from `394c828`, isolated on `feat/codex-mcp-shadow`.
+This extends the original Claude-only scope; it does not change the pinned handoff
+or claim Codex supports Claude's request mutation contract.
+
+Added a separate `mcp/` package (SDK 2.1.0, Zod 4.6.5, locked dependencies), one
+`jet_router_shadow` tool, and a Codex `UserPromptSubmit` configuration example.
+The server defaults off/fake; Jev requires shadow, consent, environment key and
+an explicit reference effort. It reuses the existing HTTPS helper/parser and
+process limits without modifying shared provider or Claude hook source files.
+
+Codex's documented hook input does not include current effort. The adapter does
+not guess it: reference effort is labeled user-specified, actual effort unknown,
+and changes are always none. All successful tool results contain nonblocking
+hook JSON; no additionalContext or effort setter is returned. Concurrent calls
+are skipped and the last 256 event ids suppress duplicate calls/reports in one
+server process. Runtime raw provider output, prompts and keys are not logged.
+
+Verification on Node 23.11.0:
+
+| Command/check | Result |
+| --- | --- |
+| `npm --prefix mcp test` | Exit 0, 18 offline tests; includes real SDK STDIO initialization/list/call, duplicate/schema/error checks |
+| `npm test` | Exit 0, existing 43 tests |
+| `npm run test:hooks` | Exit 0, existing 2 Claude fake/Jev mock tests |
+| `npm run validate` | Exit 0, strict Claude plugin and marketplace manifests |
+| Python tomllib + Ajv Draft-7 against official Codex config-schema.json | Exit 0, example TOML accepted; format validation disabled, field/type validation active |
+
+The first schema-validator command assumed Ajv was a transitive SDK dependency
+and failed with module-not-found. Installed it only in a temporary validation
+directory and reran successfully; it is not a project runtime dependency.
+
+[Codex installation and manual checklist](codex-mcp.md) records remaining host
+verification: trust review, automatic hook dispatch, UI placement, cancellation,
+missing-server continuation and actual request-effort evidence. MCP protocol
+success is not proof of these native Codex behaviors. No Codex user settings,
+credentials, actual model sessions, Jev live calls or enforce were used here.
+
+Clean-install follow-up: copied only source/package files into a new temporary
+directory, installed the lockfile with `npm ci --offline --ignore-scripts`, and
+reran all 18 MCP tests (both exit 0). No existing node_modules, credentials or
+user configuration were copied. Temporary files were removed after the check.
+
+Added [cross-client mechanism diagrams](architecture.md) at the user's request,
+including classification timing, shared Jev transport, message timing, actual
+versus reference effort, and the unimplemented enforce boundary.
+
+## MCP follow-up refactor and pre-push verification
+
+Extracted the existing helper body validator as `parseHelperBody` so both the
+process adapter and MCP can use it directly. MCP no longer serializes an already
+parsed provider result just to parse it again. Process exit status, output-size
+limit and JSON parsing remain at the process boundary; enum/numeric validation
+and removal of extra fields remain shared. No new provider, mode or setting.
+
+Baseline MCP tests: 18 passed. After refactoring, `npm test` passed 45 tests
+(including two new validation-boundary regressions), `npm --prefix mcp test`
+passed 18, `npm run test:hooks` passed 2, and `npm run validate` passed both
+manifests. All commands exited 0. Native Codex hook/UI checks remain manual;
+no live API calls or user settings changes were made. The user authorized pushing
+the isolated branch after this verification; default-branch integration remains
+separate.
+
+
+## HARNESS-001 stage one — offline request preparation
+
+Implemented `src/harness.js` with explicit host/reference/unknown provenance,
+model capabilities, event correlation and context-missing state. Request choices
+are the intersection of advertised fixture capabilities and current policy,
+plus keep. All outputs remain enforce-ineligible. Unknown required facts skip;
+model summaries are unverified input, not host facts. No adapter runtime or
+existing provider transport was changed.
+
+Added a fixed 14-case contract corpus and an offline-only runner. Reports contain
+versions and request hashes, not prompt/context/event ids or credentials. A
+committed report detects request drift; it is contract evidence, not Jev quality
+or verified model capabilities. Initial focused tests failed with the expected
+missing-module error (exit 1); after implementation all 20 new tests passed.
+
+Verification: `npm test` (65), `npm --prefix mcp test` (18),
+`npm run test:hooks` (2) and `npm run validate` all exit 0.
+`node scripts/evaluate-harness.mjs --dry-run` exits 0, fixtures 14/14, provider
+calls 0. No credentials were read or live API/model requests performed.
+
+Next: establish actual host capability/context provenance, validate dynamic
+response choices and transport, then wire adapters. Current helper rebuilds
+fixed-choice requests and cannot consume the new prepared payload as-is.
+See [harness guide](harness.md) and [TASKS](../TASKS.md) for boundaries.
+
+
+## 요청별 후보 응답 검사와 helper 연결 (2026-09-27)
+
+- `parseJevResponse`는 요청별 후보를 받아 선택값과 확률 분포의 정확한 후보 집합을 검사한다.
+  기본 호출의 고정 후보 동작은 유지하며, 잘못된 후보 집합·범위 밖 응답은 거부한다.
+- helper는 `routingInput`에서 공통 하네스로 질문을 재구성한다. 임의 질문을 수용하지 않으며,
+  `state`와 중복 입력하거나 하네스가 보류하면 네트워크 호출 없이 종료한다.
+- 새 회귀 테스트 3개는 구현 전 실패, 구현 후 통과했다. 모의 전송으로 본문과 응답 후보 일치를 확인했다.
+- 실제 Claude/Codex 훅은 아직 기존 `state` 경로를 사용한다. 실제 Jev 호출·모델별 품질·effort 변경 검증은 하지 않았다.
+
+
+## Shadow 하네스 v2 연결 (2026-09-27)
+
+- Claude/Codex Jev 어댑터가 공통 입력과 preflight를 사용한다. 실제/참고 effort 출처를 구분한다.
+- 모델·지원 목록·맥락 미확인은 불확실성으로 전달하고 실험 추천을 허용한다.
+  동의·연결·입력 제한·max 보호·응답 후보 검사는 유지하고 자동 적용은 계속 금지한다.
+- v2 기준/정책/fixture와 고정 요청 해시 기록을 추가했다. v1 기록은 보존한다.
+- 모의 전송과 오프라인 훅에서 연결을 검증했다. 새 기준의 실호출과 품질 검증은 미완료다.
+
+
+## Claude 모델 변경 방어 (2026-09-27)
+
+실사용에서 발생한 장애가 아니라 코드 점검과 모의 이벤트로 발견한 방어 조건이다.
+같은 턴의 후속 turn.step에서 다른 모델이 관측되면 기존 추천과 진행 중 판정을 무효화한다.
+모든 요청은 원본 그대로 위임하고 다음 턴에서는 다시 판정할 수 있다.
+수명주기 테스트 21개, 오프라인 훅 2개 및 manifest 검증 통과.
+실제 host에서 같은 턴 중 모델 변경이 발생하는지와 관측 시점은 미검증이다.
+Codex의 활성 모델 조회 및 변경 감지는 여전히 후속 작업이다.
+
+
+## Shadow 마무리 (2026-09-27)
+
+MCP 취소 신호를 helper까지 전달하고 4초 정리 제한을 추가했다. 선택적 Codex model/list 시작 조회, hook 모델 입력, 지원 범위별 후보 검사와 관측된 모델 변경 시 이전 결과 폐기를 연결했다. 기본은 조회 비활성이고 effort 변경은 없다. [검증 및 남은 한계](evaluations/shadow-closeout-2026-09-27.md).

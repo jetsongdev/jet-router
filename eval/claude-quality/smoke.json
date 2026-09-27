@@ -1,0 +1,7 @@
+{
+  "model": "claude-opus-5-5",
+  "baseline": "xhigh",
+  "tasks": ["ranges"],
+  "rounds": 1,
+  "maxBudgetUsdPerRun": 1
+}

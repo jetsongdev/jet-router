@@ -1,0 +1,65 @@
+{
+  "split": "dev",
+  "rounds": 2,
+  "efforts": {
+    "ranges": "medium",
+    "ttl-lru": "medium",
+    "async-memo": "xhigh",
+    "ledger": "xhigh"
+  },
+  "routing": [
+    {
+      "id": "ranges",
+      "requestSha256": "f248648bed6805182bf437c8ca711d08c717cafc927463cc0c2b869ff7918f39",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.61,
+        "contextScore": 0.42,
+        "riskScore": 0.02,
+        "selectedProbability": 0.69
+      }
+    },
+    {
+      "id": "ttl-lru",
+      "requestSha256": "dd69e531bec186affadb8e79524c073a553c6ea8c19afc5cb75449a19589432b",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.25,
+        "contextScore": 0.44,
+        "riskScore": 0.02,
+        "selectedProbability": 0.4
+      }
+    },
+    {
+      "id": "async-memo",
+      "requestSha256": "cf9e5420501866248afbb86e599e02958517180cb548d4571ecc41bcd300cf6e",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.96,
+        "contextScore": 0.45,
+        "riskScore": 0.03,
+        "selectedProbability": 0.97
+      }
+    },
+    {
+      "id": "ledger",
+      "requestSha256": "e04b51c415b8cf9b5d2dc459ddadc32c609fa448877f1b6ffc1257130bb145f5",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.42,
+        "contextScore": 0.45,
+        "riskScore": 0.03,
+        "selectedProbability": 0.54
+      }
+    }
+  ],
+  "complete": true,
+  "config": {
+    "split": "dev",
+    "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Estimate effort from independent boundary conditions that must hold simultaneously. Identity preservation, reentrant callbacks, stale asynchronous cleanup, safe-integer overflow, and all-or-nothing mutation require deep verification; choose xhigh for multiple interacting such conditions."
+  }
+}

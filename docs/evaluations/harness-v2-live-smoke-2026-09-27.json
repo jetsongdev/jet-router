@@ -1,0 +1,30 @@
+{
+  "kind": "live-mcp-jev-shadow-smoke",
+  "startedAt": "2026-09-27T13:23:08.052Z",
+  "commit": "75a49d9",
+  "referenceEffort": "medium",
+  "nativeCodexHookTested": false,
+  "actualEffortChanged": false,
+  "items": [
+    {
+      "id": "typo",
+      "latencyMs": 289,
+      "valid": true,
+      "message": "[jet-router] Jev.shadow(): medium → low"
+    },
+    {
+      "id": "count-items",
+      "latencyMs": 297,
+      "valid": true,
+      "message": "[jet-router] Jev.shadow(): medium → medium"
+    },
+    {
+      "id": "limiter",
+      "latencyMs": 292,
+      "valid": true,
+      "message": "[jet-router] Jev.shadow(): medium → high"
+    }
+  ],
+  "stderrBytes": 0,
+  "completed": true
+}

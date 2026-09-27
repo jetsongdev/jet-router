@@ -1,0 +1,5 @@
+{
+  "set": "dev",
+  "baseline": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear.",
+  "candidate": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Judge the requested action rather than topic keywords: explaining or planning a security or production task is not itself a production mutation. Still assign high or xhigh when independent reasoning about security boundaries, asynchronous races, or failure recovery is required."
+}
