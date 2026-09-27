@@ -10,7 +10,7 @@ const forbidden = () => assert.fail('provider must not run');
 test('default off and fake require no credentials or provider call', async () => {
   assert.deepEqual(await createShadow(readConfig({}), forbidden)(input), { continue: true });
   const out = await createShadow(readConfig({ JET_ROUTER_MODE: 'shadow' }), forbidden)(input);
-  assert.match(out.systemMessage, /fake.*keep.*\(shadow\)$/);
+  assert.match(out.systemMessage, /fake.*keep.*· shadow$/);
 });
 
 for (const [name, patch, expected] of [
@@ -37,14 +37,14 @@ test('invalid, empty, long inputs and malformed ids are skipped without provider
   }
 });
 
-for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${referenceEffort} is explicit, not actual baseline/application`, async () => {
+for (const referenceEffort of ['medium', 'high', 'xhigh']) test(`reference ${referenceEffort} is sent to provider, not displayed as actual effort`, async () => {
   const shadow = createShadow({ ...config, referenceEffort }, async (state, key) => {
     assert.deepEqual(state, { userPrompt: input.prompt, currentEffort: referenceEffort });
     assert.equal(key, config.apiKey);
     return { decision };
   });
   const out = await shadow(input);
-  assert.equal(out.systemMessage, `[jet-router] ${referenceEffort} - Jev -> low (shadow)`);
+  assert.equal(out.systemMessage, `[jet-router] low 추천 · Jev · shadow`);
   assert.equal(JSON.stringify(out).includes('canary'), false);
   assert.deepEqual(Object.keys(out).sort(), ['continue', 'systemMessage']);
   assert.equal(out.continue, true);

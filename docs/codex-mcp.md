@@ -57,7 +57,7 @@ MCP 등록만으로 자동 승인되지 않는다.
 합성 프롬프트 하나를 보내면 다음 안내를 기대한다. **실제 UI 검증 전의 예상 표시**다.
 
 ```text
-[jet-router] fake(테스트) · 추천 keep(고정값) (shadow)
+[jet-router] fake(테스트) · 추천 keep(고정값) · shadow
 ```
 
 별도 MCP 호출을 모델에게 요청할 필요는 없다. 이 도구는 hook용이며 모델이 자율적으로
@@ -107,12 +107,12 @@ GUI 클라이언트는 이 터미널 환경을 자동 상속하지 않을 수 �
 예상 안내:
 
 ```text
-[jet-router] medium - Jev -> low (shadow)
-[jet-router] Jev 생략: 전송 미동의 (shadow)
+[jet-router] low 추천 · Jev · shadow
+[jet-router] Jev 생략: 전송 미동의 · shadow
 ```
 
-왼쪽 effort는 사용자 지정 참고값, 오른쪽은 Jev 추천값이다. 실제 요청 effort를 읽은 값이 아니며,
-추천 품질은 아직 미평가다. `(shadow)`는 추천을 표시만 하고 effort를 변경하지 않는다는 뜻이다.
+표시되는 effort는 Jev 추천값이다. 사용자 지정 참고값은 판정에 전달하지만 안내에서는 생략한다.
+추천 품질은 아직 미평가다. `shadow`는 추천을 표시만 하고 effort를 변경하지 않는다는 뜻이다.
 
 ## 3. 중지와 문제 해결
 
