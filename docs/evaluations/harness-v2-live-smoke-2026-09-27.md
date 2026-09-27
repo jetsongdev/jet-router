@@ -42,3 +42,27 @@ Codex는 Hello로 수정한 함수 코드를 반환하고 idle로 돌아왔다. 
 이는 native UserPromptSubmit → MCP → 새 하네스 → Jev → 표시 → 응답 흐름의 단일 사례 증거다.
 실제 요청의 effort wire trace, 반복 안정성, Claude 입력창은 검증하지 않았다.
 테스트 pane은 사용자가 확인할 수 있도록 열어 두었다.
+
+
+## 같은 Codex 세션의 2·3번째 턴
+
+같은 `jet-router-smoke` 세션에서 두 프롬프트를 순서대로 제출했다. 재시도는 하지 않았다.
+
+| 턴 | 입력 | 실제 hook 안내 | 작업 결과 |
+| --- | --- | --- | --- |
+| 1 | 오타 | Jev.shadow(): medium → low | 수정 코드 반환 |
+| 2 | countItems | Jev 생략: invalid-response · shadow | 수정 코드와 테스트 반환 |
+| 3 | limiter | Jev.shadow(): medium → high | 수정 코드와 테스트 반환 |
+
+- 각 입력에서 hook 안내가 다시 나왔다. 두 번째 실패 뒤에도 세 번째 Jev 추천이 정상 표시됐다.
+- 세 턴 모두 Codex가 응답을 완료하고 idle로 돌아왔다. 화면 설정은 medium이었다.
+- native 호출은 추천 성공 2/3, 응답 검증 거부 1/3이다. 전체 성공으로 기록하지 않는다.
+- invalid-response는 정규화된 사유만 남으며 원문 응답/세부 검사 실패 지점은 보존하지 않는다.
+  분포 합계, 후보, 점수 등 어느 검사에서 실패했는지 이 화면만으로 단정할 수 없다.
+  앞선 MCP 직접 호출 3/3 성공과 구분한다.
+
+Codex는 코드와 실행 명령을 출력했으며 직접 테스트를 실행하지 않았다.
+검증자는 Herdr 출력에서 count-items/limiter의 코드와 테스트를 그대로 `/tmp/jet-router-native-output-wulb6mdt`에 추출했다.
+`node --test <임시폴더>/count-items.test.mjs <임시폴더>/limiter.test.mjs` 종료 코드 0, 6/6 통과.
+null/undefined, 배열, 잘못된 입력, FIFO/동시 실행 수 1, sync throw/reject 이후 큐 진행 및 원래 오류 전달을 검사했다.
+이는 현재 Codex 설정의 생성 코드에 대한 로컬 테스트이며 Jev 추천 effort로 실행한 품질 비교가 아니다.
