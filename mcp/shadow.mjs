@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { EFFORTS } from '../src/policy.js';
-import { PROCESS_ENV, PROCESS_TIMEOUT_MS, HELPER_OUTPUT_LIMIT, parseHelperResult, validJevKey } from '../src/providers/jev.js';
+import { PROCESS_ENV, PROCESS_TIMEOUT_MS, HELPER_OUTPUT_LIMIT, parseHelperResult, parseHelperBody, validJevKey } from '../src/providers/jev.js';
 
 const helper = fileURLToPath(new URL('../scripts/jev-request.mjs', import.meta.url));
 
@@ -57,8 +57,8 @@ export function createShadow(config, classify = classifyJev) {
     try {
       const classified = await classify({ userPrompt: input.prompt, currentEffort: config.referenceEffort }, config.apiKey);
       // Revalidate injected/provider output and whitelist every displayed value.
-      const checked = parseHelperResult({ exitCode: 0, stdout: JSON.stringify(classified?.decision
-        ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason }) });
+      const checked = parseHelperBody(classified?.decision
+        ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason });
       if (!checked.decision) return message(`Jev 생략: ${checked.reason}`);
       return message(`Jev · 참고 ${config.referenceEffort}(사용자 지정) · 추천 ${checked.decision.choice}(미평가)`);
     } catch {

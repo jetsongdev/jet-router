@@ -19,6 +19,11 @@ export function parseHelperResult(result) {
   if (result?.exitCode !== 0 || typeof result.stdout !== 'string' || result.stdout.length > HELPER_OUTPUT_LIMIT) return { reason: 'provider-error' };
   let body;
   try { body = JSON.parse(result.stdout); } catch { return { reason: 'invalid-response' }; }
+  return parseHelperBody(body);
+}
+
+// Object validation is shared with MCP; process status/size/JSON checks stay above.
+export function parseHelperBody(body) {
   if (body?.ok === false && ERRORS.includes(body.reason)) return { reason: body.reason };
   const d = body?.decision;
   if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) ||

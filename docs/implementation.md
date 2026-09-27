@@ -198,3 +198,19 @@ user configuration were copied. Temporary files were removed after the check.
 Added [cross-client mechanism diagrams](architecture.md) at the user's request,
 including classification timing, shared Jev transport, message timing, actual
 versus reference effort, and the unimplemented enforce boundary.
+
+## MCP follow-up refactor and pre-push verification
+
+Extracted the existing helper body validator as `parseHelperBody` so both the
+process adapter and MCP can use it directly. MCP no longer serializes an already
+parsed provider result just to parse it again. Process exit status, output-size
+limit and JSON parsing remain at the process boundary; enum/numeric validation
+and removal of extra fields remain shared. No new provider, mode or setting.
+
+Baseline MCP tests: 18 passed. After refactoring, `npm test` passed 45 tests
+(including two new validation-boundary regressions), `npm --prefix mcp test`
+passed 18, `npm run test:hooks` passed 2, and `npm run validate` passed both
+manifests. All commands exited 0. Native Codex hook/UI checks remain manual;
+no live API calls or user settings changes were made. The user authorized pushing
+the isolated branch after this verification; default-branch integration remains
+separate.
