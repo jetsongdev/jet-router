@@ -1,0 +1,8 @@
+.worktrees/
+HANDOFF.md
+docs/handoff-source/
+node_modules/
+.claude/
+.env
+.env.*
+*.log
