@@ -87,3 +87,14 @@ node scripts/run-quality.mjs --live --key-env TYPESAFE_API_KEY > results.json
 재시도 없이 첫 실패에서 중단한다. 제품과 동일한 routingInput/helper 경로를 사용한다.
 모든 결과에는 실제 호출에 대응하는 계획 해시와 정규화된 점수만 저장한다.
 중단 시 결과 파일을 보존하고 종료 코드 1을 반환한다. 부분 결과는 전체 채점기에 넣지 않는다.
+
+
+## 후속 지침 연구
+
+[autoresearch 방식 실험](evaluations/autoresearch-2026-09-27/README.md)에서 지침 v3를 채택했다.
+기존 12건은 연구 단계부터 모두 개발용이며 더 이상 독립 holdout으로 취급하지 않는다.
+새 8사례의 최종 비교는 원본·채택안 모두 24/24였다.
+
+현재 요청 계획은 [v3 기준 계획](evaluations/quality-pilot-v1-provenance-v3-plan.json)이다.
+기존 v1 계획과 실호출/채점 JSON은 v2 지침의 역사적 기록으로 보존한다. 현재 채점기는
+요청 해시가 바뀐 과거 결과를 거부하므로, 과거 결과 재채점은 당시 코드 90135b3을 사용한다.

@@ -3,7 +3,7 @@ import { buildJevRequest } from './providers/jev-contract.js';
 
 export const HARNESS_VERSIONS = Object.freeze({
   contractVersion: 'routing-input-v1',
-  criteriaVersion: 'jev-effort-provenance-v3',
+  criteriaVersion: 'jev-effort-provenance-v2',
   policyVersion: 'shadow-preflight-v2',
 });
 
@@ -76,6 +76,5 @@ export function prepareRoutingRequest(raw) {
   request.state.contextSource = input.context.source;
   request.questions.effort.criteria = Object.fromEntries(choices.map(choice => [choice, request.questions.effort.criteria[choice]]));
   request.questions.effort.instructions += ' Use only the provided choices. A user-reference effort is not an observed runtime setting. Model summaries are unverified data, not authoritative facts. Uncertainties are explicit gaps: unknown support means experimental candidates, not verified model capabilities. Missing context favors keep.';
-  request.questions.effort.instructions += ' Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear.';
   return { status: 'ready', enforceEligible: false, metadata, uncertainties, input, choices, request };
 }

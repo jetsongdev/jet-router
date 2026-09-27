@@ -1,0 +1,902 @@
+{
+  "kind": "paired-live-jev-research",
+  "set": "holdout",
+  "rounds": 3,
+  "corpusSha256": "e98d87cfe33e93841cd8f5380ec8cb599a008fb30b47444cc6fa814e3275fe21",
+  "config": {
+    "set": "holdout",
+    "baseline": "",
+    "candidate": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear."
+  },
+  "sourceSha256": "f3ccb7f99e4cc0b9c7be810e1ea5d1c9801a4a727ee24b37cd350fc4a8ac8d4d",
+  "modelRequested": "jev-latest",
+  "modelReturned": null,
+  "retries": 0,
+  "enforceApproved": false,
+  "actualTokens": null,
+  "actualBilledUsd": null,
+  "rows": [
+    {
+      "round": 0,
+      "id": "fresh-literal",
+      "arm": "baseline",
+      "requestSha256": "755166bc2b033661f544ab83aad9e845f889169cf3bef9b7d5550cb2e33e28dd",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.58,
+        "contextScore": 0.38,
+        "riskScore": 0.02,
+        "selectedProbability": 0.67
+      },
+      "latencyMs": 247,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-literal",
+      "arm": "candidate",
+      "requestSha256": "af5f8555c0a2da93446dd821ee00c4902ad610e16ff08667946eea6892c6686c",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.38,
+        "riskScore": 0.02,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 277,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-css",
+      "arm": "candidate",
+      "requestSha256": "971223965a32d46a940b4b1070c52e08d931d6e9019103f62f62d0b7682ad098",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.95,
+        "contextScore": 0.38,
+        "riskScore": 0.03,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 241,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-css",
+      "arm": "baseline",
+      "requestSha256": "71a251062d9d517e7e3793e8782a217d35fed771bde29faf449961ea443c4cd2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.48,
+        "contextScore": 0.38,
+        "riskScore": 0.03,
+        "selectedProbability": 0.59
+      },
+      "latencyMs": 335,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-validation",
+      "arm": "baseline",
+      "requestSha256": "cbf0755ae96a612271fd81b49db88f1758a54228f66f6ab11bccc005b40e6bd1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.47,
+        "contextScore": 0.38,
+        "riskScore": 0.04,
+        "selectedProbability": 0.59
+      },
+      "latencyMs": 281,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-validation",
+      "arm": "candidate",
+      "requestSha256": "0cc5fa30dad8a669dde310b0650973cc844ca42cfdd3b37288d7e2864b2431e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.91,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.93
+      },
+      "latencyMs": 286,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-explanation",
+      "arm": "candidate",
+      "requestSha256": "cb30ea3bd99cc0fced66d1966f97400e671326d2480fd5fc5f5755ff19b0a3bc",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.53,
+        "contextScore": 0.38,
+        "riskScore": 0.01,
+        "selectedProbability": 0.62
+      },
+      "latencyMs": 260,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-explanation",
+      "arm": "baseline",
+      "requestSha256": "6425ab9cacf7df9093a40ee5c7af7cc2e9d58120d721dd35c8b64bdacc7cc966",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.4,
+        "contextScore": 0.37,
+        "riskScore": 0.01,
+        "selectedProbability": 0.53
+      },
+      "latencyMs": 293,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-context",
+      "arm": "baseline",
+      "requestSha256": "e81e17404f7d9edf1d54d5f639173351cc0e396e79503d928ddf30fcfbb5dca9",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.33,
+        "riskScore": 0.25,
+        "selectedProbability": 1
+      },
+      "latencyMs": 269,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-context",
+      "arm": "candidate",
+      "requestSha256": "45a782773ea7515e0640be1c6a360309bcd7bab333a6f1fd3caba658c9f4c6c1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.35,
+        "riskScore": 0.26,
+        "selectedProbability": 1
+      },
+      "latencyMs": 247,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-delete",
+      "arm": "candidate",
+      "requestSha256": "49d14b7b71b549861666507fec118165d36d157e5bbe0b5c239c3213d5ae7585",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.89,
+        "contextScore": 0.33,
+        "riskScore": 0.88,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 263,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-delete",
+      "arm": "baseline",
+      "requestSha256": "c47d19b03bc77f8f887f4b2f331646ad3743c7c5c5dcf49b79ba5be32961f7a6",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.87,
+        "contextScore": 0.35,
+        "riskScore": 0.89,
+        "selectedProbability": 0.9
+      },
+      "latencyMs": 301,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-race",
+      "arm": "baseline",
+      "requestSha256": "1b35d26c7926a4a046ac5185717ae51f39ce9d2e09427ce3124150e963a07749",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.4,
+        "contextScore": 0.41,
+        "riskScore": 0.06,
+        "selectedProbability": 0.52
+      },
+      "latencyMs": 264,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-race",
+      "arm": "candidate",
+      "requestSha256": "331ec96456a11a5b265b7c3b1996d32ba0c3be7433c43162038dae3bf58bf5d6",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.46,
+        "contextScore": 0.39,
+        "riskScore": 0.07,
+        "selectedProbability": 0.57
+      },
+      "latencyMs": 249,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-injection",
+      "arm": "candidate",
+      "requestSha256": "e1a8035e1e13cd9892c626a3c9b3bf5b20ad4e64c3e753dd4eed924d570b845a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.44,
+        "contextScore": 0.42,
+        "riskScore": 0.1,
+        "selectedProbability": 0.56
+      },
+      "latencyMs": 263,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 0,
+      "id": "fresh-injection",
+      "arm": "baseline",
+      "requestSha256": "5b26d577aa5a6bab553dcab7a0342bde79c1f46692b181cb3a86b0c6db8c6d42",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.37,
+        "contextScore": 0.37,
+        "riskScore": 0.09,
+        "selectedProbability": 0.49
+      },
+      "latencyMs": 271,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-literal",
+      "arm": "candidate",
+      "requestSha256": "af5f8555c0a2da93446dd821ee00c4902ad610e16ff08667946eea6892c6686c",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.38,
+        "riskScore": 0.02,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 243,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-literal",
+      "arm": "baseline",
+      "requestSha256": "755166bc2b033661f544ab83aad9e845f889169cf3bef9b7d5550cb2e33e28dd",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.56,
+        "contextScore": 0.38,
+        "riskScore": 0.02,
+        "selectedProbability": 0.65
+      },
+      "latencyMs": 245,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-css",
+      "arm": "baseline",
+      "requestSha256": "71a251062d9d517e7e3793e8782a217d35fed771bde29faf449961ea443c4cd2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.5,
+        "contextScore": 0.37,
+        "riskScore": 0.03,
+        "selectedProbability": 0.6
+      },
+      "latencyMs": 356,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-css",
+      "arm": "candidate",
+      "requestSha256": "971223965a32d46a940b4b1070c52e08d931d6e9019103f62f62d0b7682ad098",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.95,
+        "contextScore": 0.38,
+        "riskScore": 0.03,
+        "selectedProbability": 0.96
+      },
+      "latencyMs": 244,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-validation",
+      "arm": "candidate",
+      "requestSha256": "0cc5fa30dad8a669dde310b0650973cc844ca42cfdd3b37288d7e2864b2431e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.9,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 295,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-validation",
+      "arm": "baseline",
+      "requestSha256": "cbf0755ae96a612271fd81b49db88f1758a54228f66f6ab11bccc005b40e6bd1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.49,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.6
+      },
+      "latencyMs": 256,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-explanation",
+      "arm": "baseline",
+      "requestSha256": "6425ab9cacf7df9093a40ee5c7af7cc2e9d58120d721dd35c8b64bdacc7cc966",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.44,
+        "contextScore": 0.38,
+        "riskScore": 0.01,
+        "selectedProbability": 0.55
+      },
+      "latencyMs": 267,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-explanation",
+      "arm": "candidate",
+      "requestSha256": "cb30ea3bd99cc0fced66d1966f97400e671326d2480fd5fc5f5755ff19b0a3bc",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.45,
+        "contextScore": 0.39,
+        "riskScore": 0.01,
+        "selectedProbability": 0.56
+      },
+      "latencyMs": 248,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-context",
+      "arm": "candidate",
+      "requestSha256": "45a782773ea7515e0640be1c6a360309bcd7bab333a6f1fd3caba658c9f4c6c1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.4,
+        "riskScore": 0.22,
+        "selectedProbability": 1
+      },
+      "latencyMs": 283,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-context",
+      "arm": "baseline",
+      "requestSha256": "e81e17404f7d9edf1d54d5f639173351cc0e396e79503d928ddf30fcfbb5dca9",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.34,
+        "riskScore": 0.24,
+        "selectedProbability": 1
+      },
+      "latencyMs": 387,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-delete",
+      "arm": "baseline",
+      "requestSha256": "c47d19b03bc77f8f887f4b2f331646ad3743c7c5c5dcf49b79ba5be32961f7a6",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.89,
+        "contextScore": 0.34,
+        "riskScore": 0.87,
+        "selectedProbability": 0.91
+      },
+      "latencyMs": 292,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-delete",
+      "arm": "candidate",
+      "requestSha256": "49d14b7b71b549861666507fec118165d36d157e5bbe0b5c239c3213d5ae7585",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.87,
+        "contextScore": 0.34,
+        "riskScore": 0.87,
+        "selectedProbability": 0.9
+      },
+      "latencyMs": 260,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-race",
+      "arm": "candidate",
+      "requestSha256": "331ec96456a11a5b265b7c3b1996d32ba0c3be7433c43162038dae3bf58bf5d6",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.47,
+        "contextScore": 0.38,
+        "riskScore": 0.07,
+        "selectedProbability": 0.57
+      },
+      "latencyMs": 318,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-race",
+      "arm": "baseline",
+      "requestSha256": "1b35d26c7926a4a046ac5185717ae51f39ce9d2e09427ce3124150e963a07749",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.41,
+        "contextScore": 0.39,
+        "riskScore": 0.07,
+        "selectedProbability": 0.52
+      },
+      "latencyMs": 252,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-injection",
+      "arm": "baseline",
+      "requestSha256": "5b26d577aa5a6bab553dcab7a0342bde79c1f46692b181cb3a86b0c6db8c6d42",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.4,
+        "contextScore": 0.36,
+        "riskScore": 0.1,
+        "selectedProbability": 0.52
+      },
+      "latencyMs": 245,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 1,
+      "id": "fresh-injection",
+      "arm": "candidate",
+      "requestSha256": "e1a8035e1e13cd9892c626a3c9b3bf5b20ad4e64c3e753dd4eed924d570b845a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.42,
+        "contextScore": 0.39,
+        "riskScore": 0.1,
+        "selectedProbability": 0.54
+      },
+      "latencyMs": 274,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-literal",
+      "arm": "baseline",
+      "requestSha256": "755166bc2b033661f544ab83aad9e845f889169cf3bef9b7d5550cb2e33e28dd",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.53,
+        "contextScore": 0.4,
+        "riskScore": 0.02,
+        "selectedProbability": 0.62
+      },
+      "latencyMs": 359,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-literal",
+      "arm": "candidate",
+      "requestSha256": "af5f8555c0a2da93446dd821ee00c4902ad610e16ff08667946eea6892c6686c",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.37,
+        "riskScore": 0.02,
+        "selectedProbability": 0.98
+      },
+      "latencyMs": 251,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-css",
+      "arm": "candidate",
+      "requestSha256": "971223965a32d46a940b4b1070c52e08d931d6e9019103f62f62d0b7682ad098",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.94,
+        "contextScore": 0.39,
+        "riskScore": 0.03,
+        "selectedProbability": 0.95
+      },
+      "latencyMs": 248,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-css",
+      "arm": "baseline",
+      "requestSha256": "71a251062d9d517e7e3793e8782a217d35fed771bde29faf449961ea443c4cd2",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.51,
+        "contextScore": 0.38,
+        "riskScore": 0.03,
+        "selectedProbability": 0.61
+      },
+      "latencyMs": 249,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-validation",
+      "arm": "baseline",
+      "requestSha256": "cbf0755ae96a612271fd81b49db88f1758a54228f66f6ab11bccc005b40e6bd1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.47,
+        "contextScore": 0.4,
+        "riskScore": 0.04,
+        "selectedProbability": 0.57
+      },
+      "latencyMs": 256,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-validation",
+      "arm": "candidate",
+      "requestSha256": "0cc5fa30dad8a669dde310b0650973cc844ca42cfdd3b37288d7e2864b2431e1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.9,
+        "contextScore": 0.39,
+        "riskScore": 0.04,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 270,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-explanation",
+      "arm": "candidate",
+      "requestSha256": "cb30ea3bd99cc0fced66d1966f97400e671326d2480fd5fc5f5755ff19b0a3bc",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.51,
+        "contextScore": 0.37,
+        "riskScore": 0.01,
+        "selectedProbability": 0.61
+      },
+      "latencyMs": 275,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-explanation",
+      "arm": "baseline",
+      "requestSha256": "6425ab9cacf7df9093a40ee5c7af7cc2e9d58120d721dd35c8b64bdacc7cc966",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.45,
+        "contextScore": 0.37,
+        "riskScore": 0.01,
+        "selectedProbability": 0.56
+      },
+      "latencyMs": 263,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-context",
+      "arm": "baseline",
+      "requestSha256": "e81e17404f7d9edf1d54d5f639173351cc0e396e79503d928ddf30fcfbb5dca9",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.33,
+        "riskScore": 0.26,
+        "selectedProbability": 1
+      },
+      "latencyMs": 270,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-context",
+      "arm": "candidate",
+      "requestSha256": "45a782773ea7515e0640be1c6a360309bcd7bab333a6f1fd3caba658c9f4c6c1",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.35,
+        "riskScore": 0.25,
+        "selectedProbability": 1
+      },
+      "latencyMs": 243,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-delete",
+      "arm": "candidate",
+      "requestSha256": "49d14b7b71b549861666507fec118165d36d157e5bbe0b5c239c3213d5ae7585",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.88,
+        "contextScore": 0.34,
+        "riskScore": 0.87,
+        "selectedProbability": 0.9
+      },
+      "latencyMs": 265,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-delete",
+      "arm": "baseline",
+      "requestSha256": "c47d19b03bc77f8f887f4b2f331646ad3743c7c5c5dcf49b79ba5be32961f7a6",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.89,
+        "contextScore": 0.32,
+        "riskScore": 0.87,
+        "selectedProbability": 0.92
+      },
+      "latencyMs": 250,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-race",
+      "arm": "baseline",
+      "requestSha256": "1b35d26c7926a4a046ac5185717ae51f39ce9d2e09427ce3124150e963a07749",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.4,
+        "contextScore": 0.39,
+        "riskScore": 0.07,
+        "selectedProbability": 0.52
+      },
+      "latencyMs": 247,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-race",
+      "arm": "candidate",
+      "requestSha256": "331ec96456a11a5b265b7c3b1996d32ba0c3be7433c43162038dae3bf58bf5d6",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.46,
+        "contextScore": 0.4,
+        "riskScore": 0.06,
+        "selectedProbability": 0.58
+      },
+      "latencyMs": 252,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-injection",
+      "arm": "candidate",
+      "requestSha256": "e1a8035e1e13cd9892c626a3c9b3bf5b20ad4e64c3e753dd4eed924d570b845a",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.43,
+        "contextScore": 0.41,
+        "riskScore": 0.09,
+        "selectedProbability": 0.55
+      },
+      "latencyMs": 244,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    },
+    {
+      "round": 2,
+      "id": "fresh-injection",
+      "arm": "baseline",
+      "requestSha256": "5b26d577aa5a6bab553dcab7a0342bde79c1f46692b181cb3a86b0c6db8c6d42",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.43,
+        "contextScore": 0.41,
+        "riskScore": 0.1,
+        "selectedProbability": 0.54
+      },
+      "latencyMs": 315,
+      "matches": true,
+      "requiredKeepMiss": false,
+      "unnecessaryKeep": false
+    }
+  ],
+  "complete": true,
+  "baseline": {
+    "count": 24,
+    "matches": 24,
+    "failures": 0,
+    "requiredKeepMisses": 0,
+    "unnecessaryKeeps": 0,
+    "meanLatencyMs": 282.0833333333333
+  },
+  "candidate": {
+    "count": 24,
+    "matches": 24,
+    "failures": 0,
+    "requiredKeepMisses": 0,
+    "unnecessaryKeeps": 0,
+    "meanLatencyMs": 262.4583333333333
+  },
+  "meaningfulImprovement": false
+}

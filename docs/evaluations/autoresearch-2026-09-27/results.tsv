@@ -1,0 +1,6 @@
+trial	baseline_matches	candidate_matches	count_per_arm	status	no_improvement_streak	description
+1	33	36	36	keep	0	distinguish scope assessment from execution context
+2	36	27	36	discard	1	clarify keep versus same-reference effort
+3	36	36	36	discard	2	separate capability uncertainty from task complexity
+4	36	36	36	discard	3	distinguish task action from risky topic
+final	24	24	24	validate	3	fresh holdout no regression; no further tuning

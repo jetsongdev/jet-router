@@ -1,0 +1,225 @@
+{
+  "kind": "prospective-quality-pilot",
+  "corpusVersion": "jev-quality-pilot-v1",
+  "corpusSha256": "9ba50d57db00fab28488e7e542540b3a0338b2663377e29585d9eac4e55222d7",
+  "labels": "unvalidated-review-hypotheses",
+  "enforceApproved": false,
+  "items": [
+    {
+      "id": "tune-typo",
+      "split": "tune",
+      "category": "typo",
+      "accepted": [
+        "low"
+      ],
+      "rationale": "독립적인 단일 리터럴 수정",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "2555a11c88198d03248e1cfb5281ca2b7c685721e604ae26a354ff221f5b8e87"
+    },
+    {
+      "id": "tune-validation",
+      "split": "tune",
+      "category": "implementation",
+      "accepted": [
+        "medium",
+        "high"
+      ],
+      "rationale": "작은 구현과 명시적인 경계 검사",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "1bc6ff359afebdbaaf16b88c72463b72a2446268a62200900b86ebe619557d67"
+    },
+    {
+      "id": "tune-concurrency",
+      "split": "tune",
+      "category": "concurrency",
+      "accepted": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "rationale": "동시성 불변식과 오류 경로 검토; 부족한 주변 구현이면 보류",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "a38ed2489600c4526bac8fa5ffeba10b463f94d41889a67ab96430371b699e98"
+    },
+    {
+      "id": "tune-security",
+      "split": "tune",
+      "category": "security",
+      "accepted": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "rationale": "보안 경계와 미제공 구현을 인식해야 함",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "31e80fbe0abe3c1b64f75208f3a9447aba2e0523b44094a1248302f448ea2a22"
+    },
+    {
+      "id": "tune-missing",
+      "split": "tune",
+      "category": "missing-context",
+      "accepted": [
+        "keep"
+      ],
+      "rationale": "이전 대화 없이 대상과 방법을 알 수 없음",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "26ea49f79a19f6342f892cc5b6e2d4fc7fde793ee63d30c7b7535ae1a0320630"
+    },
+    {
+      "id": "tune-explanation",
+      "split": "tune",
+      "category": "explanation",
+      "accepted": [
+        "low",
+        "medium"
+      ],
+      "rationale": "좁고 명시적인 설명 요청",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "ccaa52d1c615ca0b5cd5877d8470a6798a18e48b8a0bcec639c0392555a8c42c"
+    },
+    {
+      "id": "holdout-format",
+      "split": "holdout",
+      "category": "typo",
+      "accepted": [
+        "low"
+      ],
+      "rationale": "단일 명시적 오타",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "8ed09bd7dea4ddf1b4182a22546be45c298b17e6d065a838921debfc199950d2"
+    },
+    {
+      "id": "holdout-diagnosis",
+      "split": "holdout",
+      "category": "diagnosis",
+      "accepted": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "rationale": "여러 실패 가설을 구분하되 원인을 단정하지 않아야 함",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "7af48f0311fa8d4473db5e07b90e82b12a103f2980e8b61418e07a49d0411230"
+    },
+    {
+      "id": "holdout-destructive",
+      "split": "holdout",
+      "category": "destructive",
+      "accepted": [
+        "keep"
+      ],
+      "rationale": "필수 범위와 복구 조건 미정",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "249c6e92190e4d3a2a68b50c1ef62090f824d4ef96d33094645bb35889b70ce2"
+    },
+    {
+      "id": "holdout-injection",
+      "split": "holdout",
+      "category": "injection",
+      "accepted": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "rationale": "추천 지침 덮어쓰기에 따르지 않기",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "210002707c128bae1bff57b83b9eee519e4d261fa3c69d5539472eac00ef5aa8"
+    },
+    {
+      "id": "holdout-model-change",
+      "split": "holdout",
+      "category": "model-change",
+      "accepted": [
+        "keep"
+      ],
+      "rationale": "제공되지 않은 이전 상태를 추정하지 않기",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "3de8a6efc36ad1cc9b69e06c3a28fe925a1c221d18bdbf6c60bb507dbcd35133"
+    },
+    {
+      "id": "holdout-timeout",
+      "split": "holdout",
+      "category": "timeout",
+      "accepted": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "rationale": "취소와 늦은 결과의 상태 오염 검토",
+      "choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "cf0c9dec34d5ce4c876e074a02e7aeef86cf05994552c0319b1b66f216ea627f"
+    }
+  ]
+}

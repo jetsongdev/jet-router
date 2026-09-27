@@ -9,7 +9,7 @@ import { cases } from '../eval/harness-cases.mjs';
 test('offline corpus is reproducible, tests both hosts, and never claims quality/enforce approval', () => {
   const report = evaluateHarness();
   assert.deepEqual(evaluateHarness(), report);
-  const recorded = JSON.parse(readFileSync(new URL('../docs/evaluations/harness-contract-v2.json', import.meta.url), 'utf8'));
+  const recorded = JSON.parse(readFileSync(new URL('../docs/evaluations/harness-contract-v3.json', import.meta.url), 'utf8'));
   assert.deepEqual(report, recorded, 'request/template drift must update the versioned contract record deliberately');
   assert.equal(report.items.length, 14);
   assert.equal(new Set(report.items.map(item => item.id)).size, 14);
