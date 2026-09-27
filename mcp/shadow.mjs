@@ -28,7 +28,7 @@ export function readConfig(env) {
 }
 
 const result = systemMessage => ({ continue: true, ...(systemMessage ? { systemMessage } : {}) });
-const message = detail => result(`[jet-router] shadow · ${detail} · 적용 안 함`);
+const message = detail => result(`[jet-router] shadow · ${detail} · 추천만`);
 
 // One MCP process owns a bounded set of event ids, never prompt text or results.
 // Ids are supplied by the host; this is duplicate suppression, not authentication.
