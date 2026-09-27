@@ -196,3 +196,22 @@ Codex의 MCP hook 출력에는 effort 변경 계약이 없다. 실제 적용에�
 공통 하네스 v2 연결: 현재 프롬프트와 effort 출처를 공통 입력으로 전달한다.
 모델 지원 범위·맥락 미확인은 `uncertainties`로 Jev에 전달하고 shadow 추천을 허용한다.
 동의·입력·응답 검사는 유지한다. 세부 정보와 검증 한계는 [하네스 가이드](harness.md)를 참고한다.
+
+
+## Codex 지원 범위와 취소 경로
+
+```mermaid
+flowchart TD
+    S["MCP 시작: 조회 옵션 활성화"] --> L["Codex app-server model/list"]
+    L --> C["메모리의 모델별 지원 목록; 실패하면 unknown"]
+    H["UserPromptSubmit: model/session/turn/prompt"] --> P["공통 하네스"]
+    C --> P
+    P --> J["지원 effort와 정책 후보의 교집합 + keep"]
+    J --> R["Jev 분류 및 요청별 응답 검사"]
+    R --> M["Jev.shadow(): 참고 → 추천 (확률)"]
+    X["MCP 취소 신호 / 4초 제한"] --> A["helper 중단·정리"]
+    N["새 hook에서 모델 변경 관측"] --> D["이전 진행 중 결과 표시 억제"]
+```
+
+실제 effort는 바꾸지 않는다. 모델 변경은 hook으로 관측한 범위에서만 감지한다.
+Codex Escape의 즉시 취소 전달 한계와 검증 범위는 [마무리 기록](evaluations/shadow-closeout-2026-09-27.md)에 남겼다.

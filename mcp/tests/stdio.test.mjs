@@ -38,3 +38,30 @@ test('real stdio initialize/list/call: hook JSON, dedup, invalid input, no stdou
   assert.match(long.structuredContent.systemMessage, /입력 또는/);
   assert.equal(stderr, '');
 });
+
+test('real MCP cancellation reaches classifier and next request recovers', { timeout: 10000 }, async t => {
+  const transport = new StdioClientTransport({ command: process.execPath,
+    args: [fileURLToPath(new URL('./fixtures/cancellation-server.mjs', import.meta.url))], stderr: 'pipe' });
+  const client = new Client({ name: 'cancel-test', version: '1.0.0' });
+  t.after(() => client.close());
+  await client.connect(transport);
+  let started, aborted, stderr = '';
+  const ready = new Promise(resolve => { started = resolve; });
+  const cancelled = new Promise(resolve => { aborted = resolve; });
+  transport.stderr.on('data', chunk => {
+    stderr += chunk;
+    if (stderr.includes('started\n')) started();
+    if (stderr.includes('aborted\n')) aborted();
+  });
+  const controller = new AbortController();
+  const args = { prompt: 'synthetic', session_id: 's1', turn_id: 't1' };
+  const pending = client.callTool({ name: 'jet_router_shadow', arguments: args }, { signal: controller.signal });
+  const rejected = assert.rejects(pending);
+  await ready;
+  controller.abort();
+  await rejected;
+  await cancelled;
+  const next = await client.callTool({ name: 'jet_router_shadow', arguments: { ...args, turn_id: 't2' } });
+  assert.equal(next.structuredContent.systemMessage, '[jet-router] Jev.shadow(): medium → low (90%)');
+  assert.deepEqual((await client.callTool({ name: 'jet_router_shadow', arguments: args })).structuredContent, { continue: true });
+});

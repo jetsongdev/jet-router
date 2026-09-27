@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { z } from 'zod';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { discoverCodexModels } from './codex-models.mjs';
 import { createShadow, readConfig } from './shadow.mjs';
 
 export function createServer(config = readConfig(process.env), classify) {
@@ -16,18 +17,24 @@ export function createServer(config = readConfig(process.env), classify) {
     inputSchema: z.object({
       prompt: z.string().describe('Current submitted text only, at most 6000 characters; longer input is skipped.'),
       session_id: z.string().max(128).describe('Host event session_id, used only for bounded in-memory deduplication.'),
+      model: z.string().regex(/^[a-zA-Z0-9._:-]{1,128}$/).optional().describe('Host event model slug, not a model selected by the caller.'),
       turn_id: z.string().max(128).describe('Host event turn_id; repeated events are silently skipped.'),
     }).strict(),
     outputSchema: z.object({ continue: z.literal(true), systemMessage: z.string().max(500).optional() }).strict(),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
-  }, async input => {
-    const output = await shadow(input);
+  }, async (input, ctx) => {
+    const output = await shadow(input, ctx.mcpReq.signal);
     return { content: [{ type: 'text', text: JSON.stringify(output) }], structuredContent: output };
   });
   return server;
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
-  try { await createServer().connect(new StdioServerTransport()); }
+  try {
+    const config = readConfig(process.env);
+    const modelCatalog = config.discoverModels && config.mode === 'shadow' && config.provider === 'jev'
+      ? await discoverCodexModels() : null;
+    await createServer({ ...config, modelCatalog }).connect(new StdioServerTransport());
+  }
   catch { process.stderr.write('jet-router: MCP startup failed\n'); process.exitCode = 1; }
 }

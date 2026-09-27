@@ -14,6 +14,6 @@ JET_ROUTER_PROVIDER = "fake"
 type = "mcp_tool"
 server = "jet_router"
 tool = "jet_router_shadow"
-input = { prompt = "${prompt}", session_id = "${session_id}", turn_id = "${turn_id}" }
+input = { prompt = "${prompt}", session_id = "${session_id}", turn_id = "${turn_id}", model = "${model}" }
 timeout = 5
 statusMessage = "jet-router shadow 판정 중"

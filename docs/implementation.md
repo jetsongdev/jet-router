@@ -269,3 +269,8 @@ See [harness guide](harness.md) and [TASKS](../TASKS.md) for boundaries.
 수명주기 테스트 21개, 오프라인 훅 2개 및 manifest 검증 통과.
 실제 host에서 같은 턴 중 모델 변경이 발생하는지와 관측 시점은 미검증이다.
 Codex의 활성 모델 조회 및 변경 감지는 여전히 후속 작업이다.
+
+
+## Shadow 마무리 (2026-09-27)
+
+MCP 취소 신호를 helper까지 전달하고 4초 정리 제한을 추가했다. 선택적 Codex model/list 시작 조회, hook 모델 입력, 지원 범위별 후보 검사와 관측된 모델 변경 시 이전 결과 폐기를 연결했다. 기본은 조회 비활성이고 effort 변경은 없다. [검증 및 남은 한계](evaluations/shadow-closeout-2026-09-27.md).

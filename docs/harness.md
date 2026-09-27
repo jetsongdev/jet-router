@@ -96,12 +96,12 @@ flowchart TD
 - Claude: `turn.step`의 model/effort와 기존 prompt↔turn 연결 검사를 사용한다.
   session ID와 지원 목록은 미확인이다. 세션 재시작 때 기존 수명주기 상태가 초기화된다.
 - Codex: hook의 session/turn ID와 사용자 지정 참고 effort를 사용한다.
-  활성 모델·실제 effort·지원 목록을 조회한 것으로 간주하지 않는다.
+  선택적 hook 모델명과 시작 시 model/list 조회 목록을 연결한다. 실제 effort는 미확인이다.
 - 두 어댑터 모두 preflight 후 `{ routingInput, apiKey }`를 helper stdin에 전달한다.
   helper는 같은 하네스로 질문을 재구성하고 그 후보로 응답을 검증한다.
   반환값도 요청 후보 안에 있는지 검사하며 기존 timeout/중복/취소 제어를 유지한다.
 - 기존 평가기의 `{ state, apiKey }`는 과거 기준을 유지한다. 새 기준 평가에는 routingInput 경로가 필요하다.
-- 실제 host 재테스트, 모델 지원 목록 수집, 판정 도중 모델 변경 감지, 품질 평가와 enforce는 후속 작업이다.
+- Codex native hook·취소 및 모델 목록 조회는 검증했다. 수정한 모델 hook의 native 전환, Claude 실사용, 품질 평가와 enforce는 후속 작업이다.
 - v1 고정 기록은 과거 엄격 정책의 증거로 보존한다. v2는 누락 정보를 불확실성으로 전달하는 정책이다.
 
 범위와 순서: [TASKS.md](../TASKS.md).
