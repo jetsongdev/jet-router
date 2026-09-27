@@ -1,0 +1,4 @@
+{
+  "split": "dev",
+  "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Choose the effort needed to implement and independently verify every stated requirement, rather than the effort needed to recognize a familiar pattern. Parsing validation, cache recency and expiry, rejection recovery, and transactional deduplication may require high when their interactions can violate invariants."
+}

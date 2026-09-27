@@ -141,3 +141,5 @@ Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했�
 추천 품질 평가 준비: [파일럿 평가셋·채점 방법](docs/quality-evaluation.md). 조정용/검증용 사례를 분리했고 [첫 12건 실호출](docs/evaluations/quality-pilot-v1-live-2026-09-27.md)을 기록했습니다. 기대 범위 일치는 실제 작업 성공률과 다릅니다.
 
 [판정 지침 개선 실험](docs/evaluations/autoresearch-2026-09-27/README.md): 4개 변경안·336건 호출 후 첫 변경안만 채택했습니다. 이후 3회 연속 추가 개선이 없어 중단했으며, 새 holdout에서 회귀는 없었습니다.
+
+[실제 코드 품질 비교·그래프](docs/evaluations/task-quality-2026-09-27/README.md): Codex gpt-6-astra의 48개 독립 실행을 저장·재검사했습니다. 세 지침 변경안은 모두 기준선과 동률이라 폐기했습니다. 작은 합성 과제군에서 품질 향상은 확인하지 못했으며, enforce 활성화 근거로 사용하지 않습니다.

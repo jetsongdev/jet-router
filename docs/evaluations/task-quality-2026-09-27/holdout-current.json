@@ -1,0 +1,39 @@
+{
+  "split": "holdout",
+  "rounds": 2,
+  "efforts": {
+    "keyed-queue": "xhigh",
+    "intervals": "medium"
+  },
+  "routing": [
+    {
+      "id": "keyed-queue",
+      "requestSha256": "2b6b8b6031a0d380d953acc1c5149ff0127dbcfa661c109f19ad554c1b7ee619",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.35,
+        "contextScore": 0.42,
+        "riskScore": 0.03,
+        "selectedProbability": 0.48
+      }
+    },
+    {
+      "id": "intervals",
+      "requestSha256": "42db7e4fd9e58d7f541af1bdc964fb966de5f97e09240c7f9b8bf3d1c3f733d3",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.67,
+        "contextScore": 0.43,
+        "riskScore": 0.02,
+        "selectedProbability": 0.75
+      }
+    }
+  ],
+  "complete": true,
+  "config": {
+    "split": "holdout",
+    "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear."
+  }
+}

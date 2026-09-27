@@ -1,0 +1,209 @@
+{
+  "config": {
+    "split": "holdout",
+    "rounds": 2,
+    "efforts": {
+      "keyed-queue": "xhigh",
+      "intervals": "medium"
+    },
+    "routing": [
+      {
+        "id": "keyed-queue",
+        "requestSha256": "2b6b8b6031a0d380d953acc1c5149ff0127dbcfa661c109f19ad554c1b7ee619",
+        "decision": {
+          "provider": "jev",
+          "choice": "xhigh",
+          "confidence": 0.35,
+          "contextScore": 0.42,
+          "riskScore": 0.03,
+          "selectedProbability": 0.48
+        }
+      },
+      {
+        "id": "intervals",
+        "requestSha256": "42db7e4fd9e58d7f541af1bdc964fb966de5f97e09240c7f9b8bf3d1c3f733d3",
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.67,
+          "contextScore": 0.43,
+          "riskScore": 0.02,
+          "selectedProbability": 0.75
+        }
+      }
+    ],
+    "complete": true,
+    "config": {
+      "split": "holdout",
+      "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear."
+    }
+  },
+  "startedAt": "2026-09-27T15:10:18.504Z",
+  "taskSha256": "d38cfc3f12031c9c3c420ef992b6aff6b0b2ec447c6e50a001dd7b0f2e33f9de",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "results": [
+    {
+      "task": "keyed-queue",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+      "threadId": "01a0e36a-bf81-7fb3-a343-ce6cfc8b343c",
+      "usage": {
+        "input_tokens": 20570,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 512,
+        "reasoning_output_tokens": 366
+      },
+      "latencyMs": 29839,
+      "usedTools": false,
+      "code": "export function createKeyedQueue() {\n  const tails = new Map();\n\n  return function enqueue(key, task) {\n    const previous = tails.get(key) ?? Promise.resolve();\n    const result = previous.then(() => task());\n    const tail = result.then(\n      () => undefined,\n      () => undefined\n    );\n\n    tails.set(key, tail);\n    tail.then(() => {\n      if (tails.get(key) === tail) {\n        tails.delete(key);\n      }\n    });\n\n    return result;\n  };\n}",
+      "codeSha256": "63b2ab5da74d13f4d87d573f75ed2ee25860f16c6f5741a50be3401fcdc1dc22",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e36b-3405-7942-be3e-f8ce74f06c6c",
+      "usage": {
+        "input_tokens": 20561,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 616,
+        "reasoning_output_tokens": 160
+      },
+      "latencyMs": 45831,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) throw new RangeError('Expected an array of intervals');\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2 ||\n          !Number.isFinite(pair[0]) || !Number.isFinite(pair[1]) ||\n          pair[0] > pair[1]) {\n        throw new RangeError('Invalid interval');\n      }\n      if (pair[0] < pair[1]) sorted.push([pair[0], pair[1]]);\n    }\n    sorted.sort((a, b) => a[0] - b[0]);\n    const merged = [];\n    for (const pair of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && pair[0] <= last[1]) {\n        last[1] = Math.max(last[1], pair[1]);\n      } else {\n        merged.push(pair);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const exclusions = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < exclusions.length && exclusions[j][1] <= cursor) j++;\n    while (j < exclusions.length && exclusions[j][0] < end) {\n      const [cutStart, cutEnd] = exclusions[j];\n      if (cutStart > cursor) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n    if (cursor < end) result.push([cursor, end]);\n  }\n\n  return result;\n}",
+      "codeSha256": "d5a50b80c6da7aadfba3f8d03c62b2ce5d77dfb230a307411959bd9f6f4b946d",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "keyed-queue",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+      "threadId": "01a0e36b-e5ae-7911-9fad-4695f385343c",
+      "usage": {
+        "input_tokens": 20568,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 898,
+        "reasoning_output_tokens": 761
+      },
+      "latencyMs": 48041,
+      "usedTools": false,
+      "code": "export function createKeyedQueue() {\n  const tails = new Map();\n\n  return function enqueue(key, task) {\n    const previous = tails.get(key) ?? Promise.resolve();\n    const result = previous.then(() => task());\n\n    const cleanup = () => {\n      if (tails.get(key) === tail) {\n        tails.delete(key);\n      }\n    };\n\n    const tail = result.then(cleanup, cleanup);\n    tails.set(key, tail);\n    return result;\n  };\n}\n",
+      "codeSha256": "a5b6c0951dcc461b17a0c3fe4293b77c39344cf291d2a8022c250325bc85f149",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    },
+    {
+      "task": "intervals",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+      "threadId": "01a0e36c-a312-77f3-8894-f7d4f708e9f3",
+      "usage": {
+        "input_tokens": 20565,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 720,
+        "reasoning_output_tokens": 247
+      },
+      "latencyMs": 38635,
+      "usedTools": false,
+      "code": "export function subtractIntervals(base, cuts) {\n  function normalize(intervals) {\n    if (!Array.isArray(intervals)) {\n      throw new RangeError('Expected an array of interval pairs');\n    }\n\n    const sorted = [];\n    for (const pair of intervals) {\n      if (!Array.isArray(pair) || pair.length !== 2 ||\n          !Number.isFinite(pair[0]) || !Number.isFinite(pair[1]) ||\n          pair[0] > pair[1]) {\n        throw new RangeError('Invalid interval pair');\n      }\n      if (pair[0] < pair[1]) sorted.push([pair[0], pair[1]]);\n    }\n    sorted.sort((a, b) => a[0] - b[0]);\n\n    const merged = [];\n    for (const pair of sorted) {\n      const last = merged[merged.length - 1];\n      if (last && pair[0] <= last[1]) {\n        last[1] = Math.max(last[1], pair[1]);\n      } else {\n        merged.push(pair);\n      }\n    }\n    return merged;\n  }\n\n  const bases = normalize(base);\n  const removals = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (const [start, end] of bases) {\n    let cursor = start;\n    while (j < removals.length && removals[j][1] <= cursor) j++;\n\n    while (j < removals.length && removals[j][0] < end) {\n      const [cutStart, cutEnd] = removals[j];\n      if (cursor < cutStart) result.push([cursor, cutStart]);\n      cursor = Math.max(cursor, cutEnd);\n      if (cursor >= end) break;\n      j++;\n    }\n\n    if (cursor < end) result.push([cursor, end]);\n  }\n  return result;\n}",
+      "codeSha256": "53e741126c585a75ef0e0f8181331d536355bf40b456071ef98c9480a819134d",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    }
+  ],
+  "complete": true,
+  "successes": 4,
+  "finishedAt": "2026-09-27T15:13:00.970Z"
+}

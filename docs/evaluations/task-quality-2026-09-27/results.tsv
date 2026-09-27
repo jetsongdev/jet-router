@@ -1,0 +1,8 @@
+policy	successes	runs	status	no_improvement_streak
+medium	8	8	reference	0
+current	8	8	incumbent	0
+01-invariants	8	8	discard-tie	1
+02-boundaries	8	8	discard-tie	2
+03-verification	8	8	discard-tie	3
+holdout-medium	4	4	final-reference	3
+holdout-current	4	4	final-incumbent	3

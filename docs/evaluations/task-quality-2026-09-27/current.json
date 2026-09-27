@@ -1,0 +1,65 @@
+{
+  "split": "dev",
+  "rounds": 2,
+  "efforts": {
+    "ranges": "medium",
+    "ttl-lru": "medium",
+    "async-memo": "xhigh",
+    "ledger": "medium"
+  },
+  "routing": [
+    {
+      "id": "ranges",
+      "requestSha256": "94bfb5303dd8825ed7e7f969ff6a64af59b4997df6dab860186f688c6f293ac1",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.78,
+        "contextScore": 0.42,
+        "riskScore": 0.03,
+        "selectedProbability": 0.83
+      }
+    },
+    {
+      "id": "ttl-lru",
+      "requestSha256": "20b8b2c7dadc2616846c908ce5bc6e5694d89183d312c6ab5de9c1801db41ca3",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.85,
+        "contextScore": 0.45,
+        "riskScore": 0.02,
+        "selectedProbability": 0.88
+      }
+    },
+    {
+      "id": "async-memo",
+      "requestSha256": "509fe0abe1b25e288d38c91c3bce5fb5933556bb1707fab5090fea42ccae9914",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.58,
+        "contextScore": 0.44,
+        "riskScore": 0.03,
+        "selectedProbability": 0.67
+      }
+    },
+    {
+      "id": "ledger",
+      "requestSha256": "1a5fdd92d18aae51820a74d5e79a0ecd764df0f4b6f15980c127ddd7437b06e7",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.48,
+        "contextScore": 0.45,
+        "riskScore": 0.03,
+        "selectedProbability": 0.58
+      }
+    }
+  ],
+  "complete": true,
+  "config": {
+    "split": "dev",
+    "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear."
+  }
+}

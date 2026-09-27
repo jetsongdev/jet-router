@@ -1,0 +1,428 @@
+{
+  "config": {
+    "split": "dev",
+    "rounds": 2,
+    "efforts": {
+      "ranges": "medium",
+      "ttl-lru": "medium",
+      "async-memo": "xhigh",
+      "ledger": "high"
+    },
+    "routing": [
+      {
+        "id": "ranges",
+        "requestSha256": "7397b8e18f042eaad7b83426813f8e24242aa40eb0fcdf30387410291cb959ec",
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.39,
+          "contextScore": 0.43,
+          "riskScore": 0.03,
+          "selectedProbability": 0.52
+        }
+      },
+      {
+        "id": "ttl-lru",
+        "requestSha256": "7d0e6c5ca82d5f996d5836f7742c6c7d1390ed415b36439693f17f379ec83919",
+        "decision": {
+          "provider": "jev",
+          "choice": "medium",
+          "confidence": 0.36,
+          "contextScore": 0.44,
+          "riskScore": 0.03,
+          "selectedProbability": 0.48
+        }
+      },
+      {
+        "id": "async-memo",
+        "requestSha256": "7f4c477cb4884496e3393c843d171dfb1e8c4576bf9cd75a75c55959ab195559",
+        "decision": {
+          "provider": "jev",
+          "choice": "xhigh",
+          "confidence": 0.76,
+          "contextScore": 0.41,
+          "riskScore": 0.03,
+          "selectedProbability": 0.81
+        },
+        "warning": "probability-sum-tolerance"
+      },
+      {
+        "id": "ledger",
+        "requestSha256": "fa8840d6013e757aaa8cecf694c7951f86d653dbc9f5420d5179fce8432e880d",
+        "decision": {
+          "provider": "jev",
+          "choice": "high",
+          "confidence": 0.74,
+          "contextScore": 0.45,
+          "riskScore": 0.03,
+          "selectedProbability": 0.8
+        }
+      }
+    ],
+    "complete": true,
+    "config": {
+      "split": "dev",
+      "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Choose the effort needed to implement and independently verify every stated requirement, rather than the effort needed to recognize a familiar pattern. Parsing validation, cache recency and expiry, rejection recovery, and transactional deduplication may require high when their interactions can violate invariants."
+    }
+  },
+  "startedAt": "2026-09-27T15:02:28.574Z",
+  "taskSha256": "2c5b236680db7b4119c39e587f0ec9e3e2c393a378c34b40d65f022764699272",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "results": [
+    {
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e363-9225-73f2-8a27-1a99e5713fce",
+      "usage": {
+        "input_tokens": 20577,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 450,
+        "reasoning_output_tokens": 148
+      },
+      "latencyMs": 28477,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid range syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    if (start > end) throw new RangeError('Descending range');\n\n    const distance = end - start;\n    if (distance >= 1000) throw new RangeError('Range exceeds 1000 members');\n    for (let offset = 0; offset <= distance; offset++) {\n      values.add(start + offset);\n    }\n  }\n\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "2608d4d90be13328ecf532a8716bb6caf43885e7cdfc487b93be4370fd4351f5",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e364-0392-70e0-801f-12b607c7bc98",
+      "usage": {
+        "input_tokens": 20632,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 513,
+        "reasoning_output_tokens": 103
+      },
+      "latencyMs": 28099,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiration) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiration: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (now() >= entry.expiration) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (now() >= entry.expiration) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "9cc72c8ade4e4654ee6680fe24e708b412dc8a57f2e829a4c13d3ce590884baa",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "async-memo",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+      "threadId": "01a0e364-710a-72a3-ad43-a9e5b465989e",
+      "usage": {
+        "input_tokens": 20633,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1234,
+        "reasoning_output_tokens": 1013
+      },
+      "latencyMs": 45495,
+      "usedTools": false,
+      "code": "export function memoizeAsync(fn) {\n  const cache = new Map();\n\n  function get(key) {\n    if (cache.has(key)) return cache.get(key);\n\n    let resolve;\n    let reject;\n    const pending = new Promise((res, rej) => {\n      resolve = res;\n      reject = rej;\n    });\n\n    const promise = pending.catch(error => {\n      if (cache.get(key) === promise) cache.delete(key);\n      throw error;\n    });\n\n    cache.set(key, promise);\n\n    try {\n      resolve(fn(key));\n    } catch (error) {\n      reject(error);\n    }\n\n    return promise;\n  }\n\n  return {\n    get,\n    invalidate(key) {\n      cache.delete(key);\n    },\n    clear() {\n      cache.clear();\n    }\n  };\n}",
+      "codeSha256": "c859eb668963c6a294322a16e2e5b1b09e19741f8ed59e4e0c6de7435c8bb095",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "high",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e365-245e-7560-bcaa-c73f7adb2c16",
+      "usage": {
+        "input_tokens": 20686,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 816,
+        "reasoning_output_tokens": 195
+      },
+      "latencyMs": 44122,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial balances');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const account of Object.keys(initial)) {\n    const balance = initial[account];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(account, balance);\n  }\n\n  return {\n    apply(batch) {\n      if (!Array.isArray(batch)) throw new RangeError('Invalid batch');\n\n      const nextBalances = new Map(balances);\n      const nextRemembered = new Map(remembered);\n      const statuses = [];\n\n      for (const transfer of batch) {\n        if (transfer === null || typeof transfer !== 'object') {\n          throw new RangeError('Invalid transfer');\n        }\n\n        const { id, from, to, amount } = transfer;\n        if (\n          typeof id !== 'string' || id.length === 0 ||\n          typeof from !== 'string' || !nextBalances.has(from) ||\n          typeof to !== 'string' || !nextBalances.has(to) ||\n          !Number.isSafeInteger(amount) || amount <= 0\n        ) {\n          throw new RangeError('Invalid transfer fields');\n        }\n\n        const previous = nextRemembered.get(id);\n        if (previous !== undefined) {\n          if (previous.from !== from || previous.to !== to || previous.amount !== amount) {\n            throw new RangeError('Conflicting transfer id');\n          }\n          statuses.push('duplicate');\n          continue;\n        }\n\n        const source = nextBalances.get(from);\n        if (source < amount) throw new RangeError('Insufficient balance');\n\n        if (from !== to) {\n          const destination = nextBalances.get(to);\n          if (amount > Number.MAX_SAFE_INTEGER - destination) {\n            throw new RangeError('Destination balance overflow');\n          }\n          nextBalances.set(from, source - amount);\n          nextBalances.set(to, destination + amount);\n        }\n\n        nextRemembered.set(id, { from, to, amount });\n        statuses.push('applied');\n      }\n\n      balances = nextBalances;\n      remembered = nextRemembered;\n      return statuses;\n    },\n\n    snapshot() {\n      const result = Object.create(null);\n      for (const [account, balance] of balances) result[account] = balance;\n      return result;\n    }\n  };\n}\n",
+      "codeSha256": "dfb6b2f33ea491c503419b8fe00cf3174e8e9a9e1530f8048627537fc741d6da",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 0
+    },
+    {
+      "task": "ranges",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+      "threadId": "01a0e365-cf43-79c3-bdf3-08804a8d4438",
+      "usage": {
+        "input_tokens": 20577,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 429,
+        "reasoning_output_tokens": 139
+      },
+      "latencyMs": 33825,
+      "usedTools": false,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('Expected a string');\n  }\n  if (text.trim() === '') return [];\n\n  const values = new Set();\n  for (const item of text.split(',')) {\n    const match = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/.exec(item.trim());\n    if (!match) throw new RangeError('Invalid syntax');\n\n    const start = Number(match[1]);\n    const end = match[2] === undefined ? start : Number(match[2]);\n    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {\n      throw new RangeError('Expected safe integers');\n    }\n    if (end < start || end - start > 999) {\n      throw new RangeError('Invalid range size or order');\n    }\n\n    const count = end - start + 1;\n    for (let i = 0; i < count; i++) values.add(start + i);\n  }\n  return [...values].sort((a, b) => a - b);\n}",
+      "codeSha256": "852989a7fcd4c913e1f7c066264743b80b58a772d121381fdf0b1bfb1a95b724",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    },
+    {
+      "task": "ttl-lru",
+      "model": "gpt-6-astra",
+      "requestedEffort": "medium",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+      "threadId": "01a0e366-544d-7fc2-a672-a1107528aac1",
+      "usage": {
+        "input_tokens": 20634,
+        "cached_input_tokens": 18688,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 505,
+        "reasoning_output_tokens": 81
+      },
+      "latencyMs": 30083,
+      "usedTools": false,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError('capacity must be a positive safe integer');\n  }\n\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (!Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError('ttl must be finite and nonnegative');\n      }\n\n      const time = now();\n      purge(time);\n      entries.delete(key);\n      if (ttl === 0) return;\n\n      entries.set(key, { value, expiresAt: time + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n    },\n\n    get(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (!entry) return undefined;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return undefined;\n      }\n\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const time = now();\n      const entry = entries.get(key);\n      if (!entry) return false;\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    }\n  };\n}",
+      "codeSha256": "932322fa38f151a1db9a76ac67134474d4f984cec21b04a3f95171e02ec1a561",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    },
+    {
+      "task": "async-memo",
+      "model": "gpt-6-astra",
+      "requestedEffort": "xhigh",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+      "threadId": "01a0e366-c91a-70b2-a428-fdb4783463c8",
+      "usage": {
+        "input_tokens": 20631,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1090,
+        "reasoning_output_tokens": 878
+      },
+      "latencyMs": 48531,
+      "usedTools": false,
+      "code": "export function memoizeAsync(fn) {\n  const cache = new Map();\n\n  return {\n    get(key) {\n      if (cache.has(key)) return cache.get(key);\n\n      let resolve, reject;\n      const pending = new Promise((res, rej) => {\n        resolve = res;\n        reject = rej;\n      });\n      const promise = pending.catch(error => {\n        if (cache.get(key) === promise) cache.delete(key);\n        throw error;\n      });\n\n      cache.set(key, promise);\n      try {\n        resolve(fn(key));\n      } catch (error) {\n        reject(error);\n      }\n      return promise;\n    },\n\n    invalidate(key) {\n      cache.delete(key);\n    },\n\n    clear() {\n      cache.clear();\n    }\n  };\n}",
+      "codeSha256": "5f841c89e8dddbab4dd924b995239c74f41b30fd16ce45bd591aec28a7887732",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    },
+    {
+      "task": "ledger",
+      "model": "gpt-6-astra",
+      "requestedEffort": "high",
+      "effortEvidence": "explicit-codex-cli-config; wire-unobserved",
+      "promptSha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+      "threadId": "01a0e367-855b-70a1-b383-1981fefaa538",
+      "usage": {
+        "input_tokens": 20690,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 835,
+        "reasoning_output_tokens": 199
+      },
+      "latencyMs": 43537,
+      "usedTools": false,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('Invalid initial accounts');\n  }\n\n  let balances = new Map();\n  let remembered = new Map();\n\n  for (const name of Object.keys(initial)) {\n    const balance = initial[name];\n    if (!Number.isSafeInteger(balance) || balance < 0) {\n      throw new RangeError('Invalid balance');\n    }\n    balances.set(name, balance);\n  }\n\n  function snapshot() {\n    const result = Object.create(null);\n    for (const [name, balance] of balances) {\n      result[name] = balance;\n    }\n    return result;\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new RangeError('Invalid batch');\n    }\n\n    const nextBalances = new Map(balances);\n    const nextRemembered = new Map(remembered);\n    const statuses = [];\n\n    for (const transfer of batch) {\n      if (transfer === null || typeof transfer !== 'object') {\n        throw new RangeError('Invalid transfer');\n      }\n      const { id, from, to, amount } = transfer;\n      if (\n        typeof id !== 'string' || id.length === 0 ||\n        !nextBalances.has(from) || !nextBalances.has(to) ||\n        !Number.isSafeInteger(amount) || amount <= 0\n      ) {\n        throw new RangeError('Invalid transfer fields');\n      }\n\n      if (nextRemembered.has(id)) {\n        const previous = nextRemembered.get(id);\n        if (\n          previous.from !== from || previous.to !== to ||\n          previous.amount !== amount\n        ) {\n          throw new RangeError('Conflicting transfer id');\n        }\n        statuses.push('duplicate');\n        continue;\n      }\n\n      const sourceBalance = nextBalances.get(from);\n      if (sourceBalance < amount) {\n        throw new RangeError('Insufficient balance');\n      }\n\n      if (from !== to) {\n        const destinationBalance = nextBalances.get(to);\n        if (destinationBalance > Number.MAX_SAFE_INTEGER - amount) {\n          throw new RangeError('Destination balance overflow');\n        }\n        nextBalances.set(from, sourceBalance - amount);\n        nextBalances.set(to, destinationBalance + amount);\n      }\n\n      nextRemembered.set(id, { from, to, amount });\n      statuses.push('applied');\n    }\n\n    balances = nextBalances;\n    remembered = nextRemembered;\n    return statuses;\n  }\n\n  return { apply, snapshot };\n}",
+      "codeSha256": "ba39acd99f48b5315474e723fefbbf364d6c253f44b652452d6315667e43c066",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true,
+      "round": 1
+    }
+  ],
+  "complete": true,
+  "successes": 8,
+  "finishedAt": "2026-09-27T15:07:30.982Z"
+}

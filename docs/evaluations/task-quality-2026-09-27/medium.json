@@ -1,0 +1,10 @@
+{
+  "split": "dev",
+  "rounds": 2,
+  "efforts": {
+    "ranges": "medium",
+    "ttl-lru": "medium",
+    "async-memo": "medium",
+    "ledger": "medium"
+  }
+}

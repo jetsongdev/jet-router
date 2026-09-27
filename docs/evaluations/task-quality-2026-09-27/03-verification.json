@@ -1,0 +1,66 @@
+{
+  "split": "dev",
+  "rounds": 2,
+  "efforts": {
+    "ranges": "medium",
+    "ttl-lru": "medium",
+    "async-memo": "xhigh",
+    "ledger": "high"
+  },
+  "routing": [
+    {
+      "id": "ranges",
+      "requestSha256": "7397b8e18f042eaad7b83426813f8e24242aa40eb0fcdf30387410291cb959ec",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.39,
+        "contextScore": 0.43,
+        "riskScore": 0.03,
+        "selectedProbability": 0.52
+      }
+    },
+    {
+      "id": "ttl-lru",
+      "requestSha256": "7d0e6c5ca82d5f996d5836f7742c6c7d1390ed415b36439693f17f379ec83919",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.36,
+        "contextScore": 0.44,
+        "riskScore": 0.03,
+        "selectedProbability": 0.48
+      }
+    },
+    {
+      "id": "async-memo",
+      "requestSha256": "7f4c477cb4884496e3393c843d171dfb1e8c4576bf9cd75a75c55959ab195559",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.76,
+        "contextScore": 0.41,
+        "riskScore": 0.03,
+        "selectedProbability": 0.81
+      },
+      "warning": "probability-sum-tolerance"
+    },
+    {
+      "id": "ledger",
+      "requestSha256": "fa8840d6013e757aaa8cecf694c7951f86d653dbc9f5420d5179fce8432e880d",
+      "decision": {
+        "provider": "jev",
+        "choice": "high",
+        "confidence": 0.74,
+        "contextScore": 0.45,
+        "riskScore": 0.03,
+        "selectedProbability": 0.8
+      }
+    }
+  ],
+  "complete": true,
+  "config": {
+    "split": "dev",
+    "addition": " Assess whether the supplied request is sufficient to estimate reasoning effort, not whether you have enough repository context to execute it. A self-contained literal edit with the exact before and after text is sufficient; unknown target model or supported efforts alone does not make its task scope unclear. Choose the effort needed to implement and independently verify every stated requirement, rather than the effort needed to recognize a familiar pattern. Parsing validation, cache recency and expiry, rejection recovery, and transactional deduplication may require high when their interactions can violate invariants."
+  }
+}
