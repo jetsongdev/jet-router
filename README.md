@@ -117,6 +117,7 @@ npm run test:hooks
 
 `test:hooks`는 임시 플러그인 사본의 fake/Jev 두 설정에서 설치된 Claude 테스트 도구를 실행합니다. 모델·UI·process를 mock하며 실제 키나 사용자 설정을 읽지 않습니다. 실제 provider 호출이나 대화 세션 검증과는 다릅니다. 별도 실호출 결과는 위 평가 기록을 참고하세요.
 
+- [향후 기능 후보](docs/planned/feature-candidates.md) — 미구현 후보와 선행 조건
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)
 

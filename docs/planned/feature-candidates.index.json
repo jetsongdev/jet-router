@@ -1,0 +1,53 @@
+{
+  "candidates": [
+    {
+      "id": "feedback-guided-improvement",
+      "title": "사용 결과 기반 개선 제안과 로컬 개인화",
+      "source": "user_request",
+      "status": "candidate",
+      "category": "features",
+      "file": "docs/planned/candidates/features.md",
+      "markdown_anchor": "feedback-guided-improvement",
+      "summary": "Opt-in 로컬 기록과 명시적 피드백으로 개선 후보를 만들고 별도 평가·shadow 비교·승인 후 정책 버전에 반영한다.",
+      "relationships": {
+        "blocked_by": [],
+        "related_to": []
+      },
+      "implementation_viewpoints": [
+        {
+          "area": "core-state",
+          "notes": "완료 턴·프로젝트·정책 버전에 피드백 연결; 관측과 추정 분리"
+        },
+        {
+          "area": "settings-persistence",
+          "notes": "기본 off, 원문 없는 로컬 기록, 보관·삭제·동의 경계"
+        },
+        {
+          "area": "evaluation-policy",
+          "notes": "별도 검증셋, 기존/후보 비교, 보호 규칙 불변, 승인과 rollback"
+        },
+        {
+          "area": "commands-docs",
+          "notes": "피드백·상태·삭제·개선안·승인 인터페이스 설계"
+        },
+        {
+          "area": "verification",
+          "notes": "오연결·피드백 편향·유출·정책 회귀 검증"
+        }
+      ],
+      "test_focus": [
+        "기록 off와 전송 동의 경계",
+        "턴·프로젝트·버전 연결",
+        "침묵을 성공으로 간주하지 않음",
+        "보호 규칙 변경 거부",
+        "회귀 차단과 rollback"
+      ],
+      "open_decisions": [
+        "shadow 실제 세션 및 enforce 요청 검증 완료가 선행 조건",
+        "성공 신호·최소 사례 수·평가 기준",
+        "개인화 우선순위·보관기간·삭제 범위",
+        "후보 생성 방식·추가 모델 호출 비용과 동의"
+      ]
+    }
+  ]
+}
