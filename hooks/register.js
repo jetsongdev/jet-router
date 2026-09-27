@@ -1,5 +1,6 @@
 import { parseDecision } from '../src/policy.js';
 import { fakeProvider } from '../src/providers/fake.js';
+import { summary, status } from '../src/report.js';
 
 export function register(on, options) {
   registerRouter(on, fakeProvider(options.fakeChoice));
@@ -10,6 +11,7 @@ export function registerRouter(on, classify) {
   let mode = 'off';
   let locked = false;
   let pending;
+  let lastSummary;
   const turns = new Map();
 
   function invalidate() {
@@ -25,6 +27,7 @@ export function registerRouter(on, classify) {
     invalidate();
     mode = 'off';
     locked = false;
+    lastSummary = undefined;
     await $.command.register({ name: 'jet-router', description: 'Offline effort routing preview',
       argumentHint: 'status|shadow|off|lock|unlock', immediate: true });
     return next(e);
@@ -32,7 +35,7 @@ export function registerRouter(on, classify) {
 
   on('command.run', { command: 'jet-router' }, ($, e) => {
     const action = e.args.trim() || 'status';
-    if (action === 'enforce') return { text: 'Enforce unavailable: runtime validation and approved evaluation thresholds are required.' };
+    if (action === 'enforce') return { text: '자동 적용(enforce)은 아직 사용할 수 없습니다. 실제 요청 검증과 평가 기준 승인이 필요합니다.' };
     if (action === 'off' || action === 'shadow') {
       invalidate();
       mode = action;
@@ -40,10 +43,10 @@ export function registerRouter(on, classify) {
       invalidate();
       locked = action === 'lock';
     } else if (action !== 'status') {
-      return { text: 'Usage: /jet-router status|shadow|off|lock|unlock' };
+      return { text: '사용법: /jet-router status|shadow|off|lock|unlock' };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
-    return { text: `provider=fake mode=${mode} locked=${locked}; offline fixture only; request effort is never changed` };
+    return { text: status(mode, locked, lastSummary) };
   });
 
   on('prompt.submit', async ($, e, next) => {
@@ -85,7 +88,8 @@ export function registerRouter(on, classify) {
     try {
       const result = await next(e);
       if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn && turn.record) {
-        publish($, turn.record, e.reason);
+        lastSummary = summary(turn.record, e.reason);
+        publish($, lastSummary);
       }
       return result;
     } finally {
@@ -103,7 +107,7 @@ export function registerRouter(on, classify) {
     }
     turn.started = true;
     const record = { provider: 'fake', mode: 'shadow', original: safeEffort(e.effort),
-      recommendation: 'keep', forwarded: safeEffort(e.effort), reasonCode: 'correlation', latencyMs: 0 };
+      recommendation: 'keep', forwarded: safeEffort(e.effort), reasonCode: 'correlation', latencyMs: null };
     if (turn.valid && e.index === 0 && e.effort !== 'max' && safeEffort(e.effort) !== 'unsupported') {
       const timer = new AbortController();
       const began = await $.clock.now();
@@ -140,11 +144,7 @@ function safeEffort(value) {
   return ['low', 'medium', 'high', 'xhigh', 'max'].includes(value) ? value : 'unsupported';
 }
 
-function publish($, record, outcome) {
+function publish($, text) {
   // Provider strings, prompts, errors, IDs and API keys never enter the UI.
-  const forwarded = record.original === record.forwarded
-    ? `${record.forwarded} 유지` : `마지막 요청 ${record.forwarded}`;
-  const ending = outcome === 'aborted' ? ' · 중단' : outcome === 'error' ? ' · 오류' : outcome === 'refusal' ? ' · 거절' : '';
-  const text = `[jet-router] ${record.mode} · ${record.provider} · ${record.original} → 추천 ${record.recommendation} · ${forwarded} · ${record.latencyMs}ms · ${record.reasonCode}${ending}`;
   try { $.ui.log(text); } catch { /* Display is optional. */ }
 }

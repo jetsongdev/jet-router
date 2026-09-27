@@ -27,7 +27,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     });
     await $.session.start({ cwd: '/offline-no-sdd', surface: 'terminal', isInteractive: true });
     const command = (args: string) => $.command.run({ command: 'jet-router', args, origin: { kind: 'composer' } });
-    expect((await command('status')).text).toContain('mode=off');
+    expect((await command('status')).text).toContain('꺼짐(off)');
     await command('shadow');
     await $.prompt.submit({ text: 'RUNTIME_CANARY', origin: { kind: 'composer' }, wait: false });
     const input = { turnId: 'runtime-turn', index: 0, model: 'claude-opus-5-5', effort: 'high' as const, messageCount: 1 };
@@ -39,10 +39,10 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     const completed = await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
     expect(completed.text).toBe('done');
     expect(logs).toHaveLength(1);
-    expect(logs[0]).toContain('[jet-router] shadow · fake');
-    expect(logs[0]).toContain('high → 추천 keep · high 유지');
-    expect(logs[0]).toContain('context');
+    expect(logs[0]).toContain('[jet-router] 관찰 · fake(테스트)');
+    expect(logs[0]).toContain('high 유지 · 추천 보류(맥락 부족)');
+    expect(logs[0]).toContain('분류 0ms');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
-    expect((await command('enforce')).text).toContain('unavailable');
+    expect((await command('enforce')).text).toContain('아직 사용할 수 없습니다');
   });
 });

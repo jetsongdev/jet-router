@@ -40,7 +40,7 @@ test('off does not classify; shadow is explicit and delegates identical requests
   assert.equal(w.calls.length, 1); assert.equal(w.logs.length, 0);
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(w.logs.length, 1);
-  assert.match(w.logs[0], /high → 추천 low/);
+  assert.match(w.logs[0], /추천 low/);
   assert.match(w.logs[0], /high 유지/);
   assert.ok(!w.logs[0].includes('CANARY_SECRET'));
 });
@@ -63,7 +63,7 @@ test('lock and session restart stop classification; enforce is unavailable', asy
   await w.submit(); await w.step(); assert.equal(w.calls.length, 0);
   await w.command('unlock'); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
   await w.start(); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
-  assert.match((await w.command('enforce')).text, /unavailable/);
+  assert.match((await w.command('enforce')).text, /아직 사용할 수 없습니다/);
 });
 
 test('off, lock, interruption and session changes invalidate in-flight decisions', async () => {
@@ -87,11 +87,11 @@ test('timeout and errors preserve the original and never leak exception text', a
   await w.start(); await w.command('shadow'); await w.submit();
   const stepping = w.step(); await began.promise; w.expire(); await stepping;
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.match(w.logs[0], /timeout/); pending.resolve(choice);
+  assert.match(w.logs[0], /시간 초과/); pending.resolve(choice);
   const broken = world(() => { throw new Error('SECRET_API_KEY'); });
   await broken.start(); await broken.command('shadow'); await broken.submit(); await broken.step();
   await broken.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.match(broken.logs[0], /provider-error/); assert.ok(!broken.logs[0].includes('SECRET_API_KEY'));
+  assert.match(broken.logs[0], /분류 실패/); assert.ok(!broken.logs[0].includes('SECRET_API_KEY'));
 });
 
 test('a dropped or queued prompt cannot classify an unrelated later turn', async () => {
@@ -162,4 +162,17 @@ test('interrupted and failed completed turns are labeled without changing respon
     assert.equal(await w.event('turn.complete', { turnId: 't1', reason }, async () => response), response);
     assert.equal(w.logs.length, 1); assert.ok(w.logs[0].endsWith(label));
   }
+});
+
+
+test('status retains only the last completed summary and clears it on session start', async () => {
+  const w = world(); await w.start(); await w.command('shadow'); await w.submit(); await w.step();
+  assert.match((await w.command('status')).text, /최근 완료: 없음/);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  await w.command('off');
+  const text = (await w.command('status')).text;
+  assert.match(text, /꺼짐\(off\)/);
+  assert.ok(text.includes(w.logs[0]));
+  assert.ok(!text.includes('CANARY_SECRET'));
+  await w.start(); assert.match((await w.command('status')).text, /최근 완료: 없음/);
 });

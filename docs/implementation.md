@@ -38,7 +38,7 @@ failed with missing policy module (exit 1). Following implementation:
 
 | Command | Evidence |
 | --- | --- |
-| `npm test` | Exit 0; 20 offline policy, Jev protocol and lifecycle tests passed |
+| `npm test` | Exit 0; 24 offline policy, Jev protocol and lifecycle tests passed |
 | `npm run validate` | Exit 0; strict plugin/module and marketplace validation passed |
 | `npm run test:hooks` | Exit 0; 1 installed Claude 2.1.283 test passed, mocked downstream endpoints |
 | `git diff --check` | Exit 0; whitespace check |
@@ -65,3 +65,12 @@ Remaining gates: supported transport for local no-egress/redirect guarantees,
 provider-specific policy thresholds and evaluation set, Jev data policy/consent,
 real-request verification and local model resource measurements. Public release
 also needs a license choice and authorized push/review. See [compatibility](compatibility.md).
+
+
+Summary polish: the footer labels fake as a test fixture, shows the forwarded
+effort before its recommendation and translates reason codes into readable Korean.
+Skipped classification has no invented zero-duration measurement. The status
+command separates current mode/lock from the previous completed summary; that
+summary is memory-only and cleared on session start. Node tests cover these
+cases and the installed offline hook test asserts the formatted completion line.
+Live terminal placement remains unverified.

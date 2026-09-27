@@ -34,7 +34,7 @@ This starts a Claude session; the implementation work did not execute it.
 
 | Command | Behavior |
 | --- | --- |
-| `/jet-router status` | Shows provider, mode and manual lock |
+| `/jet-router status` | Shows mode, manual lock, no-egress status and last completed summary |
 | `/jet-router shadow` | Explicitly enables offline fake recommendations |
 | `/jet-router off` | Stops classification and invalidates pending work |
 | `/jet-router lock` | Pauses classification for manual control |
@@ -55,7 +55,7 @@ classified again. A stalled fixture is bounded to 1 second.
 After the main turn completes, one separate line appears below the response:
 
 ```text
-[jet-router] shadow · fake · high → 추천 low · high 유지 · 0ms · shadow
+[jet-router] 관찰 · fake(테스트) · high 유지 · 추천 low · 분류 0ms
 ```
 
 This example uses the `low` fixture; the default recommendation is `keep`.
@@ -65,7 +65,11 @@ suppress pending summaries. If effort changed manually during the tool loop, the
 line shows the last forwarded effort rather than claiming the initial one stayed.
 
 The line contains only provider/mode, original/recommended/forwarded effort,
-reason code and classifier latency. Forwarded means delegated to the next hook, not
+a readable reason and classifier latency. Skipped classification has no latency;
+failed classification is shown as no recommendation, not a successful keep.
+`status` retains only the last completed summary in memory and resets it on
+session start. It labels that result as historical even when the current mode
+changes. No confidence or savings estimate is fabricated for the fake provider. Forwarded means delegated to the next hook, not
 confirmed on the wire or a measurement of internal reasoning. Jet-router writes
 no log files; UI messages may remain in Claude's own transcript retention.
 It does not read files, past conversations, environment keys or SDD documents.
