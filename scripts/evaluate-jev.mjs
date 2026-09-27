@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { cases } from '../eval/jev-smoke.mjs';
 import { buildJevRequest } from '../src/providers/jev-contract.js';
-import { parseHelperResult } from '../src/providers/jev.js';
+import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS, HELPER_OUTPUT_LIMIT } from '../src/providers/jev.js';
 
 export function plan() {
   const items = cases.map(({ id, expected, ...state }) => {
@@ -26,8 +26,7 @@ export function runHelper(state, apiKey) {
     const childEnv = { ...process.env };
     for (const name of Object.keys(childEnv)) if (childEnv[name] === apiKey) delete childEnv[name];
     const child = spawn(process.execPath, [fileURLToPath(new URL('./jev-request.mjs', import.meta.url))], {
-      env: { ...childEnv, NODE_OPTIONS: '', NODE_DEBUG: '', NODE_DEBUG_NATIVE: '',
-        SSLKEYLOGFILE: '', NODE_TLS_REJECT_UNAUTHORIZED: '1', NODE_USE_ENV_PROXY: '0' },
+      env: { ...childEnv, ...PROCESS_ENV },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     let stdout = '', done = false;
@@ -35,12 +34,12 @@ export function runHelper(state, apiKey) {
       if (done) return;
       done = true; clearTimeout(timer); resolveResult(result);
     };
-    const timer = setTimeout(() => { child.kill('SIGKILL'); finish({ reason: 'timeout' }); }, 4000);
+    const timer = setTimeout(() => { child.kill('SIGKILL'); finish({ reason: 'timeout' }); }, PROCESS_TIMEOUT_MS);
     child.on('error', () => finish({ reason: 'provider-error' }));
     child.stdout.on('data', chunk => {
       if (done) return;
       stdout += chunk.toString('utf8');
-      if (stdout.length > 2048) { child.kill('SIGKILL'); finish({ reason: 'invalid-response' }); }
+      if (stdout.length > HELPER_OUTPUT_LIMIT) { child.kill('SIGKILL'); finish({ reason: 'invalid-response' }); }
     });
     child.stderr.resume(); // Never propagate child errors or bodies.
     child.on('close', exitCode => finish(parseHelperResult({ exitCode, stdout })));
@@ -90,7 +89,7 @@ export async function main(args, env, output) {
     }
     plan(); // Validate the entire corpus before reading the explicitly named key.
     const key = args[1] === '--key-env' ? env[args[2]] : readKeyFile(args[2]);
-    if (typeof key !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(key)) { output('missing-key'); return 1; }
+    if (!validJevKey(key)) { output('missing-key'); return 1; }
     const report = await evaluate(key);
     output(JSON.stringify(report, null, 2));
     return report.results.some(item => item.reason) ? 1 : 0;

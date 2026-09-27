@@ -1,5 +1,5 @@
-import { parseDecision } from '../src/policy.js';
-import { parseHelperResult } from '../src/providers/jev.js';
+import { parseDecision, EFFORTS } from '../src/policy.js';
+import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status } from '../src/report.js';
 
@@ -17,6 +17,10 @@ export function registerRouter(on, classify, options = {}) {
   let lastSummary;
   const turns = new Map();
   const submissions = new Set();
+
+  function isActiveTurn(turnId, turn) {
+    return turn.valid && turns.get(turnId) === turn && mode === 'shadow' && !locked;
+  }
 
   function invalidate() {
     pending = undefined;
@@ -108,22 +112,25 @@ export function registerRouter(on, classify, options = {}) {
       return yield* next(e);
     }
     turn.started = true;
-    const record = { provider, mode: 'shadow', original: safeEffort(e.effort),
-      recommendation: 'keep', forwarded: safeEffort(e.effort), reasonCode: 'correlation', latencyMs: null };
-    if (turn.valid && e.index === 0 && e.effort !== 'max' && safeEffort(e.effort) !== 'unsupported') {
+    const effort = safeEffort(e.effort);
+    const record = { provider, mode: 'shadow', original: effort,
+      recommendation: 'keep', forwarded: effort, reasonCode: 'correlation', latencyMs: null };
+    if (turn.valid && e.index === 0 && effort !== 'max' && effort !== 'unsupported') {
       const timer = new AbortController();
       const began = await $.clock.now();
-      if (!turn.valid || turns.get(e.turnId) !== turn || mode !== 'shadow' || locked) return yield* next(e);
+      if (!isActiveTurn(e.turnId, turn)) return yield* next(e);
       const cancelled = new Promise(resolve => { turn.cancel = () => resolve({ reason: 'cancelled' }); });
       let outcome;
       try {
         outcome = await Promise.race([
-          Promise.resolve().then(() => turn.valid && mode === 'shadow' && !locked
-            ? (provider === 'jev'
-              ? classifyJev($, { userPrompt: turn.text, currentEffort: e.effort, taskContext: null }, options, flight,
-                () => turn.valid && mode === 'shadow' && !locked && turns.get(e.turnId) === turn)
-              : classify({ userPrompt: turn.text, currentEffort: e.effort, taskContext: null })) : null)
-            .then(value => ({ value }), () => ({ reason: 'provider-error' })),
+          Promise.resolve().then(() => {
+            if (!isActiveTurn(e.turnId, turn)) return null;
+            const state = { userPrompt: turn.text, currentEffort: e.effort, taskContext: null };
+            if (provider === 'jev') {
+              return classifyJev($, state, options, flight, () => isActiveTurn(e.turnId, turn));
+            }
+            return classify(state);
+          }).then(value => ({ value }), () => ({ reason: 'provider-error' })),
           $.clock.sleep(1000, { signal: timer.signal }).then(() => ({ reason: 'timeout' })),
           cancelled,
         ]);
@@ -132,24 +139,33 @@ export function registerRouter(on, classify, options = {}) {
         turn.cancel = undefined;
         turn.text = '';
       }
-      if (!turn.valid || turns.get(e.turnId) !== turn || mode !== 'shadow' || locked) return yield* next(e);
-      const parsed = provider === 'jev' ? outcome.value?.decision : parseDecision(outcome.value);
-      record.recommendation = parsed?.choice ?? 'keep';
-      record.reasonCode = outcome.reason ?? (provider === 'jev' ? (outcome.value?.reason ?? (parsed ? 'unevaluated' : 'invalid-response'))
-        : (parsed ? (parsed.contextSufficient ? 'shadow' : 'context') : 'invalid-response'));
+      if (!isActiveTurn(e.turnId, turn)) return yield* next(e);
+      Object.assign(record, classificationResult(provider, outcome));
       record.latencyMs = Math.max(0, (await $.clock.now()) - began);
       if (['no-consent', 'missing-key', 'busy', 'invalid-input'].includes(record.reasonCode)) record.latencyMs = null;
       if (!turn.valid) return yield* next(e);
     } else if (e.effort === 'max') record.reasonCode = 'max';
-    else if (safeEffort(e.effort) === 'unsupported') record.reasonCode = 'unsupported';
+    else if (effort === 'unsupported') record.reasonCode = 'unsupported';
     if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn) turn.record = record;
     // Shadow always delegates the exact original object, including all fields.
     return yield* next(e);
   });
 }
 
+function classificationResult(provider, outcome) {
+  const decision = provider === 'jev' ? outcome.value?.decision : parseDecision(outcome.value);
+  let reasonCode = outcome.reason;
+  if (reasonCode == null && provider === 'jev') reasonCode = outcome.value?.reason;
+  if (reasonCode == null) {
+    if (!decision) reasonCode = 'invalid-response';
+    else if (provider === 'jev') reasonCode = 'unevaluated';
+    else reasonCode = decision.contextSufficient ? 'shadow' : 'context';
+  }
+  return { recommendation: decision?.choice ?? 'keep', reasonCode };
+}
+
 function safeEffort(value) {
-  return ['low', 'medium', 'high', 'xhigh', 'max'].includes(value) ? value : 'unsupported';
+  return EFFORTS.includes(value) ? value : 'unsupported';
 }
 
 function invalidateTurn(turn) {
@@ -166,7 +182,7 @@ function publish($, text) {
 
 async function classifyJev($, state, options, flight, active) {
   if (options.cloudConsent !== true) return { reason: 'no-consent' };
-  if (typeof options.jevApiKey !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(options.jevApiKey)) return { reason: 'missing-key' };
+  if (!validJevKey(options.jevApiKey)) return { reason: 'missing-key' };
   if (!active()) return { reason: 'cancelled' };
   if (flight.busy) return { reason: 'busy' };
   flight.busy = true;
@@ -174,9 +190,8 @@ async function classifyJev($, state, options, flight, active) {
     const result = await $.process.run(['node', `${$.plugin.root}/scripts/jev-request.mjs`], {
       cwd: $.plugin.root,
       stdin: JSON.stringify({ apiKey: options.jevApiKey, state }),
-      timeoutMs: 4000,
-      env: { NODE_OPTIONS: '', NODE_DEBUG: '', NODE_DEBUG_NATIVE: '', SSLKEYLOGFILE: '',
-        NODE_TLS_REJECT_UNAUTHORIZED: '1', NODE_USE_ENV_PROXY: '0' },
+      timeoutMs: PROCESS_TIMEOUT_MS,
+      env: { ...PROCESS_ENV },
     });
     return parseHelperResult(result);
   } catch { return { reason: 'provider-error' }; }

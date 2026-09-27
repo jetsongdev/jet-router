@@ -1,10 +1,22 @@
 import { CHOICES, unit } from '../policy.js';
 
+// Shared process contract for the hook, helper and development evaluator.
+export const PROCESS_TIMEOUT_MS = 4000;
+export const HELPER_OUTPUT_LIMIT = 2048;
+export const PROCESS_ENV = Object.freeze({
+  NODE_OPTIONS: '', NODE_DEBUG: '', NODE_DEBUG_NATIVE: '', SSLKEYLOGFILE: '',
+  NODE_TLS_REJECT_UNAUTHORIZED: '1', NODE_USE_ENV_PROXY: '0',
+});
+
+export function validJevKey(value) {
+  return typeof value === 'string' && /^[\x21-\x7e]{1,4096}$/.test(value);
+}
+
 const ERRORS = ['missing-key', 'invalid-input', 'redirect', 'http-error', 'timeout', 'response-too-large', 'invalid-response', 'provider-error'];
 
 // No raw stdout, stderr, exception, key or prompt is returned to the router.
 export function parseHelperResult(result) {
-  if (result?.exitCode !== 0 || typeof result.stdout !== 'string' || result.stdout.length > 2048) return { reason: 'provider-error' };
+  if (result?.exitCode !== 0 || typeof result.stdout !== 'string' || result.stdout.length > HELPER_OUTPUT_LIMIT) return { reason: 'provider-error' };
   let body;
   try { body = JSON.parse(result.stdout); } catch { return { reason: 'invalid-response' }; }
   if (body?.ok === false && ERRORS.includes(body.reason)) return { reason: body.reason };

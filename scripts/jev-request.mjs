@@ -1,6 +1,7 @@
 import https from 'node:https';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { validJevKey } from '../src/providers/jev.js';
 import { buildJevRequest, parseJevResponse } from '../src/providers/jev-contract.js';
 
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
@@ -9,7 +10,7 @@ const fail = reason => ({ ok: false, reason });
 
 // Transport injection is for offline tests only; the CLI always uses HTTPS to ENDPOINT.
 export async function requestJev(input, request = https.request, timeoutMs = 3000) {
-  if (typeof input?.apiKey !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(input.apiKey)) return fail('missing-key');
+  if (!validJevKey(input?.apiKey)) return fail('missing-key');
   let body;
   try { body = JSON.stringify(buildJevRequest(input.state)); }
   catch { return fail('invalid-input'); }

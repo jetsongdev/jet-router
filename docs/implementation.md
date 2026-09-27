@@ -117,3 +117,20 @@ unknown billing/model metadata. No plugin installation, settings mutation or
 interactive Claude request was performed. The earlier no-live-call statements
 above describe the implementation stage before this follow-up. No enforce gate
 was relaxed after the results; context score calibration remains unresolved.
+
+
+## Behavior-preserving refactor
+
+Baseline: `e232f63`. Centralized the repeated Jev key check, child environment,
+process timeout and helper output limit in the existing pure provider module.
+The hook now reuses the effort enum and active-turn predicate, and spells out
+provider selection and normalized result reasons instead of nested ternaries.
+The host process adapter remains in the hook module as required by its scanner.
+No generic provider framework, new dependency or configuration option was added.
+
+Before and after: `npm test` (43), `npm run test:hooks` (2) and `npm run validate`
+all exited 0. The evaluation `--dry-run` output was byte-identical (`cmp`, exit 0),
+including every request hash; `git diff --check` exited 0. Existing stale-result,
+request identity, consent, key, timeout and helper CLI tests cover the touched
+paths. No real API calls or credential reads were needed for this refactor.
+The prior live report remains an immutable record of its earlier source hashes.
