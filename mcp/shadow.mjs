@@ -70,7 +70,9 @@ export function createShadow(config, classify = classifyJev) {
       const checked = parseHelperBody(classified?.decision
         ? { ok: true, decision: classified.decision } : { ok: false, reason: classified?.reason, diagnostic: classified?.diagnostic }, prepared.choices);
       if (!checked.decision) return message(`Jev 생략: ${checked.reason}${checked.diagnostic ? `/${checked.diagnostic}` : ''}`);
-      return result(`[jet-router] Jev.shadow(): ${config.referenceEffort} → ${checked.decision.choice}`);
+      const probability = checked.decision.selectedProbability;
+      const percentage = probability === undefined ? '' : ` (${Math.round(probability * 100)}%)`;
+      return result(`[jet-router] Jev.shadow(): ${config.referenceEffort} → ${checked.decision.choice}${percentage}`);
     } catch {
       return message('Jev 생략: provider-error');
     } finally {

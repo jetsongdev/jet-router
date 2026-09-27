@@ -21,7 +21,7 @@ test('request separates untrusted state from criteria and keeps context opt-in',
 
 test('Jev numeric evidence is preserved without inventing policy thresholds', () => {
   assert.deepEqual(parseJevResponse(JSON.stringify(response())), {
-    provider: 'jev', providerModel: 'jev-1.13.0', choice: 'keep', confidence: 0.9, contextScore: 0.1, riskScore: 0.7,
+    provider: 'jev', providerModel: 'jev-1.13.0', choice: 'keep', confidence: 0.9, selectedProbability: 0.8, contextScore: 0.1, riskScore: 0.7,
   });
 });
 

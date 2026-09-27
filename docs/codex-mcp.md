@@ -107,9 +107,12 @@ GUI 클라이언트는 이 터미널 환경을 자동 상속하지 않을 수 �
 예상 안내:
 
 ```text
-[jet-router] Jev.shadow(): medium → low
+[jet-router] Jev.shadow(): medium → low (70%)
 [jet-router] Jev 생략: 전송 미동의 · shadow
 ```
+
+`(70%)`는 선택된 후보의 `probabilities` 값을 정수 백분율로 반올림한 값이다.
+별도의 `confidence`나 작업 성공 확률을 뜻하지 않는다.
 
 화살표 왼쪽은 사용자 지정 참고 effort이며 실제 요청에서 읽은 값이 아니다. 오른쪽은 Jev 추천값이다.
 추천 품질은 아직 미평가다. `shadow`는 추천을 표시만 하고 effort를 변경하지 않는다는 뜻이다.

@@ -95,3 +95,16 @@ test('failed provider response displays only allowlisted diagnostic codes', asyn
     assert.equal(out.continue, true);
   }
 });
+
+
+test('percentage uses selected candidate probability, not separate confidence', async () => {
+  for (const [selectedProbability, percentage] of [[0.7, 70], [0.756, 76], [0, 0], [1, 100]]) {
+    const shadow = createShadow(config, async () => ({ decision: { ...decision, selectedProbability } }));
+    const out = await shadow(input);
+    assert.equal(out.systemMessage, `[jet-router] Jev.shadow(): medium → low (${percentage}%)`);
+  }
+  for (const selectedProbability of [-0.1, 1.1, '70', null, NaN]) {
+    const shadow = createShadow(config, async () => ({ decision: { ...decision, selectedProbability } }));
+    assert.match((await shadow(input)).systemMessage, /invalid-response/);
+  }
+});

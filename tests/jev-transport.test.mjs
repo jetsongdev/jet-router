@@ -175,7 +175,7 @@ test('Codex shadow reaches shared preflight and transport with explicit unknown 
       return out.ok ? { decision: out.decision } : { reason: out.reason };
     });
   const out = await shadow({ prompt: 'Synthetic typo', session_id: 's1', turn_id: 't1' });
-  assert.equal(out.systemMessage, '[jet-router] Jev.shadow(): medium → low');
+  assert.equal(out.systemMessage, '[jet-router] Jev.shadow(): medium → low (80%)');
   const payload = JSON.parse(t.calls[0].data);
   assert.equal(payload.state.effortSource, 'user-reference');
   assert.equal(payload.state.targetModel, null);

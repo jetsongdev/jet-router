@@ -63,7 +63,8 @@ export function inspectJevResponse(text, choices = CHOICES, { allowRoundedSum = 
   if (probabilities[effort.choice] < Math.max(...values)) return fail('probability-winner');
   // Numeric evidence is not a calibrated policy threshold.
   return { decision: { provider: 'jev', providerModel: body.model, choice: effort.choice,
-    confidence: effort.confidence, contextScore: context.noul, riskScore: risk.noul },
+    confidence: effort.confidence, selectedProbability: probabilities[effort.choice],
+    contextScore: context.noul, riskScore: risk.noul },
     ...(sumWarning ? { warning: 'probability-sum-tolerance' } : {}) };
 }
 

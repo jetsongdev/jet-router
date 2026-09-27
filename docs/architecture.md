@@ -151,7 +151,7 @@ sequenceDiagram
 예상 안내는 실제 적용값을 모른다는 점을 명시한다.
 
 ```text
-[jet-router] Jev.shadow(): high → medium
+[jet-router] Jev.shadow(): high → medium (70%)
 ```
 
 구현: [mcp/server.mjs](../mcp/server.mjs), [mcp/shadow.mjs](../mcp/shadow.mjs).

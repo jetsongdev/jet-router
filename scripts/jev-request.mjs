@@ -69,7 +69,7 @@ export async function requestJev(input, request = https.request, timeoutMs = 300
           const inspected = inspectJevResponse(Buffer.concat(chunks).toString('utf8'), choices, { allowRoundedSum });
           const decision = inspected.decision;
           finish(decision ? { ok: true, decision: { provider: 'jev', choice: decision.choice,
-            confidence: decision.confidence, contextScore: decision.contextScore, riskScore: decision.riskScore }, ...(inspected.warning ? { warning: inspected.warning } : {}) }
+            confidence: decision.confidence, selectedProbability: decision.selectedProbability, contextScore: decision.contextScore, riskScore: decision.riskScore }, ...(inspected.warning ? { warning: inspected.warning } : {}) }
             : { ...fail('invalid-response'), diagnostic: inspected.error });
         });
       });

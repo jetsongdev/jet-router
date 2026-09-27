@@ -31,9 +31,10 @@ export function parseHelperBody(body, choices = CHOICES) {
   };
   const d = body?.decision;
   if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) || !choices.includes(d.choice) ||
-      !unit(d.confidence) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
+      !unit(d.confidence) || (d.selectedProbability !== undefined && !unit(d.selectedProbability)) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
   return { decision: { provider: 'jev', choice: d.choice, confidence: d.confidence,
-    contextScore: d.contextScore, riskScore: d.riskScore },
+    contextScore: d.contextScore, riskScore: d.riskScore,
+    ...(d.selectedProbability !== undefined ? { selectedProbability: d.selectedProbability } : {}) },
     ...(body.warning === 'probability-sum-tolerance' ? { warning: body.warning } : {}) };
 }
 
