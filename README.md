@@ -4,7 +4,17 @@
 
 **현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. [합성 입력 12건 실호출](docs/evaluations/jev-smoke-2026-09-27.md)을 마쳤으며, 본격 품질 평가가 남아 있습니다. 로컬 모델 연결과 effort 자동 변경(enforce)은 미지원입니다.
 
+## Codex MCP shadow — 별도 실험
+
+Codex용 로컬 MCP 서버와 `UserPromptSubmit` hook 설정 예시를 추가했습니다.
+자동 추천 관찰용이며 실제 effort는 변경하지 않습니다. MCP 오프라인 연결 테스트는 통과했고,
+실제 Codex hook 실행·화면 표시는 수동 검증 전입니다.
+**[설치·Jev 설정·중지·테스트 방법](docs/codex-mcp.md)**을 참고하세요.
+Claude 플러그인 설정과 키를 자동 공유하지 않습니다.
+
 ## 동작 원리
+
+**[Claude Code·Codex 작동 다이어그램](docs/architecture.md)**: 호출 시점, Jev 판정 경로, 메시지 표시와 effort 유지 방식.
 
 목표 흐름은 **사용자 입력 → Jev 추천 → 정책 검사 → 해당 턴의 요청 effort 적용**입니다.
 

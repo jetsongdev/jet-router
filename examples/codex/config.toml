@@ -1,0 +1,19 @@
+# Merge into your Codex config.toml; replace the absolute path. No keys here.
+[mcp_servers.jet_router]
+command = "node"
+args = ["/absolute/path/to/jet-router/mcp/server.mjs"]
+startup_timeout_sec = 10
+tool_timeout_sec = 5
+
+[mcp_servers.jet_router.env]
+JET_ROUTER_MODE = "shadow"
+JET_ROUTER_PROVIDER = "fake"
+
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "mcp_tool"
+server = "jet_router"
+tool = "jet_router_shadow"
+input = { prompt = "${prompt}", session_id = "${session_id}", turn_id = "${turn_id}" }
+timeout = 5
+statusMessage = "jet-router shadow 판정 중"

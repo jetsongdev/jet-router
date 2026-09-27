@@ -150,3 +150,51 @@ files and offline runtime loading, not marketplace installation, secure-storage
 configuration or an interactive Claude session. README/usage now reflect the
 published repository and include the remote installation commands. The old
 no-push statements above describe earlier stages.
+
+## Codex MCP shadow adapter — local implementation
+
+User-authorized follow-up from `394c828`, isolated on `feat/codex-mcp-shadow`.
+This extends the original Claude-only scope; it does not change the pinned handoff
+or claim Codex supports Claude's request mutation contract.
+
+Added a separate `mcp/` package (SDK 2.1.0, Zod 4.6.5, locked dependencies), one
+`jet_router_shadow` tool, and a Codex `UserPromptSubmit` configuration example.
+The server defaults off/fake; Jev requires shadow, consent, environment key and
+an explicit reference effort. It reuses the existing HTTPS helper/parser and
+process limits without modifying shared provider or Claude hook source files.
+
+Codex's documented hook input does not include current effort. The adapter does
+not guess it: reference effort is labeled user-specified, actual effort unknown,
+and changes are always none. All successful tool results contain nonblocking
+hook JSON; no additionalContext or effort setter is returned. Concurrent calls
+are skipped and the last 256 event ids suppress duplicate calls/reports in one
+server process. Runtime raw provider output, prompts and keys are not logged.
+
+Verification on Node 23.11.0:
+
+| Command/check | Result |
+| --- | --- |
+| `npm --prefix mcp test` | Exit 0, 18 offline tests; includes real SDK STDIO initialization/list/call, duplicate/schema/error checks |
+| `npm test` | Exit 0, existing 43 tests |
+| `npm run test:hooks` | Exit 0, existing 2 Claude fake/Jev mock tests |
+| `npm run validate` | Exit 0, strict Claude plugin and marketplace manifests |
+| Python tomllib + Ajv Draft-7 against official Codex config-schema.json | Exit 0, example TOML accepted; format validation disabled, field/type validation active |
+
+The first schema-validator command assumed Ajv was a transitive SDK dependency
+and failed with module-not-found. Installed it only in a temporary validation
+directory and reran successfully; it is not a project runtime dependency.
+
+[Codex installation and manual checklist](codex-mcp.md) records remaining host
+verification: trust review, automatic hook dispatch, UI placement, cancellation,
+missing-server continuation and actual request-effort evidence. MCP protocol
+success is not proof of these native Codex behaviors. No Codex user settings,
+credentials, actual model sessions, Jev live calls or enforce were used here.
+
+Clean-install follow-up: copied only source/package files into a new temporary
+directory, installed the lockfile with `npm ci --offline --ignore-scripts`, and
+reran all 18 MCP tests (both exit 0). No existing node_modules, credentials or
+user configuration were copied. Temporary files were removed after the check.
+
+Added [cross-client mechanism diagrams](architecture.md) at the user's request,
+including classification timing, shared Jev transport, message timing, actual
+versus reference effort, and the unimplemented enforce boundary.
