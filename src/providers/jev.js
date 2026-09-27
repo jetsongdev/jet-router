@@ -1,3 +1,4 @@
+import { RESPONSE_ERRORS } from './jev-contract.js';
 import { CHOICES, unit } from '../policy.js';
 
 // Shared process contract for the hook, helper and development evaluator.
@@ -24,11 +25,15 @@ export function parseHelperResult(result, choices = CHOICES) {
 
 // Object validation is shared with MCP; process status/size/JSON checks stay above.
 export function parseHelperBody(body, choices = CHOICES) {
-  if (body?.ok === false && ERRORS.includes(body.reason)) return { reason: body.reason };
+  if (body?.ok === false && ERRORS.includes(body.reason)) return {
+    reason: body.reason,
+    ...(body.reason === 'invalid-response' && RESPONSE_ERRORS.includes(body.diagnostic) ? { diagnostic: body.diagnostic } : {}),
+  };
   const d = body?.decision;
   if (body?.ok !== true || d?.provider !== 'jev' || !CHOICES.includes(d.choice) || !choices.includes(d.choice) ||
       !unit(d.confidence) || !unit(d.contextScore) || !unit(d.riskScore)) return { reason: 'invalid-response' };
   return { decision: { provider: 'jev', choice: d.choice, confidence: d.confidence,
-    contextScore: d.contextScore, riskScore: d.riskScore } };
+    contextScore: d.contextScore, riskScore: d.riskScore },
+    ...(body.warning === 'probability-sum-tolerance' ? { warning: body.warning } : {}) };
 }
 

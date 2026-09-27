@@ -31,3 +31,13 @@ test('helper output remains bounded by the originating request choices', () => {
   assert.deepEqual(parseHelperResult({ exitCode: 0, stdout: JSON.stringify(body) }, ['medium', 'keep']), { reason: 'invalid-response' });
   assert.equal(parseHelperBody(body, ['low', 'keep']).decision.choice, 'low');
 });
+
+
+test('only fixed response diagnostic codes survive helper boundaries', () => {
+  for (const diagnostic of ['probability-sum', 'SECRET_CANARY']) {
+    const body = { ok: false, reason: 'invalid-response', diagnostic };
+    const expected = diagnostic === 'probability-sum' ? { reason: body.reason, diagnostic } : { reason: body.reason };
+    assert.deepEqual(parseHelperBody(body), expected);
+    assert.deepEqual(parseHelperResult({ exitCode: 0, stdout: JSON.stringify(body) }), expected);
+  }
+});

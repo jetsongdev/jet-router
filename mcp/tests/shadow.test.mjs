@@ -85,3 +85,13 @@ test('provider exceptions, timeouts and arbitrary output fail open without leaki
 test('real helper process fails safely before network with missing key', async () => {
   assert.deepEqual(await classifyJev({ userPrompt: 'synthetic', currentEffort: 'medium' }, undefined), { reason: 'missing-key' });
 });
+
+
+test('failed provider response displays only allowlisted diagnostic codes', async () => {
+  for (const diagnostic of ['probability-sum', 'SECRET_CANARY']) {
+    const shadow = createShadow(config, async () => ({ reason: 'invalid-response', diagnostic }));
+    const out = await shadow(input);
+    assert.equal(out.systemMessage, `[jet-router] Jev 생략: invalid-response${diagnostic === 'probability-sum' ? '/probability-sum' : ''} · shadow`);
+    assert.equal(out.continue, true);
+  }
+});

@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { prepareRoutingRequest } from '../src/harness.js';
 import { validJevKey } from '../src/providers/jev.js';
-import { buildJevRequest, parseJevResponse } from '../src/providers/jev-contract.js';
+import { buildJevRequest, inspectJevResponse } from '../src/providers/jev-contract.js';
 
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 const LIMIT = 65536;
@@ -12,7 +12,7 @@ const fail = reason => ({ ok: false, reason });
 // Transport injection is for offline tests only; the CLI always uses HTTPS to ENDPOINT.
 export async function requestJev(input, request = https.request, timeoutMs = 3000) {
   if (!validJevKey(input?.apiKey)) return fail('missing-key');
-  let body, choices;
+  let body, choices, allowRoundedSum = false;
   try {
     // Accept facts, never caller-supplied questions. No legacy fallback on skips.
     const hasRoutingInput = Object.hasOwn(input, 'routingInput');
@@ -22,6 +22,7 @@ export async function requestJev(input, request = https.request, timeoutMs = 300
       const prepared = prepareRoutingRequest(input.routingInput);
       if (prepared.status !== 'ready') return fail('invalid-input');
       payload = prepared.request;
+      allowRoundedSum = true; // Shared harness is shadow-only; legacy evaluations stay strict.
     } else {
       payload = buildJevRequest(input.state);
     }
@@ -65,10 +66,11 @@ export async function requestJev(input, request = https.request, timeoutMs = 300
         res.on('aborted', () => finish(fail('provider-error')));
         res.on('end', () => {
           if (done) return;
-          const decision = parseJevResponse(Buffer.concat(chunks).toString('utf8'), choices);
+          const inspected = inspectJevResponse(Buffer.concat(chunks).toString('utf8'), choices, { allowRoundedSum });
+          const decision = inspected.decision;
           finish(decision ? { ok: true, decision: { provider: 'jev', choice: decision.choice,
-            confidence: decision.confidence, contextScore: decision.contextScore, riskScore: decision.riskScore } }
-            : fail('invalid-response'));
+            confidence: decision.confidence, contextScore: decision.contextScore, riskScore: decision.riskScore }, ...(inspected.warning ? { warning: inspected.warning } : {}) }
+            : { ...fail('invalid-response'), diagnostic: inspected.error });
         });
       });
       req.on('error', () => finish(fail('provider-error')));

@@ -73,7 +73,10 @@ test('HTTP, malformed, numeric, stream and size errors fail closed with fixed co
     [{ error: true }, 'provider-error'],
   ]) {
     const t = transport(config);
-    assert.deepEqual(await requestJev(input, t.request), { ok: false, reason });
+    const result = await requestJev(input, t.request);
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, reason);
+    if (reason === 'invalid-response') assert.ok(['json', 'risk'].includes(result.diagnostic));
   }
 });
 
@@ -148,7 +151,7 @@ test('harness transport sends prepared criteria and validates the same narrowed 
   assert.equal(JSON.stringify(out).includes('CANARY'), false);
   // A valid legacy response is invalid for this request's narrower range.
   assert.deepEqual(await requestJev({ apiKey: input.apiKey, routingInput }, transport().request),
-    { ok: false, reason: 'invalid-response' });
+    { ok: false, reason: 'invalid-response', diagnostic: 'effort' });
 });
 
 test('harness skips and ambiguous envelopes never fall back to legacy transport', async () => {
@@ -180,4 +183,18 @@ test('Codex shadow reaches shared preflight and transport with explicit unknown 
   assert.equal(payload.state.taskContext, null);
   assert.equal(JSON.stringify(payload).includes('sessionId'), false);
   assert.equal(out.continue, true);
+});
+
+
+test('observed 0.99 sum passes shadow with warning but stays invalid for legacy evaluation', async () => {
+  const response = body();
+  response.answers.effort.choice = 'medium';
+  response.answers.effort.probabilities = { low: 0.01, medium: 0.8, high: 0.02, xhigh: 0, keep: 0.16 };
+  const makeTransport = () => transport({ chunks: [JSON.stringify(response)] }).request;
+  assert.deepEqual(await requestJev(input, makeTransport()),
+    { ok: false, reason: 'invalid-response', diagnostic: 'probability-sum' });
+  const out = await requestJev({ apiKey: input.apiKey, routingInput: cases[0].input }, makeTransport());
+  assert.equal(out.ok, true);
+  assert.equal(out.warning, 'probability-sum-tolerance');
+  assert.equal(parseHelperResult({ exitCode: 0, stdout: JSON.stringify(out) }).warning, out.warning);
 });
