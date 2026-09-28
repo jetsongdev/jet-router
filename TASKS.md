@@ -46,9 +46,11 @@
 ### 현재 확인한 내용
 
 - 2026-09-28 / Codex 0.158.0: 턴 한정 `turn/settings/update` 실험적 계약을 확인했다.
-  독립 서버의 메서드 인식까지 검증했으며 기존 세션 proxy 초기화는 시간 초과됐다.
-  **다음 선행 작업은 세션 소유 서버 연결과 첫 요청 전 적용 시점 검증**이다.
-  [적용 경로 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 현재 enforce는 미구현이다.
+  proxy의 WebSocket 전송 형식을 확인해 기존 세션 metadata 조회에 성공했다.
+  격리 HTTP 캡처는 `applied` 이후에도 첫 요청 medium, 도구 후 low, 다음 턴 medium이었다.
+  **hook 이후 변경으로 첫 요청까지 적용하는 요구는 충족하지 못했다. 다음은 turn/start 이전 어댑터 검증이다.**
+  [격리 재현 결과](docs/evaluations/codex-turn-effort-2026-09-28/README.md),
+  [이전 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 현재 제품 enforce는 미구현이다.
 
 - MCP shadow는 hook 모델명과 선택적 model/list 조회 결과로 후보를 검사한다.
   실제 effort는 미확인이고 사용자 지정 참고값으로 추천하며, effort를 변경하지 않는다. [검증 기록](docs/evaluations/shadow-closeout-2026-09-27.md).
