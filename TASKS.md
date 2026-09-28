@@ -45,6 +45,11 @@
 
 ### 현재 확인한 내용
 
+- 2026-09-28 / Codex 0.158.0: 턴 한정 `turn/settings/update` 실험적 계약을 확인했다.
+  독립 서버의 메서드 인식까지 검증했으며 기존 세션 proxy 초기화는 시간 초과됐다.
+  **다음 선행 작업은 세션 소유 서버 연결과 첫 요청 전 적용 시점 검증**이다.
+  [적용 경로 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 현재 enforce는 미구현이다.
+
 - MCP shadow는 hook 모델명과 선택적 model/list 조회 결과로 후보를 검사한다.
   실제 effort는 미확인이고 사용자 지정 참고값으로 추천하며, effort를 변경하지 않는다. [검증 기록](docs/evaluations/shadow-closeout-2026-09-27.md).
 - 공식 API 문서상 GPT-6 Astra는 low/medium/high/xhigh/max,
