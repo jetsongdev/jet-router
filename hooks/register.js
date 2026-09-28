@@ -15,6 +15,8 @@ export function registerRouter(on, classify, options = {}) {
   let mode = 'off';
   let locked = false;
   let pending;
+  // A user submission that was queued and has not started its turn yet.
+  let queuedUser = false;
   let lastSummary;
   const turns = new Map();
   const submissions = new Set();
@@ -25,6 +27,7 @@ export function registerRouter(on, classify, options = {}) {
 
   function invalidate() {
     pending = undefined;
+    queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
   }
@@ -57,13 +60,14 @@ export function registerRouter(on, classify, options = {}) {
   });
 
   on('prompt.submit', async ($, e, next) => {
+    const user = ['composer', 'bridge'].includes(e.origin?.kind);
     const ambiguous = mode === 'off' || locked || submissions.size > 0 || turns.size > 0 || e.turnId !== undefined || e.wait ||
-      !['composer', 'bridge'].includes(e.origin?.kind) || Boolean(e.attachments?.length) ||
+      !user || Boolean(e.attachments?.length) ||
       Boolean(e.context?.length) || !e.text.trim() || e.text.length > 6000;
     if (ambiguous) {
       for (const turn of turns.values()) invalidateTurn(turn);
     }
-    const ticket = { text: ambiguous ? undefined : e.text, ambiguous };
+    const ticket = { text: ambiguous ? undefined : e.text, ambiguous, user };
     submissions.add(ticket);
     pending = ticket;
     try {
@@ -71,7 +75,10 @@ export function registerRouter(on, classify, options = {}) {
     } finally {
       // A turn must have consumed this exact submission synchronously through
       // next. Queued/blocked submissions cannot become a later turn's decision.
-      if (pending === ticket) pending = undefined;
+      if (pending === ticket) {
+        pending = undefined;
+        if (user) queuedUser = true;
+      }
       submissions.delete(ticket);
     }
   });
@@ -81,9 +88,15 @@ export function registerRouter(on, classify, options = {}) {
     pending = undefined;
     const valid = mode === 'shadow' && !locked && turns.size === 0 &&
       ticket && !ticket.ambiguous && ticket.text === e.text;
+    // Turns opened by subagent reports or task notifications stay tracked for
+    // overlap checks but never produce a summary: nobody typed them.
+    const silent = ticket ? !ticket.user : !queuedUser;
+    queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
-    if (mode === 'shadow' && !locked) turns.set(e.turnId, { valid: Boolean(valid), text: valid ? e.text : '', started: false });
+    if (mode === 'shadow' && !locked) {
+      turns.set(e.turnId, { valid: Boolean(valid), silent, text: valid ? e.text : '', started: false });
+    }
     return next(e);
   });
 
@@ -108,7 +121,7 @@ export function registerRouter(on, classify, options = {}) {
   on('turn.step', async function* ($, e, next) {
     if (mode !== 'shadow' || locked || e.agentId !== undefined) return yield* next(e);
     const turn = turns.get(e.turnId);
-    if (!turn || turn.completing) return yield* next(e);
+    if (!turn || turn.completing || turn.silent) return yield* next(e);
     if (turn.started) {
       if (turn.model !== (e.model ?? null)) invalidateTurn(turn);
       if (turn.record) turn.record.forwarded = safeEffort(e.effort);

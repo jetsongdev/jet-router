@@ -115,6 +115,24 @@ test('overlapping submissions and rewritten prompts are conservatively skipped',
   await w.step(); assert.equal(w.calls.length, 0);
 });
 
+test('turns nobody typed stay silent while queued user input still reports the skip', async () => {
+  for (const kind of ['peer', 'task-notification']) {
+    const w = world(); await w.start(); await w.command('shadow');
+    await w.submit('t1', 'report', { origin: { kind } }); await w.step();
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.equal(w.calls.length, 0); assert.equal(w.logs.length, 0);
+  }
+  const w = world(); await w.start(); await w.command('shadow');
+  await w.event('turn.start', { turnId: 't1', text: 'notification' }); await w.step();
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.length, 0);
+  await w.event('prompt.submit', { text: 'queued', wait: false, origin: { kind: 'composer' } });
+  await w.event('turn.start', { turnId: 't2', text: 'queued' }); await w.step({ turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  assert.equal(w.calls.length, 0);
+  assert.deepEqual(w.logs, ['[jet-router] fake 생략: 요청 연결 불확실 · shadow']);
+});
+
 test('a completed turn releases state and the next turn gets a fresh decision', async () => {
   const w = world(); await w.start(); await w.command('shadow');
   await w.submit(); await w.step(); await w.event('turn.complete', { turnId: 't1' });
