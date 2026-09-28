@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -30,6 +30,13 @@
       "title": "Record local token usage",
       "description": "Append one line per routed turn (effort decision and token counts, never prompt text) to ~/.claude/jet-router/usage for savings reports.",
       "default": true
+    },
+    "holdoutRate": {
+      "type": "string",
+      "title": "Enforce control share",
+      "description": "Share of applicable enforce turns left unchanged at random so savings can be measured on real work: 0, 0.05, 0.1 or 0.2.",
+      "options": ["0", "0.05", "0.1", "0.2"],
+      "default": "0.1"
     },
     "cloudConsent": {
       "type": "boolean",

@@ -16,6 +16,7 @@ try {
     manifest.userConfig.provider.default = mode;
     manifest.userConfig.cloudConsent.default = mode === 'jev';
     manifest.userConfig.jevApiKey.default = 'SYNTHETIC_KEY_CANARY';
+    manifest.userConfig.holdoutRate.default = '0'; // Random control turns would make the runtime test flaky.
     writeFileSync(manifestPath, JSON.stringify(manifest));
     console.log(`Offline Claude hook test: ${mode}`);
     const result = spawnSync('claude', ['plugin', 'test', dir], { stdio: 'inherit' });

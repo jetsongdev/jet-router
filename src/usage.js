@@ -32,6 +32,7 @@ export function usageRecord({ project, model, record, outcome, durationMs, usage
     recommendation: record.recommendation === 'keep' ? 'keep' : effort(record.recommendation),
     applied: effort(record.applied),
     yielded: record.yielded === true,
+    holdout: record.holdout === true,
     forwarded: effort(record.forwarded),
     reasonCode: text(record.reasonCode, 32),
     probability: typeof record.probability === 'number' && record.probability >= 0 && record.probability <= 1 ? record.probability : null,
@@ -85,14 +86,59 @@ export const GROUPS = Object.freeze({
   all: () => 'all',
 });
 
-function factorFor(r, target) {
-  return SAVINGS_FACTORS[r.model]?.[`${r.original}>${target}`] ?? null;
+export const MIN_SAMPLES = 10;
+const mean = values => values.reduce((a, b) => a + b, 0) / values.length;
+
+// Deterministic resampling so the same log always prints the same interval.
+function bootstrapRatio(treatment, control, rounds = 1000) {
+  let seed = 0x9e3779b9;
+  const next = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 2 ** 32; };
+  const pick = values => values[Math.floor(next() * values.length)];
+  const ratios = [];
+  for (let i = 0; i < rounds; i++) {
+    const t = mean(treatment.map(() => pick(treatment))), c = mean(control.map(() => pick(control)));
+    if (c > 0) ratios.push(t / c);
+  }
+  ratios.sort((a, b) => a - b);
+  return ratios.length ? [ratios[Math.floor(ratios.length * 0.025)], ratios[Math.ceil(ratios.length * 0.975) - 1]] : [null, null];
+}
+
+// Measured ratio per model and pair: applied turns versus randomly held-out
+// turns of the same pair. Turns whose effort the user changed mid-turn are
+// excluded from both arms.
+export function measuredFactors(records) {
+  const arms = new Map();
+  for (const r of records) {
+    if (r.mode !== 'enforce' || r.usage.output === null || !r.model) continue;
+    const target = r.applied ?? (r.holdout ? r.recommendation : null);
+    if (!target) continue;
+    const key = `${r.model}|${r.original}>${target}`;
+    if (!arms.has(key)) arms.set(key, { treatment: [], control: [] });
+    if (r.applied && !r.yielded && !r.holdout) arms.get(key).treatment.push(r.usage.output);
+    if (r.holdout && r.forwarded === r.original) arms.get(key).control.push(r.usage.output);
+  }
+  return [...arms.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, { treatment, control }]) => {
+    const [model, pair] = key.split('|');
+    const usable = treatment.length >= MIN_SAMPLES && control.length >= MIN_SAMPLES && mean(control) > 0;
+    const ratio = treatment.length && control.length && mean(control) > 0 ? mean(treatment) / mean(control) : null;
+    const [low, high] = usable ? bootstrapRatio(treatment, control) : [null, null];
+    return { model, pair, treatmentTurns: treatment.length, controlTurns: control.length,
+      treatmentMeanOutput: treatment.length ? mean(treatment) : null, controlMeanOutput: control.length ? mean(control) : null,
+      outputRatio: ratio, ci95: [low, high], usable };
+  });
+}
+
+function factorFor(r, target, measured) {
+  const own = measured.find(f => f.usable && f.model === r.model && f.pair === `${r.original}>${target}`);
+  if (own) return { outputRatio: own.outputRatio, source: 'measured' };
+  const evaluated = SAVINGS_FACTORS[r.model]?.[`${r.original}>${target}`];
+  return evaluated ? { outputRatio: evaluated.outputRatio, source: 'evaluation' } : null;
 }
 
 function emptyTotals() {
-  return { turns: 0, enforceTurns: 0, applied: 0, upshifts: 0, yielded: 0, skipped: 0,
+  return { turns: 0, enforceTurns: 0, applied: 0, upshifts: 0, yielded: 0, holdout: 0, skipped: 0,
     output: 0, input: 0, cacheRead: 0, cacheCreation: 0,
-    estimatedSaved: 0, estimatedBaselineOutput: 0, estimatedTurns: 0, unestimatedAppliedTurns: 0, unestimatedAppliedOutput: 0,
+    estimatedSaved: 0, estimatedBaselineOutput: 0, estimatedTurns: 0, measuredTurns: 0, unestimatedAppliedTurns: 0, unestimatedAppliedOutput: 0,
     shadowPotentialSaved: 0, shadowEstimatedTurns: 0, shadowUnestimatedTurns: 0 };
 }
 
@@ -101,25 +147,28 @@ const SKIP = new Set(['no-consent', 'missing-key', 'busy', 'redirect', 'http-err
   'hidden-context', 'empty', 'too-long', 'command', 'rewritten']);
 
 // Estimates only what was measured. An applied turn's actual output is the
-// recommended arm, so the counterfactual is actual / ratio. A yielded turn ran
-// partly at the user's effort and is never estimated.
-export function accumulate(totals, r) {
+// recommended arm, so the counterfactual is actual / ratio; a measured upshift
+// ratio above 1 yields a negative saving. A yielded turn ran partly at the
+// user's effort and is never estimated; held-out turns are the control.
+export function accumulate(totals, r, measured = []) {
   const t = totals;
   t.turns++;
   for (const key of ['output', 'input', 'cacheRead', 'cacheCreation']) t[key] += r.usage[key] ?? 0;
   if (SKIP.has(r.reasonCode)) t.skipped++;
   if (r.mode === 'enforce') {
     t.enforceTurns++;
+    if (r.holdout) t.holdout++;
     if (r.applied) {
       t.applied++;
       if (EFFORTS.indexOf(r.applied) > EFFORTS.indexOf(r.original)) t.upshifts++;
       if (r.yielded) t.yielded++;
-      const factor = r.yielded ? null : factorFor(r, r.applied);
+      const factor = r.yielded ? null : factorFor(r, r.applied, measured);
       if (factor && r.usage.output !== null) {
         const baseline = r.usage.output / factor.outputRatio;
         t.estimatedBaselineOutput += baseline;
         t.estimatedSaved += baseline - r.usage.output;
         t.estimatedTurns++;
+        if (factor.source === 'measured') t.measuredTurns++;
       } else {
         t.unestimatedAppliedTurns++;
         t.unestimatedAppliedOutput += r.usage.output ?? 0;
@@ -127,7 +176,7 @@ export function accumulate(totals, r) {
     }
   } else if (r.mode === 'shadow' && EFFORTS.includes(r.recommendation) && r.recommendation !== r.original && !SKIP.has(r.reasonCode)) {
     // Shadow ran at the original effort: potential saving = actual * (1 - ratio).
-    const factor = factorFor(r, r.recommendation);
+    const factor = factorFor(r, r.recommendation, measured);
     if (factor && r.usage.output !== null) {
       t.shadowPotentialSaved += r.usage.output * (1 - factor.outputRatio);
       t.shadowEstimatedTurns++;
@@ -144,14 +193,17 @@ export function report(records, { by = ['day'], from, to } = {}) {
   });
   const groups = new Map();
   const total = emptyTotals();
-  for (const r of records.filter(inRange)) {
+  const selected = records.filter(inRange);
+  // Ratios come from the whole selected period, not from each group.
+  const factors = measuredFactors(selected);
+  for (const r of selected) {
     const key = keys.map(k => k(r)).join(' · ');
     if (!groups.has(key)) groups.set(key, emptyTotals());
-    accumulate(groups.get(key), r);
-    accumulate(total, r);
+    accumulate(groups.get(key), r, factors);
+    accumulate(total, r, factors);
   }
   const rows = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, t]) => ({ key, ...round(t) }));
-  return { by, from: from ?? null, to: to ?? null, rows, total: round(total) };
+  return { by, from: from ?? null, to: to ?? null, rows, total: round(total), factors };
 }
 
 function round(t) {
