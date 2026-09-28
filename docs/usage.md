@@ -68,7 +68,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 claude --resume --plugin-dir /absolute/path/to/jet-router
 ```
 
-활성화 환경 변수를 설정하지 않았다면 앞에 `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`을 붙입니다. 이 조합의 실제 대화 재개는 아직 수동 검증하지 않았습니다. 시작 후 `/jet-router status`로 로드 여부를 확인합니다. 새로 시작·재개한 세션의 라우터는 항상 off입니다.
+활성화 환경 변수를 설정하지 않았다면 앞에 `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`을 붙입니다. 이 조합의 실제 대화 재개는 아직 수동 검증하지 않았습니다. 시작 후 `/jet-router status`로 로드 여부를 확인합니다. 새로 시작·재개한 세션의 라우터는 기본 off이며, 시작할 때 현재 모드를 한 줄로 표시합니다. 시작 모드는 아래 `defaultMode`로 바꿀 수 있습니다.
 
 ## 4. 사용 순서와 명령어
 
@@ -89,6 +89,14 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 `on` 명령은 없습니다. 잠금 상태에서 shadow를 선택해도 잠금은 유지됩니다. 상태의 “최근 완료”는 이전 턴 기록이며 현재 모드와 다를 수 있습니다. 새 세션에서 초기화됩니다.
 
 ## 5. 추천 테스트값 바꾸기
+
+`defaultMode` 옵션은 세션을 시작·재개할 때의 모드를 정합니다. `off`(기본값) 또는 `shadow`를 받습니다. `shadow`는 **fake 분류기에서만 적용**됩니다. Jev에서는 모든 세션의 프롬프트가 자동으로 외부 전송되지 않도록 설정과 관계없이 off로 시작하며, 필요할 때마다 `/jet-router shadow`로 켭니다. 시작 시 표시 예시입니다.
+
+```text
+[jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음)
+[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow
+```
+
 
 `fakeChoice` 옵션은 `keep`(기본값), `low`, `medium`, `high`, `xhigh`를 받습니다. 잘못된 값은 `keep`으로 처리합니다.
 
@@ -197,7 +205,7 @@ Jev shadow의 표시 예시입니다. Jev 추천은 응답 형식만 검증했�
 | 추천 줄이 안 나옴 | off 또는 lock인지, 턴이 끝났는지, 입력이 생략 조건에 해당하는지 |
 | 늘 같은 추천이 나옴 | fake의 정상 동작. Jev 분류가 아님 |
 | high가 low로 안 바뀜 | 현재 shadow는 추천만 표시함 |
-| 새 세션에서 꺼져 있음 | 초기값 off가 정상. 필요할 때 shadow 실행 |
+| 새 세션에서 꺼져 있음 | 초기값 off가 정상. fake는 `defaultMode=shadow`로 자동 시작 가능, Jev는 필요할 때 shadow 실행 |
 | 변경한 코드가 안 보임 | 최신 worktree 경로인지 확인하고 세션을 다시 로드 |
 
 큐에 넣은 입력, 턴 도중 추가 입력, 중복 제출, 첨부파일, 추가 숨은 문맥, 비사용자 출처, 다른 훅에서 수정된 입력, 6,000자 초과 입력, 불명확한 턴 연결은 보수적으로 건너뜁니다. subagent·max·미지원 effort도 분류하지 않습니다.

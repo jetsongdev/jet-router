@@ -38,6 +38,9 @@ describe('installed Claude function-hook contract (no model or network)', () => 
       return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null };
     });
     await $.session.start({ cwd: '/offline-no-sdd', surface: 'terminal', isInteractive: true });
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toContain('[jet-router] 세션 시작 · 꺼짐(off)');
+    logs.length = 0;
     const command = (args: string) => $.command.run({ command: 'jet-router', args, origin: { kind: 'composer' } });
     const initialStatus = (await command('status')).text;
     expect(initialStatus).toContain('꺼짐(off)');

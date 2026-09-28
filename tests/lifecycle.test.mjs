@@ -6,7 +6,7 @@ const choice = { choice: 'low', contextSufficient: true, risky: false };
 const deferred = () => { let resolve, reject; const promise = new Promise((r, j) => { resolve = r; reject = j; }); return { promise, resolve, reject }; };
 
 function world(provider = async () => choice, now = async () => 10, options = {}, run = async () => { throw new Error('unexpected process'); }) {
-  const handlers = new Map(), logs = [], sent = [], calls = [];
+  const handlers = new Map(), logs = [], notices = [], sent = [], calls = [];
   let expire;
   const $ = {
     plugin: { root: '/plugin with spaces' }, process: { run },
@@ -20,7 +20,8 @@ function world(provider = async () => choice, now = async () => 10, options = {}
   registerRouter((name, ...args) => handlers.set(name, args.at(-1)), async state => { calls.push(state); return provider(state); }, options);
   const event = (name, e, next = async e => e) => handlers.get(name)($, e, next);
   const command = args => event('command.run', { args });
-  const start = () => event('session.start', {});
+  // The session-start notice is kept apart so summary counts stay per turn.
+  const start = async () => { const result = await event('session.start', {}); notices.push(...logs.splice(0)); return result; };
   const submit = (turnId = 't1', text = 'CANARY_SECRET', extra = {}) => event('prompt.submit',
     { text, origin: { kind: 'composer' }, wait: false, ...extra },
     async e => { await event('turn.start', { turnId, text: e.text }); return { text: e.text }; });
@@ -31,7 +32,7 @@ function world(provider = async () => choice, now = async () => 10, options = {}
     assert.deepEqual(await stream.next(), { value: 'result', done: true });
     assert.ok(sent.includes(e)); // Concurrent steps may finish in a different order.
   };
-  return { event, command, start, submit, step, logs, calls, sent, expire: () => expire() };
+  return { event, command, start, submit, step, logs, notices, calls, sent, expire: () => expire() };
 }
 
 test('off does not classify; shadow is explicit and delegates identical requests', async () => {
@@ -305,4 +306,25 @@ test('model change during Jev classification cancels the stale result without ch
   assert.equal(processes, 1);
   assert.equal(w.logs.length, 0);
   assert.deepEqual(w.sent.map(e => e.model).sort(), ['changed-model', 'unchanged']);
+});
+
+test('session start announces the mode and only fake honors a shadow default', async () => {
+  const plain = world(); await plain.start();
+  assert.deepEqual(plain.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow']);
+  await plain.submit(); await plain.step();
+  assert.equal(plain.calls.length, 0);
+
+  const fake = world(undefined, undefined, { defaultMode: 'shadow' }); await fake.start();
+  assert.deepEqual(fake.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음)']);
+  await fake.submit(); await fake.step();
+  await fake.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(fake.calls.length, 1); assert.equal(fake.logs.length, 1);
+
+  const jev = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY', defaultMode: 'shadow' });
+  await jev.start();
+  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow']);
+  await jev.submit(); await jev.step();
+  await jev.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(jev.logs.length, 0);
+  assert.match(jev.command('status').text, /꺼짐\(off\)/);
 });

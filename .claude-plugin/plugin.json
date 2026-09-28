@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -17,6 +17,13 @@
       "description": "fake is offline. Jev requires explicit cloud consent and an API key.",
       "options": ["fake", "jev"],
       "default": "fake"
+    },
+    "defaultMode": {
+      "type": "string",
+      "title": "Mode at session start",
+      "description": "off (default) or shadow. shadow applies only with the fake classifier; Jev always starts off to avoid sending prompts from every session.",
+      "options": ["off", "shadow"],
+      "default": "off"
     },
     "cloudConsent": {
       "type": "boolean",

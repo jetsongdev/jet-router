@@ -36,6 +36,13 @@ export function summary(record, outcome) {
   return parts.join(' · ');
 }
 
+export function sessionNotice(mode, provider, requestedShadow = false) {
+  const classifier = provider === 'jev' ? 'Jev' : 'fake(외부 전송 없음)';
+  if (mode === 'shadow') return `[jet-router] 세션 시작 · 관찰(shadow) · ${classifier}`;
+  const blocked = requestedShadow && provider === 'jev' ? ' · Jev는 기본 shadow 미적용' : '';
+  return `[jet-router] 세션 시작 · 꺼짐(off) · ${classifier}${blocked} · 켜기: /jet-router shadow`;
+}
+
 export function status(mode, locked, lastSummary, provider = 'fake', cloudConsent = false) {
   return [
     'jet-router',
