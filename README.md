@@ -59,7 +59,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 기본 테스트 결과는 `keep`입니다. 응답 종료 후 다음 형태의 별도 로그 한 줄을 출력합니다. 시간은 예시이며 실제 터미널의 배치는 아직 수동 검증하지 않았습니다.
 
 ```text
-[jet-router] fake.shadow(): high → keep(고정값) · 0ms
+[jet-router] fake.shadow(): high 유지(고정값) · 0ms
 ```
 
 이 문구는 실제 난도 분석 결과가 아니라 fake의 고정 결과입니다. 일반 Claude 응답에는 구독 사용량/API 비용이 발생할 수 있습니다. 기본 fake는 외부 요청을 보내지 않습니다. Jev는 별도 선택·전송 동의·키 설정 후 shadow에서만 현재 입력을 전송합니다.

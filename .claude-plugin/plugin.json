@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
