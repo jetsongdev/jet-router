@@ -130,7 +130,31 @@ test('turns nobody typed stay silent while queued user input still reports the s
   await w.event('turn.start', { turnId: 't2', text: 'queued' }); await w.step({ turnId: 't2' });
   await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
   assert.equal(w.calls.length, 0);
-  assert.deepEqual(w.logs, ['[jet-router] fake 생략: 요청 연결 불확실 · shadow']);
+  assert.deepEqual(w.logs, ['[jet-router] fake 생략: 대기 중 입력 · shadow']);
+});
+
+test('skipped turns name the specific reason instead of a generic correlation miss', async () => {
+  const cases = [
+    [{ attachments: [{ type: 'image' }] }, 'CANARY_SECRET', '첨부 포함'],
+    [{ context: ['hidden'] }, 'CANARY_SECRET', '숨은 문맥 포함'],
+    [{ wait: true }, 'CANARY_SECRET', '입력 겹침'],
+    [{}, 'x'.repeat(6001), '6,000자 초과'],
+    [{}, '   ', '빈 입력'],
+  ];
+  for (const [extra, text, label] of cases) {
+    const w = world(); await w.start(); await w.command('shadow');
+    await w.submit('t1', text, extra); await w.step();
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.deepEqual(w.logs, [`[jet-router] fake 생략: ${label} · shadow`]);
+  }
+  for (const [text, label] of [['/probe', '스킬·명령 입력'], ['before', '입력 변경됨']]) {
+    const w = world(); await w.start(); await w.command('shadow');
+    await w.event('prompt.submit', { text, wait: false, origin: { kind: 'composer' } },
+      () => w.event('turn.start', { turnId: 't1', text: '<command-name>expanded</command-name>' }));
+    await w.step(); await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.equal(w.calls.length, 0);
+    assert.deepEqual(w.logs, [`[jet-router] fake 생략: ${label} · shadow`]);
+  }
 });
 
 test('a completed turn releases state and the next turn gets a fresh decision', async () => {
