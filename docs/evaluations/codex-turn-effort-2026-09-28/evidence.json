@@ -1,0 +1,19 @@
+{
+  "codexVersion": "codex-cli 0.158.0",
+  "source": "isolated local mock Responses HTTP capture",
+  "firstRequestNotYetSentAtUpdate": true,
+  "turnStatuses": [
+    "completed",
+    "completed"
+  ],
+  "update": {
+    "status": "applied"
+  },
+  "efforts": [
+    "medium",
+    "low",
+    "medium"
+  ],
+  "baselineAfter": "medium",
+  "hookIdsMatch": true
+}

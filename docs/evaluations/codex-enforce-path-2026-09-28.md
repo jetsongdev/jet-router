@@ -1,5 +1,8 @@
 # Codex enforce 적용 경로 조사 — 2026-09-28
 
+후속: [WebSocket 연결 해결과 첫 요청 적용 제한 재현](codex-turn-effort-2026-09-28/README.md).
+아래는 후속 검증 전의 조사 기록이다.
+
 ## 판정
 
 기존 입력창의 `UserPromptSubmit → jet-router MCP` 경로에서 자동 적용하는 기능은
