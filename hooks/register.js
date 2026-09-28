@@ -61,13 +61,13 @@ export function registerRouter(on, classify, options = {}) {
 
   on('prompt.submit', async ($, e, next) => {
     const user = ['composer', 'bridge'].includes(e.origin?.kind);
-    const ambiguous = mode === 'off' || locked || submissions.size > 0 || turns.size > 0 || e.turnId !== undefined || e.wait ||
-      !user || Boolean(e.attachments?.length) ||
-      Boolean(e.context?.length) || !e.text.trim() || e.text.length > 6000;
+    const reason = skipReason(e, user);
+    const ambiguous = mode === 'off' || locked || reason !== undefined;
     if (ambiguous) {
       for (const turn of turns.values()) invalidateTurn(turn);
     }
-    const ticket = { text: ambiguous ? undefined : e.text, ambiguous, user };
+    const ticket = { text: ambiguous ? undefined : e.text, ambiguous, user, reason,
+      command: e.text.trimStart().startsWith('/') };
     submissions.add(ticket);
     pending = ticket;
     try {
@@ -83,6 +83,17 @@ export function registerRouter(on, classify, options = {}) {
     }
   });
 
+  // Why a submission cannot be classified; undefined when it can.
+  function skipReason(e, user) {
+    if (submissions.size > 0 || turns.size > 0 || e.turnId !== undefined || e.wait) return 'overlap';
+    if (!user) return 'origin';
+    if (e.attachments?.length) return 'attachment';
+    if (e.context?.length) return 'hidden-context';
+    if (!e.text.trim()) return 'empty';
+    if (e.text.length > 6000) return 'too-long';
+    return undefined;
+  }
+
   on('turn.start', ($, e, next) => {
     const ticket = pending;
     pending = undefined;
@@ -91,11 +102,15 @@ export function registerRouter(on, classify, options = {}) {
     // Turns opened by subagent reports or task notifications stay tracked for
     // overlap checks but never produce a summary: nobody typed them.
     const silent = ticket ? !ticket.user : !queuedUser;
+    // Skills and commands expand the typed text before the turn starts.
+    let reason = 'queued';
+    if (ticket) reason = ticket.reason ?? (ticket.ambiguous ? 'correlation'
+      : turns.size > 0 ? 'overlap' : ticket.command ? 'command' : 'rewritten');
     queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
     if (mode === 'shadow' && !locked) {
-      turns.set(e.turnId, { valid: Boolean(valid), silent, text: valid ? e.text : '', started: false });
+      turns.set(e.turnId, { valid: Boolean(valid), silent, reason, text: valid ? e.text : '', started: false });
     }
     return next(e);
   });
@@ -131,7 +146,7 @@ export function registerRouter(on, classify, options = {}) {
     turn.model = e.model ?? null;
     const effort = safeEffort(e.effort);
     const record = { provider, mode: 'shadow', original: effort,
-      recommendation: 'keep', forwarded: effort, reasonCode: 'correlation', latencyMs: null };
+      recommendation: 'keep', forwarded: effort, reasonCode: turn.valid ? 'correlation' : turn.reason, latencyMs: null };
     if (turn.valid && e.index === 0 && effort !== 'max' && effort !== 'unsupported') {
       const timer = new AbortController();
       const began = await $.clock.now();
