@@ -26,6 +26,9 @@ export function registerRouter(on, classify, options = {}) {
   let project = null;
   const turns = new Map();
   const submissions = new Set();
+  // Subagent turn id -> effort inherited from the main turn that was running at
+  // its first step, or null when it must pass through unchanged.
+  const subagents = new Map();
 
   // shadow and enforce share classification; only enforce rewrites effort.
   function routing() {
@@ -41,6 +44,7 @@ export function registerRouter(on, classify, options = {}) {
     queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
+    subagents.clear();
   }
 
   on('session.start', async ($, e, next) => {
@@ -129,6 +133,7 @@ export function registerRouter(on, classify, options = {}) {
   });
 
   on('turn.complete', async ($, e, next) => {
+    if (e.agentId !== undefined) subagents.delete(e.turnId);
     const turn = e.agentId === undefined ? turns.get(e.turnId) : undefined;
     if (!turn || turn.completing) return next(e);
     turn.completing = true;
@@ -150,8 +155,28 @@ export function registerRouter(on, classify, options = {}) {
     }
   });
 
+  // Subagents carry no parent turn id and no prompt text, so a subagent turn is
+  // bound at its first step to the main turn still running then (the one that
+  // spawned it). Later steps keep that binding after the main turn ends.
+  function subagentEffort(e) {
+    if (!subagents.has(e.turnId)) {
+      const main = [...turns.values()].find(turn => turn.started && !turn.completing);
+      subagents.set(e.turnId, mode === 'enforce' && main?.applied && main.record?.applied &&
+        e.effort === main.requested && (e.model ?? null) === main.model
+        ? { effort: main.applied, requested: main.requested, model: main.model } : null);
+    }
+    const bound = subagents.get(e.turnId);
+    // The user changed effort or model: their choice wins for this subagent.
+    if (bound && (e.effort !== bound.requested || (e.model ?? null) !== bound.model)) subagents.set(e.turnId, null);
+    return subagents.get(e.turnId)?.effort;
+  }
+
   on('turn.step', async function* ($, e, next) {
-    if (!routing() || e.agentId !== undefined) return yield* next(e);
+    if (e.agentId !== undefined) {
+      const effort = routing() ? subagentEffort(e) : undefined;
+      return yield* next(effort ? { ...e, effort } : e);
+    }
+    if (!routing()) return yield* next(e);
     const turn = turns.get(e.turnId);
     if (!turn || turn.completing || turn.silent) return yield* next(e);
     if (turn.started) {

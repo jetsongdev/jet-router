@@ -66,7 +66,7 @@ test('lock and session restart stop classification; enforce is a mode', async ()
   await w.command('unlock'); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
   await w.start(); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
   assert.match((await w.command('enforce')).text, /적용\(enforce\)/);
-  assert.match((await w.command('enforce')).text, /켜짐 — 해당 턴만/);
+  assert.match((await w.command('enforce')).text, /켜짐 — 해당 턴과 그 턴의 subagent만/);
 });
 
 // Steps capture the object handed downstream so enforce rewrites are visible.
@@ -125,6 +125,63 @@ test('enforce leaves keep, same effort, max, subagents, lock and skipped turns u
   await w.submit('t1', 'CANARY_SECRET', { attachments: [{ type: 'image' }] });
   const { e, seen } = await forward(w);
   assert.equal(seen, e); assert.equal(w.calls.length, 0);
+});
+
+test('subagents inherit the applied effort of the main turn running at their first step', async () => {
+  for (const chosen of ['low', 'xhigh']) {
+    const w = world(async () => ({ ...choice, choice: chosen })); await w.start(); await w.command('enforce'); await w.submit();
+    assert.equal((await forward(w)).seen.effort, chosen);
+    const sub = extra => forward(w, { turnId: 's1', agentId: 'a1', ...extra });
+    assert.equal((await sub()).seen.effort, chosen);
+    // Background subagents keep the binding after the main turn completes.
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.equal((await sub({ index: 1 })).seen.effort, chosen);
+    // A subagent started with no main turn running (such as /subtask) is untouched.
+    const orphan = await forward(w, { turnId: 's2', agentId: 'a2' });
+    assert.equal(orphan.seen, orphan.e);
+    assert.equal(w.logs.length, 1); // Subagents never add summaries.
+  }
+});
+
+test('subagent inheritance yields to user changes, holdout, shadow, off and completion', async () => {
+  const bound = async (options = {}) => {
+    const w = world(undefined, undefined, options); await w.start(); await w.command('enforce'); await w.submit();
+    await forward(w);
+    return w;
+  };
+  const sub = (w, extra) => forward(w, { turnId: 's1', agentId: 'a1', ...extra });
+  let w = await bound();
+  assert.equal((await sub(w)).seen.effort, 'low');
+  let changed = await sub(w, { index: 1, effort: 'xhigh' });
+  assert.equal(changed.seen, changed.e);
+  changed = await sub(w, { index: 2 }); // Once the user changed it, the subagent stays theirs.
+  assert.equal(changed.seen, changed.e);
+  w = await bound();
+  changed = await sub(w, { model: 'changed-model' });
+  assert.equal(changed.seen, changed.e);
+  // A main turn that yielded, or is a holdout, has nothing to pass on.
+  w = await bound();
+  await forward(w, { index: 1, effort: 'xhigh' });
+  changed = await sub(w, { effort: 'xhigh' });
+  assert.equal(changed.seen, changed.e);
+  w = await bound({ holdoutRate: '0.5', random: () => 0 });
+  changed = await sub(w);
+  assert.equal(changed.seen, changed.e);
+  // Shadow never rewrites; off clears bindings; a completed subagent turn is forgotten.
+  w = world(); await w.start(); await w.command('shadow'); await w.submit(); await forward(w);
+  changed = await sub(w);
+  assert.equal(changed.seen, changed.e);
+  w = await bound();
+  assert.equal((await sub(w)).seen.effort, 'low');
+  await w.command('off'); await w.command('enforce');
+  changed = await sub(w, { index: 1 });
+  assert.equal(changed.seen, changed.e);
+  w = await bound();
+  assert.equal((await sub(w)).seen.effort, 'low');
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  await w.event('turn.complete', { turnId: 's1', agentId: 'a1', reason: 'answer' });
+  changed = await sub(w, { index: 1 });
+  assert.equal(changed.seen, changed.e);
 });
 
 test('switching off mid-turn stops applying the enforced effort', async () => {

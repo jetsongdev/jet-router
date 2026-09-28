@@ -32,7 +32,7 @@ It does not substitute instructions or settings edits for request mutation.
 
 No manual-effort provenance field was found in the inspected turn contract.
 Comparing effort against a default cannot prove it was not manually selected.
-Use explicit lock/off; max and subagents are protected. Automatic manual-override
+Use explicit lock/off; max is protected, and subagents only inherit the effort applied to the main turn running when they start. Automatic manual-override
 recognition is not claimed.
 
 The user's function-hook env setting is present as `1`. Offline runner tests
@@ -65,7 +65,7 @@ Provider-specific context/risk/confidence thresholds need evaluation and approva
 Jev scores are retained as scores; no arbitrary 0.5 conversion or shared
 Jev/local confidence threshold is used. No fallback model exists. The Claude plugin enforce
 (0.4.0+) rewrites only the per-turn `turn.step` effort and uses its own guards
-(keep, skips, max, subagents, lock, mid-turn user change); Codex has no
+(keep, skips, max, lock, mid-turn user change; subagents inherit the main turn's applied effort from 0.10.0); Codex has no
 enforce activation. Cloud consent, vendor data retention, local serving choice, resource
 budgets, benchmark corpus and quality gates remain open. Cold/warm resource
 measurements belong in P3/P5, not a documentation-only P0 assertion.

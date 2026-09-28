@@ -2,7 +2,7 @@
 
 기존 Claude Code 모델·대화·입력창을 유지하면서 프롬프트마다 필요한 effort를 선택하는 실험적 플러그인입니다.
 
-**현재는 Claude Code에서 off/shadow 관찰과 enforce(추천 effort를 해당 턴에만 적용)를 지원합니다.** 기본 `fake`는 고정 테스트 결과만 반환하고, Jev는 명시적 설정·전송 동의·키가 있을 때만 호출합니다. 세션은 항상 off로 시작하며 enforce는 `/jet-router enforce`로 켤 때만 동작합니다. 분류한 턴의 effort 결정과 토큰은 로컬에 기록되고, 적용 대상의 10%를 대조군으로 남겨 실제 작업의 절감을 측정합니다([사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트)). 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md). Codex MCP는 shadow만 지원하고, 로컬 모델 연결은 미지원입니다.
+**현재는 Claude Code에서 off/shadow 관찰과 enforce(추천 effort를 해당 턴에만 적용)를 지원합니다.** 기본 `fake`는 고정 테스트 결과만 반환하고, Jev는 명시적 설정·전송 동의·키가 있을 때만 호출합니다. 세션은 off(또는 설정한 경우 shadow)로 시작하며 enforce는 `/jet-router enforce`로 켤 때만 동작합니다. 적용한 턴이 띄운 subagent도 같은 effort를 이어받습니다. 분류한 턴의 effort 결정과 토큰은 로컬에 기록되고, 적용 대상의 10%를 대조군으로 남겨 실제 작업의 절감을 측정합니다([사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트)). 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md). Codex MCP는 shadow만 지원하고, 로컬 모델 연결은 미지원입니다.
 
 ## Codex MCP shadow — 별도 실험
 

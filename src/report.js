@@ -63,7 +63,7 @@ export function status(mode, locked, lastSummary, provider = 'fake', cloudConsen
     ...(provider === 'jev' ? ['전송 대상: api.typesafe.ai · 현재 프롬프트·effort만 전송',
       '취소 한계: 대기 종료 후에도 이미 시작한 요청·비용이 남을 수 있음'] : []),
     `수동 잠금: ${locked ? '켜짐 — 분류 일시 정지' : '꺼짐'}`,
-    `effort 자동 변경: ${mode === 'enforce' ? (locked ? '잠금으로 정지' : '켜짐 — 해당 턴만, subagent·max 제외, 턴 도중 /effort 변경 시 양보') : '꺼짐 — 켜기: /jet-router enforce'}`,
+    `effort 자동 변경: ${mode === 'enforce' ? (locked ? '잠금으로 정지' : '켜짐 — 해당 턴과 그 턴의 subagent만, max 제외, 턴 도중 /effort 변경 시 양보') : '꺼짐 — 켜기: /jet-router enforce'}`,
     `최근 완료: ${lastSummary ?? '없음'}`,
   ].join('\n');
 }

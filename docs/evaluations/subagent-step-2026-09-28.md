@@ -56,15 +56,27 @@ subagent 단계 출력 토큰 합계, 각 3회:
 
 재작성 조건이 약 46%이고 subagent transcript의 assistant 항목도 전부 low로 기록됐다. 기록 필드만 바뀐 것이 아니라 서버가 low로 처리했다고 판단한다. 메인 출력은 두 조건 모두 609~962 범위로 차이가 없다.
 
+## 추가 확인: 인터랙티브 병렬 subagent와 `/subtask`
+
+0.9.1 설치 상태에서 인터랙티브 세션 하나에 기록용 프로브를 붙여 확인했다(jet-router는 `--settings`로 off, Jev 호출 없음).
+
+| 경우 | 관측 |
+| --- | --- |
+| 병렬 subagent 2개 | 인터랙티브에서는 subagent가 **백그라운드로** 실행됐다. 메인 턴은 Agent 호출 단계 다음 단계를 마치고 먼저 끝났고, subagent 단계는 그 뒤에도 이어졌다. 두 subagent의 **첫 단계는 메인 턴이 진행 중일 때**(Agent 호출 단계 종료 후 약 0.03초, 메인 턴 종료 약 2초 전) 시작했다. 완료 보고는 `peer`·`task-notification` 출처의 별도 메인 턴으로 들어왔다. |
+| `/subtask` | `prompt.submit`·`turn.start`·메인 턴 없이 agent 단계(`agentId` 형식 `a3-…`)만 들어왔다. 지시문 텍스트와 이어받을 메인 턴이 모두 없다. |
+| subagent `turn.complete` | 필드에 `agentId`가 있고 usage는 그 subagent 턴 합계다. |
+
 ## 전파 설계에 주는 요구사항
 
 - subagent 단계의 `next({ ...e, effort })` 재작성은 메인 턴과 같은 방식으로 동작한다.
 - 부모 턴 필드가 없으므로 연결은 **agentId의 첫 단계가 올 때 진행 중인 메인 턴**에 묶는 방식이어야 한다. 한 번 묶은 agentId는 이후 단계에서 다시 판단하지 않는다.
-- 진행 중인 메인 턴이 없으면(연결 불확실) 넘기지 않는다.
+- 진행 중인 메인 턴이 없으면(연결 불확실) 넘기지 않는다. `/subtask`는 이 경우라 턴 훅만으로는 대상이 될 수 없다.
+- 백그라운드 subagent는 메인 턴이 끝난 뒤에도 단계가 이어지므로 묶은 값은 subagent 턴의 `turn.complete`까지 유지해야 한다.
+- 알려진 오연결: 메인 턴이 도는 동안 사용자가 `/subtask`를 띄우면 그 subtask도 메인 턴에 묶인다. 구분할 필드가 없다(⚠️ 미확인 대안: `agentId` 형식).
 - subagent 사용량은 subagent의 `turn.complete`에서 따로 받을 수 있다. 메인 턴 합계에 더하면 이중 집계가 아니라 누락 보완이지만, 구분 기록이 필요하면 별도 레코드로 남길 수 있다.
 
 ## 한계
 
-- 동기 subagent 1개만 확인했다. 백그라운드 subagent(메인 턴이 끝난 뒤에도 실행), 병렬 subagent, subagent 안의 subagent, fork는 확인하지 않았다.
+- subagent 안의 subagent, subagent 실행 중 `/effort` 변경은 확인하지 않았다.
 - 과제 1개·3회 비교라 품질·비용 평가가 아니다. subagent에 메인 추천을 넘겼을 때의 품질은 별도 평가가 필요하다.
-- headless에서만 확인했다. 인터랙티브 세션의 순서는 같다고 가정한다(⚠️ 미확인).
+- 서버 반영(출력 토큰 비교)은 headless 동기 subagent에서만 확인했다.
