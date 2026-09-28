@@ -2,7 +2,7 @@
 
 기존 Claude Code 모델·대화·입력창을 유지하면서 프롬프트마다 필요한 effort를 선택하는 실험적 플러그인입니다.
 
-**현재는 off/shadow 관찰 단계입니다.** 기본 `fake`는 고정 테스트 결과만 반환합니다. 명시적으로 설정한 Jev cloud shadow도 구현했으며 로컬 mock 검증을 마쳤습니다. [합성 입력 12건 실호출](docs/evaluations/jev-smoke-2026-09-27.md)을 마쳤으며, 본격 품질 평가가 남아 있습니다. 로컬 모델 연결은 미지원입니다. effort 자동 변경(enforce)은 `/jet-router enforce`로 켤 때만 해당 턴에 적용합니다.
+**현재는 Claude Code에서 off/shadow 관찰과 enforce(추천 effort를 해당 턴에만 적용)를 지원합니다.** 기본 `fake`는 고정 테스트 결과만 반환하고, Jev는 명시적 설정·전송 동의·키가 있을 때만 호출합니다. 세션은 항상 off로 시작하며 enforce는 `/jet-router enforce`로 켤 때만 동작합니다. 분류한 턴의 effort 결정과 토큰은 로컬에 기록되고, 적용 대상의 10%를 대조군으로 남겨 실제 작업의 절감을 측정합니다([사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트)). 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md). Codex MCP는 shadow만 지원하고, 로컬 모델 연결은 미지원입니다.
 
 ## Codex MCP shadow — 별도 실험
 

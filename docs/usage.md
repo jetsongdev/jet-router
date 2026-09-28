@@ -4,7 +4,7 @@
 
 ## 1. 현재 가능한 것
 
-현재는 **fake 또는 선택적 Jev의 off/shadow 관찰**을 지원합니다. 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.
+현재는 **fake 또는 선택적 Jev의 off/shadow 관찰과 enforce(턴 단위 적용)**를 지원하며, 분류한 턴은 로컬 사용량 기록으로 남깁니다(7절). 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.
 
 Jev 연결은 로컬 mock과 [합성 입력 12건 실호출](evaluations/jev-smoke-2026-09-27.md)로 확인했습니다. 실제 Claude 세션 연결과 본격 품질 평가는 남아 있습니다. 자동 적용(enforce)은 `/jet-router enforce`로 켤 때만 동작합니다. 세션 시작 기본값은 항상 off 또는 shadow이며 enforce로 시작하지 않습니다.
 

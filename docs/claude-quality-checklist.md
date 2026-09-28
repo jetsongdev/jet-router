@@ -1,7 +1,6 @@
 # Claude Code 설치 확인·동일 과제 비교 체크리스트
 
-현재 가능한 것은 **플러그인의 off/shadow 테스트**와 **CLI에서 추천 effort를 명시한 비교 실험**이다.
-플러그인 enforce 자동 적용은 미구현이다. 이 문서나 비교 스크립트의 통과를 enforce 검증으로 기록하지 않는다.
+이 문서는 **CLI에서 추천 effort를 명시한 비교 실험** 절차다. 플러그인 enforce(0.4.0~)는 별도로 구현·확인했으며([경로 확인](evaluations/enforce-path-2026-09-28.md)), 이 문서나 비교 스크립트의 통과를 enforce 검증으로 기록하지 않는다. 같은 방식의 Opus 5.5 비교 결과는 [Claude 하향 비교](evaluations/downshift-claude-2026-09-28/README.md)에 있다.
 
 2026-09-28: Claude Code 2.1.283에서 무과금 plan 확인과 mock 검증 완료. 실제 Claude 생성·로그인·계정별 모델 접근은 미검증이다.
 Claude 토큰 부족으로 실사용은 보류 중이다. 토큰이 확보되면 아래 smoke부터 실행한다.
@@ -100,7 +99,7 @@ node scripts/claude-quality.mjs report "$CLAUDE_FULL_DIR"
 - [ ] 각 생성마다 새 임시 폴더·UUID·프로세스·`--no-session-persistence`를 사용한다.
 - [ ] 추천 설정만 실패한 쌍은 품질 회귀로 센다. 테스트 실패는 숨기거나 재생성하지 않는다.
 - [ ] `routes.json`, `report.json`, `summary.json`, `REPORT.md`를 보존한다. `/tmp` 결과는 재부팅/정리 전에 별도 폴더로 복사한다.
-- [ ] 비교가 끝나도 플러그인은 shadow 상태다. 사용자 설정 변경이나 enforce 활성화는 하지 않는다.
+- [ ] 비교 실행은 플러그인 모드와 무관하게 격리된 `claude -p`로 한다. 비교 중 사용자 설정을 바꾸거나 플러그인 enforce를 켜지 않는다.
 
 ## E. 토큰·비용 해석
 

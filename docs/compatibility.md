@@ -63,8 +63,10 @@ the approved bounded one-shot helper. This is not live-network verification.
 
 Provider-specific context/risk/confidence thresholds need evaluation and approval.
 Jev scores are retained as scores; no arbitrary 0.5 conversion or shared
-Jev/local confidence threshold is used. No enforce activation or fallback model
-exists. Cloud consent, vendor data retention, local serving choice, resource
+Jev/local confidence threshold is used. No fallback model exists. The Claude plugin enforce
+(0.4.0+) rewrites only the per-turn `turn.step` effort and uses its own guards
+(keep, skips, max, subagents, lock, mid-turn user change); Codex has no
+enforce activation. Cloud consent, vendor data retention, local serving choice, resource
 budgets, benchmark corpus and quality gates remain open. Cold/warm resource
 measurements belong in P3/P5, not a documentation-only P0 assertion.
 

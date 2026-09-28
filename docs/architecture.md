@@ -180,15 +180,33 @@ Jev 후보는 `low / medium / high / xhigh / keep`이며, `keep`은 effort 이�
 키는 각 host의 설정에서 helper stdin으로 전달하며, 응답 본문이나 키를 안내에 포함하지 않는다.
 두 host는 키 저장소나 활성화 설정을 서로 공유하지 않는다.
 
-## 향후 enforce와 현재 shadow의 차이
+## enforce와 shadow의 차이
 
-현재 shadow는 값을 바꾸지 않으므로 **턴 종료 후 복귀시킬 effort 자체가 없다.**
+shadow는 값을 바꾸지 않으므로 **턴 종료 후 복귀시킬 effort 자체가 없다.**
 
-Claude의 향후 목표는 해당 턴의 요청만 선택한 effort로 실행하면서 사용자 기본 설정을
-보존하는 것이다. 일회용 프로브로 `turn.step` effort 재작성이 도구 루프를 포함한 해당 턴에만
-반영되고, 서버 동작이 바뀌며, 설정에 남지 않음을 확인했다. 턴 도중 `/effort` 변경은 즉시
-들어오므로 덮어쓰지 않아야 한다. 제품 enforce는 아직 구현하지 않았다
-([경로 확인 기록](evaluations/enforce-path-2026-09-28.md)).
+Claude enforce(0.4.0~)는 `turn.step`에 들어온 요청 객체의 effort만 추천값으로 바꿔 넘긴다.
+설정 파일·세션 기본값을 수정하지 않으므로 복귀 작업이 필요 없고, 다음 턴은 원래 값으로 새로 분류한다.
+같은 턴의 도구 루프 요청에는 계속 적용하며, 들어오는 effort가 첫 요청과 달라지면(턴 도중 `/effort`)
+그 턴의 남은 요청은 사용자 값을 그대로 넘긴다. keep·같은 effort·분류 생략·max·subagent·잠금은 적용하지 않는다.
+적용 대상 중 `holdoutRate`(기본 0.1) 비율은 무작위로 적용하지 않고 대조군으로 기록한다.
+재작성이 요청과 서버 동작에 반영되고 설정에 남지 않음은 [경로 확인 기록](evaluations/enforce-path-2026-09-28.md)에서,
+실제 세션 동작은 0.4.0 설치 후 확인했다.
+
+```mermaid
+flowchart TD
+    S["turn.step (index 0)"] --> C{"분류 결과 적용 가능?"}
+    C -- "아니오 (keep·생략·max 등)" --> P["원래 요청 그대로"]
+    C -- 예 --> H{"대조군 추첨"}
+    H -- 대조군 --> P
+    H -- 적용 --> A["effort만 추천값으로 바꿔 전달"]
+    A --> L["같은 턴 후속 step"]
+    L --> U{"effort가 첫 요청과 같은가"}
+    U -- 예 --> A2["추천값 유지"]
+    U -- "아니오 (/effort 변경)" --> Y["사용자 값 그대로 · 양보 표시"]
+    P --> R["turn.complete: 요약 + 로컬 사용량 기록"]
+    A2 --> R
+    Y --> R
+```
 
 Codex의 MCP hook 출력에는 effort 변경 계약이 없다. 실제 적용에는 별도 제어 클라이언트가
 필요하며, [App Server](https://learn.chatgpt.com/docs/app-server)의 `turn/start.effort`는
