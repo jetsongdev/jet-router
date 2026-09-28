@@ -359,6 +359,23 @@ test('Jev passes sensitive data only via stdin and labels the unchanged result u
   assert.equal(w.calls.length, 0); // Never falls back to fake.
 });
 
+test('a context-variant model name like claude-opus-5-5[1m] classifies and logs as the base model', async () => {
+  const runs = [];
+  const run = async (argv, init) => {
+    runs.push({ argv, stdin: init.stdin });
+    return argv[1].endsWith('/scripts/jev-request.mjs') ? jevResult : { exitCode: 0, stdout: '', stderr: '' };
+  };
+  const w = world(undefined, undefined, { ...jevOptions, usageLog: true }, run);
+  await w.start(); await w.command('enforce'); await w.submit();
+  const { seen } = await forward(w, { model: 'claude-opus-5-5[1m]' });
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer', usage: { output_tokens: 10 } });
+  const [jev, usage] = runs;
+  assert.equal(JSON.parse(jev.stdin).routingInput.target.model, 'claude-opus-5-5');
+  assert.match(w.logs[0], /^\[jet-router\] Jev\.enforce\(\): high → low 적용/);
+  assert.equal(JSON.parse(usage.stdin).model, 'claude-opus-5-5');
+  assert.deepEqual([seen.model, seen.effort], ['claude-opus-5-5[1m]', 'low']); // The host request keeps its own model.
+});
+
 test('Jev failure has no fallback and timeout keeps only one outstanding helper', async () => {
   const pending = deferred(), began = deferred(); let processes = 0;
   const w = world(undefined, undefined, jevOptions, () => { processes++; began.resolve(); return pending.promise; });

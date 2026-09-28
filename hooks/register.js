@@ -140,7 +140,7 @@ export function registerRouter(on, classify, options = {}) {
         lastSummary = summary(turn.record, e.reason);
         publish($, lastSummary);
         if (options.usageLog === true) {
-          await recordUsage($, usageRecord({ project, model: turn.model, record: turn.record,
+          await recordUsage($, usageRecord({ project, model: baseModel(turn.model), record: turn.record,
             outcome: e.reason, durationMs: e.durationMs, usage: e.usage }));
         }
       }
@@ -183,7 +183,7 @@ export function registerRouter(on, classify, options = {}) {
             if (provider === 'jev') {
               const routingInput = {
                 host: 'claude-code', prompt: turn.text, cloudConsent: options.cloudConsent === true,
-                target: { model: e.model ?? null, source: e.model ? 'host' : 'unknown', supportedEfforts: null },
+                target: { model: baseModel(e.model ?? null), source: e.model ? 'host' : 'unknown', supportedEfforts: null },
                 effort: { value: e.effort, source: 'host' },
                 event: { sessionId: null, turnId: e.turnId, correlated: true },
                 context: { source: 'prompt-only', missingRequired: null },
@@ -248,6 +248,12 @@ function applicable(record) {
 function holdoutShare(value) {
   const share = Number(value);
   return Number.isFinite(share) && share > 0 && share <= 0.5 ? share : 0;
+}
+
+// Context variants such as claude-opus-5-5[1m] share the base model's effort
+// behavior; the bracket suffix would otherwise fail the identifier check.
+function baseModel(value) {
+  return typeof value === 'string' ? value.replace(/\[[^\]]*\]$/, '') : value;
 }
 
 function safeEffort(value) {
