@@ -460,3 +460,29 @@ test('usage logging sends decisions and token counts, never prompt text, only wh
   await off.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(runs.length, 1);
 });
+
+test('holdout leaves a random share of applicable enforce turns unchanged and marks them', async () => {
+  const runs = [];
+  const run = async (argv, init) => { runs.push(JSON.parse(init.stdin)); return { exitCode: 0, stdout: '', stderr: '' }; };
+  let draws = 0;
+  const w = world(undefined, undefined, { usageLog: true, holdoutRate: '0.1', random: () => (draws++ === 0 ? 0.05 : 0.5) }, run);
+  await w.start(); await w.command('enforce');
+  await w.submit();
+  const held = await forward(w);
+  assert.equal(held.seen, held.e);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.logs.at(-1), '[jet-router] fake.enforce(): high → low 대조군 미적용(고정값) · 0ms');
+  await w.submit('t2', 'next');
+  assert.equal((await forward(w, { turnId: 't2' })).seen.effort, 'low');
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  assert.deepEqual(runs.map(r => [r.holdout, r.applied]), [[true, null], [false, 'low']]);
+  assert.equal(draws, 2);
+  // Only applicable turns draw; invalid or zero shares never hold out.
+  const keep = world(async () => ({ ...choice, choice: 'keep' }), undefined, { holdoutRate: '0.1', random: () => { throw new Error('drawn'); } });
+  await keep.start(); await keep.command('enforce'); await keep.submit(); await forward(keep);
+  for (const rate of ['0', '0.9', 'abc', undefined]) {
+    const x = world(undefined, undefined, { holdoutRate: rate, random: () => 0 });
+    await x.start(); await x.command('enforce'); await x.submit();
+    assert.equal((await forward(x)).seen.effort, 'low');
+  }
+});

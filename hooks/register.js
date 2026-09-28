@@ -12,6 +12,10 @@ export function register(on, options) {
 // The injected fake provider keeps lifecycle tests offline.
 export function registerRouter(on, classify, options = {}) {
   const provider = options.provider === 'jev' ? 'jev' : 'fake';
+  // A random share of applicable enforce turns stays unchanged as the
+  // measurement control group; the injected random keeps tests deterministic.
+  const holdoutRate = holdoutShare(options.holdoutRate);
+  const random = typeof options.random === 'function' ? options.random : Math.random;
   const flight = { busy: false };
   let mode = 'off';
   let locked = false;
@@ -204,6 +208,10 @@ export function registerRouter(on, classify, options = {}) {
     if (!routing() || turns.get(e.turnId) !== turn) return yield* next(e);
     turn.record = record;
     if (mode === 'enforce' && applicable(record)) {
+      if (holdoutRate > 0 && random() < holdoutRate) {
+        record.holdout = true;
+        return yield* next(e);
+      }
       record.applied = record.recommendation;
       turn.applied = record.recommendation;
       turn.requested = e.effort;
@@ -233,6 +241,11 @@ function applicable(record) {
   return ['unevaluated', 'shadow'].includes(record.reasonCode) && record.recommendation !== 'keep' &&
     EFFORTS.includes(record.recommendation) && record.recommendation !== 'max' &&
     EFFORTS.includes(record.original) && record.original !== 'max' && record.recommendation !== record.original;
+}
+
+function holdoutShare(value) {
+  const share = Number(value);
+  return Number.isFinite(share) && share > 0 && share <= 0.5 ? share : 0;
 }
 
 function safeEffort(value) {

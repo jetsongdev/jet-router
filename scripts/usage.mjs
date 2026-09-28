@@ -2,7 +2,7 @@ import { appendFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { parseLine, report, GROUPS } from '../src/usage.js';
+import { parseLine, report, GROUPS, MIN_SAMPLES } from '../src/usage.js';
 
 // record: the hook pipes one record on stdin; report: aggregates the monthly files.
 export const usageDir = () => process.env.JET_ROUTER_USAGE_DIR || join(homedir(), '.claude/jet-router/usage');
@@ -29,19 +29,31 @@ const padTo = (cell, size, left) => (left ? cell + ' '.repeat(size - width(cell)
 const home = homedir();
 
 export function formatReport(result) {
-  const head = ['구분', '턴', '적용', '상향', '양보', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
-  const line = (key, t) => [key.replaceAll(home, '~'), n(t.turns), n(t.applied), n(t.upshifts), n(t.yielded), n(t.skipped),
-    n(t.output), `${n(t.estimatedSaved)} (${n(t.estimatedTurns)}턴)`, `${n(t.unestimatedAppliedTurns)}턴`,
+  const head = ['구분', '턴', '적용', '상향', '양보', '대조군', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
+  const line = (key, t) => [key.replaceAll(home, '~'), n(t.turns), n(t.applied), n(t.upshifts), n(t.yielded), n(t.holdout), n(t.skipped),
+    n(t.output), `${n(t.estimatedSaved)} (${n(t.estimatedTurns)}턴, 측정 ${n(t.measuredTurns)})`, `${n(t.unestimatedAppliedTurns)}턴`,
     `${n(t.shadowPotentialSaved)} (${n(t.shadowEstimatedTurns)}턴)`];
+  const table = rows => {
+    const widths = rows[0].map((_, i) => Math.max(...rows.map(r => width(r[i]))));
+    return rows.map(r => r.map((cell, i) => padTo(cell, widths[i], i === 0)).join('  '));
+  };
   const rows = [head, ...result.rows.map(r => line(r.key, r)), line('합계', result.total)];
-  const widths = head.map((_, i) => Math.max(...rows.map(r => width(r[i]))));
-  const pad = (cell, i) => padTo(cell, widths[i], i === 0);
   const t = result.total;
   const rate = t.estimatedBaselineOutput ? ` · 추정 대상 턴 출력 절감률 ${(100 * t.estimatedSaved / t.estimatedBaselineOutput).toFixed(1)}%` : '';
+  const ratio = value => (value === null ? '-' : value.toFixed(3));
+  const factors = result.factors.length ? ['', `측정 비율 (적용 ÷ 대조군 평균 출력, 양쪽 ${MIN_SAMPLES}턴 이상일 때 사용)`, ...table([
+    ['모델 · 조합', '적용 턴', '대조군 턴', '적용 평균', '대조군 평균', '비율', '95% 구간', '상태'],
+    ...result.factors.map(f => [`${f.model} · ${f.pair}`, n(f.treatmentTurns), n(f.controlTurns),
+      f.treatmentMeanOutput === null ? '-' : n(Math.round(f.treatmentMeanOutput)),
+      f.controlMeanOutput === null ? '-' : n(Math.round(f.controlMeanOutput)), ratio(f.outputRatio),
+      f.usable ? `${ratio(f.ci95[0])}–${ratio(f.ci95[1])}` : '-', f.usable ? '사용' : '표본 부족']),
+  ])] : [];
   return [
     `기간: ${result.from ?? '처음'} ~ ${result.to ?? '끝'} · 기준: ${result.by.join(', ')}${rate}`,
-    ...rows.map(r => r.map(pad).join('  ')),
-    '추정 절감은 평가에서 측정한 모델·effort 조합(xhigh→medium, xhigh→high)만 계산합니다. 미추정 적용 턴과 상향 턴은 절감에 넣지 않습니다.',
+    ...table(rows),
+    ...factors,
+    '',
+    '추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다.',
   ].join('\n');
 }
 

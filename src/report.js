@@ -34,7 +34,7 @@ export function summary(record, outcome) {
     const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
     const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
-    const applied = record.applied ? ' 적용' : '';
+    const applied = record.applied ? ' 적용' : record.holdout ? ' 대조군 미적용' : '';
     parts.push(`[jet-router] ${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
     if (record.original !== record.forwarded) {

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { usageRecord, parseLine, report, SAVINGS_FACTORS } from '../src/usage.js';
+import { usageRecord, parseLine, report, measuredFactors, SAVINGS_FACTORS } from '../src/usage.js';
 import { recordLine, readRecords, formatReport } from '../scripts/usage.mjs';
 
 const usage = output => ({ input_tokens: 4, output_tokens: output, cache_read_input_tokens: 100, cache_creation_input_tokens: 10 });
@@ -69,4 +69,38 @@ test('savings are estimated only for measured pairs and exclude yielded and upsh
   assert.ok(pair.includes('/work/icp · xhigh>medium'));
   assert.throws(() => report(records, { by: ['nope'] }), /unknown group/);
   assert.match(formatReport(report(records, { by: ['day'] })), /추정 대상 턴 출력 절감률/);
+});
+
+test('measured control ratios replace evaluation ratios once both arms have enough turns', () => {
+  const at = i => `2026-10-${String(1 + (i % 20)).padStart(2, '0')}T02:00:00Z`;
+  const records = [];
+  for (let i = 0; i < 10; i++) {
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', applied: 'medium' }, 500));
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', holdout: true }, 1000));
+    records.push(make(at(i), { mode: 'enforce', original: 'medium', recommendation: 'xhigh', applied: 'xhigh' }, 2000));
+    records.push(make(at(i), { mode: 'enforce', original: 'medium', recommendation: 'xhigh', holdout: true }, 1000));
+  }
+  // Excluded from both arms: a yielded treatment and a control the user changed.
+  records.push(make(at(0), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', applied: 'medium', yielded: true }, 9000));
+  records.push(make(at(0), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', holdout: true, forwarded: 'high' }, 9000));
+  // Too few samples: falls back to the evaluation ratio.
+  for (let i = 0; i < 3; i++) {
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'high', applied: 'high' }, 1000));
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'high', holdout: true }, 1800));
+  }
+  const factors = measuredFactors(records);
+  const byPair = Object.fromEntries(factors.map(f => [f.pair, f]));
+  assert.deepEqual([byPair['xhigh>medium'].treatmentTurns, byPair['xhigh>medium'].controlTurns, byPair['xhigh>medium'].usable], [10, 10, true]);
+  assert.equal(byPair['xhigh>medium'].outputRatio, 0.5);
+  assert.deepEqual(byPair['xhigh>medium'].ci95, [0.5, 0.5]);
+  assert.equal(byPair['medium>xhigh'].outputRatio, 2);
+  assert.equal(byPair['xhigh>high'].usable, false);
+  const { total } = report(records, { by: ['all'] });
+  const high = SAVINGS_FACTORS['claude-opus-5-5']['xhigh>high'].outputRatio;
+  // 10 × +500 (measured down) + 10 × −1000 (measured up) + 3 × evaluation fallback.
+  assert.equal(total.estimatedSaved, Math.round(10 * 500 - 10 * 1000 + 3 * (1000 / high - 1000)));
+  assert.equal(total.measuredTurns, 20); assert.equal(total.estimatedTurns, 23);
+  assert.equal(total.holdout, 24); assert.equal(total.unestimatedAppliedTurns, 1);
+  const text = formatReport(report(records, { by: ['pair'] }));
+  assert.match(text, /측정 비율/); assert.match(text, /0\.500–0\.500\s+사용/); assert.match(text, /표본 부족/);
 });
