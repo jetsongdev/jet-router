@@ -30,7 +30,7 @@
 - [ ] `/jet-router shadow` 후 status에 관찰 모드가 표시된다.
 - [ ] `"Helllo"를 "Hello"로 바꾼 결과만 답해줘.`를 보내고 답변 종료 후 요약이 한 번 나온다.
 - [ ] 요약이 `fake.shadow(): <현재 요청 effort> → …(고정값)` 형식으로 표시된다.
-- [ ] 기본 fakeChoice=keep에서 `→ keep(고정값)`이 나온다.
+- [ ] 기본 fakeChoice=keep에서 `<현재 요청 effort> 유지(고정값)`이 나온다.
 - [ ] 답변이 완전히 끝난 뒤 다른 문장을 보내면 새 턴의 요약이 한 번 나온다.
 - [ ] Configure options에서 fakeChoice=low로 바꾸고 안내에 따라 reload한 뒤, shadow를 다시 켜면 `→ low(고정값)`이 나온다.
 - [ ] fake 추천이 달라도 Claude 세션의 기본 effort 설정은 바뀌지 않는다.

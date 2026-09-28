@@ -102,7 +102,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 
 설치된 플러그인은 `/plugin`의 Installed에서 jet-router를 선택하고 **Configure options**에서 값을 바꿀 수 있습니다. 변경 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. 이 플러그인의 설정 UI 경로는 아직 수동 실행하지 않았습니다. [공식 관리 방법](https://code.claude.com/docs/en/discover-plugins#manage-installed-plugins)
 
-기본 `keep` fixture는 맥락 충분 여부를 false로 반환하므로 `→ keep(고정값)`으로 표시합니다. `low`로 설정하면 모든 분류 대상에 low를 추천합니다. 어느 쪽도 실제 요청의 난도를 판단한 결과는 아닙니다.
+기본 `keep` fixture는 맥락 충분 여부를 false로 반환하므로 `high 유지(고정값)`처럼 현재 요청 effort 유지로 표시합니다. `low`로 설정하면 모든 분류 대상에 low를 추천합니다. 어느 쪽도 실제 요청의 난도를 판단한 결과는 아닙니다.
 
 ### Jev shadow 설정
 
@@ -126,12 +126,12 @@ Node 22+ 실행 파일이 Claude 프로세스의 PATH에 있어야 합니다. `/
 
 응답 본문을 수정하지 않고 메인 턴 종료 후 별도의 로그 한 줄을 출력합니다. 도구 요청마다 중복 출력하지 않습니다. 아래 시간은 예시입니다.
 
-형식은 Codex MCP shadow 안내([Codex MCP 가이드](codex-mcp.md))와 같습니다. 화살표 왼쪽은 이 턴의 요청 effort, 오른쪽은 추천값입니다. 추천이 있어도 shadow에서는 원래 effort를 유지합니다. fake 결과에는 `(고정값)`이 붙습니다.
+형식은 Codex MCP shadow 안내([Codex MCP 가이드](codex-mcp.md))와 같습니다. 화살표 왼쪽은 이 턴의 요청 effort, 오른쪽은 추천값입니다. 추천이 keep이면 화살표 대신 `<요청 effort> 유지`로 표시합니다. 추천이 있어도 shadow에서는 원래 effort를 유지합니다. fake 결과에는 `(고정값)`이 붙습니다.
 
 ```text
 [jet-router] fake.shadow(): high → low(고정값) · 12ms
 [jet-router] fake.shadow(): medium → xhigh(고정값) · 9ms
-[jet-router] fake.shadow(): high → keep(고정값) · 8ms
+[jet-router] fake.shadow(): high 유지(고정값) · 8ms
 ```
 
 분류를 생략·실패한 경우는 `생략:`으로 구분하고 지연값을 표시하지 않습니다.
@@ -164,6 +164,7 @@ Jev shadow의 표시 예시입니다. Jev 추천은 응답 형식만 검증했�
 
 ```text
 [jet-router] Jev.shadow(): medium → low (70%) · 180ms
+[jet-router] Jev.shadow(): medium 유지 (66%) · 376ms
 [jet-router] Jev 생략: 전송 미동의 · shadow
 [jet-router] Jev 생략: redirect 차단 · shadow
 ```

@@ -24,7 +24,8 @@ export function summary(record, outcome) {
     const original = record.original === 'unsupported' ? '미확인' : record.original;
     const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
-    parts.push(`[jet-router] ${provider}.shadow(): ${original} → ${record.recommendation}${fixture}${percentage}`);
+    const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
+    parts.push(`[jet-router] ${provider}.shadow(): ${target}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
     if (record.original !== record.forwarded) {
       parts.push(`마지막 요청 ${record.forwarded === 'unsupported' ? '확인 불가' : record.forwarded}`);
