@@ -1,0 +1,1251 @@
+{
+  "startedAt": "2026-09-28T04:57:48.828Z",
+  "routes": {
+    "baseline": "xhigh",
+    "model": "claude-opus-5-5",
+    "host": "claude-code",
+    "router": "jet-router 0.3.2 shadow · provider jev · interactive --effort xhigh",
+    "routedAt": "2026-09-28T04:57:38.309Z",
+    "taskSha256": "d64a4302dfc2bd73476a929fc4e6435365361a6a6cb626278c2dffd09908590f",
+    "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+    "routes": [
+      {
+        "task": "ranges",
+        "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+        "choice": "medium",
+        "probability": 0.71,
+        "latencyMs": 353,
+        "display": "Jev.shadow(): xhigh → medium",
+        "eligible": true
+      },
+      {
+        "task": "ttl-lru",
+        "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+        "choice": "medium",
+        "probability": 0.77,
+        "latencyMs": 277,
+        "display": "Jev.shadow(): xhigh → medium",
+        "eligible": true
+      },
+      {
+        "task": "async-memo",
+        "promptSha256": "762646240d80df80d1a5dde0a6cef562f05427d4ae32c27832bfd5791b1564c0",
+        "choice": "xhigh",
+        "probability": 0.87,
+        "latencyMs": 304,
+        "display": "Jev.shadow(): xhigh → xhigh",
+        "eligible": false
+      },
+      {
+        "task": "ledger",
+        "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+        "choice": "high",
+        "probability": 0.47,
+        "latencyMs": 309,
+        "display": "Jev.shadow(): xhigh → high",
+        "eligible": true
+      },
+      {
+        "task": "keyed-queue",
+        "promptSha256": "f47a81ec862c530d90458aebb546742e17bcc07b8a826ede18c6b48cadc3223f",
+        "choice": "xhigh",
+        "probability": 0.7,
+        "latencyMs": 302,
+        "display": "Jev.shadow(): xhigh → xhigh",
+        "eligible": false
+      },
+      {
+        "task": "intervals",
+        "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+        "choice": "medium",
+        "probability": 0.6,
+        "latencyMs": 324,
+        "display": "Jev.shadow(): xhigh → medium",
+        "eligible": true
+      }
+    ],
+    "complete": true
+  },
+  "results": [
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 0,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "2e611898-6423-4fde-bcff-63871c109312",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 2203,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 734
+      },
+      "numTurns": 2,
+      "costUsd": 0.0502804,
+      "latencyMs": 25331,
+      "code": "const INT_RE = /^[+-]?[0-9]+$/;\nconst RANGE_RE = /^([+-]?[0-9]+)\\s*\\.\\.\\s*([+-]?[0-9]+)$/;\nconst MAX_RANGE_MEMBERS = 1000;\n\nfunction toSafeInt(token) {\n  const n = Number(token);\n  if (!Number.isSafeInteger(n)) {\n    throw new RangeError(`Integer out of safe range: ${token}`);\n  }\n  // Normalize -0 to 0\n  return n === 0 ? 0 : n;\n}\n\nexport function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('parseRanges expects a string');\n  }\n  if (text.trim() === '') {\n    return [];\n  }\n\n  const seen = new Set();\n  const items = text.split(',');\n\n  for (const raw of items) {\n    const item = raw.trim();\n    if (item === '') {\n      throw new RangeError('Empty item in list');\n    }\n\n    const m = RANGE_RE.exec(item);\n    if (m) {\n      const a = toSafeInt(m[1]);\n      const b = toSafeInt(m[2]);\n      if (a > b) {\n        throw new RangeError(`Descending range: ${item}`);\n      }\n      if (b - a + 1 > MAX_RANGE_MEMBERS) {\n        throw new RangeError(`Range has more than ${MAX_RANGE_MEMBERS} members: ${item}`);\n      }\n      for (let n = a; n <= b; n++) {\n        seen.add(n === 0 ? 0 : n);\n      }\n    } else if (INT_RE.test(item)) {\n      seen.add(toSafeInt(item));\n    } else {\n      throw new RangeError(`Malformed item: ${item}`);\n    }\n  }\n\n  return Array.from(seen).sort((x, y) => x - y);\n}\n",
+      "codeSha256": "b61114034308f97994ff3eedd72f026be97fcdb1cd13f14f85ceb9aa2dbbf7b8",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 1,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "1e8e203d-4701-48ca-b168-107a7eb7d73a",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1011,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 733
+      },
+      "numTurns": 2,
+      "costUsd": 0.0264324,
+      "latencyMs": 11962,
+      "code": "const NUM = \"([+-]?[0-9]+)\";\nconst SINGLE_RE = new RegExp(\"^\\\\s*\" + NUM + \"\\\\s*$\");\nconst RANGE_RE = new RegExp(\"^\\\\s*\" + NUM + \"\\\\s*\\\\.\\\\.\\\\s*\" + NUM + \"\\\\s*$\");\nconst MAX_RANGE_MEMBERS = 1000;\n\nfunction toSafeInt(str) {\n  const n = Number(str);\n  if (!Number.isSafeInteger(n)) {\n    throw new RangeError(\"Integer out of safe range: \" + str);\n  }\n  return n === 0 ? 0 : n; // normalize -0\n}\n\nexport function parseRanges(text) {\n  if (typeof text !== \"string\") {\n    throw new TypeError(\"parseRanges expects a string\");\n  }\n  if (text.trim() === \"\") {\n    return [];\n  }\n\n  const seen = new Set();\n  const items = text.split(\",\");\n\n  for (const item of items) {\n    if (item.trim() === \"\") {\n      throw new RangeError(\"Empty item in list\");\n    }\n\n    let m = SINGLE_RE.exec(item);\n    if (m) {\n      seen.add(toSafeInt(m[1]));\n      continue;\n    }\n\n    m = RANGE_RE.exec(item);\n    if (!m) {\n      throw new RangeError(\"Malformed item: \" + JSON.stringify(item));\n    }\n\n    const a = toSafeInt(m[1]);\n    const b = toSafeInt(m[2]);\n    if (a > b) {\n      throw new RangeError(\"Descending range: \" + item.trim());\n    }\n    if (b - a + 1 > MAX_RANGE_MEMBERS) {\n      throw new RangeError(\"Range has more than \" + MAX_RANGE_MEMBERS + \" members: \" + item.trim());\n    }\n    for (let i = a; i <= b; i++) {\n      seen.add(i);\n    }\n  }\n\n  return Array.from(seen).sort((x, y) => x - y);\n}\n",
+      "codeSha256": "7adee26e3f038b8fc57c96d329f96f3a132f7f1b8b17c2c705a77b668ca2652c",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 2,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "622ab3b1-0bd8-4b9a-a808-e44cda8d1922",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 967,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 808
+      },
+      "numTurns": 2,
+      "costUsd": 0.026152400000000003,
+      "latencyMs": 12130,
+      "code": "export function createCache(capacity, now) {\n  if (typeof capacity !== \"number\" || !Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  // Map insertion order tracks recency: first = LRU, last = MRU.\n  const entries = new Map();\n\n  function purge(t) {\n    for (const [key, entry] of entries) {\n      if (t >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  function liveEntry(key, t) {\n    const entry = entries.get(key);\n    if (entry === undefined) return undefined;\n    if (t >= entry.expiresAt) {\n      entries.delete(key);\n      return undefined;\n    }\n    return entry;\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const t = now();\n      if (ttl === 0) {\n        entries.delete(key);\n        purge(t);\n        return undefined;\n      }\n      purge(t);\n      entries.delete(key);\n      entries.set(key, { value, expiresAt: t + ttl });\n      while (entries.size > capacity) {\n        const lru = entries.keys().next().value;\n        entries.delete(lru);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const t = now();\n      const entry = liveEntry(key, t);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      return liveEntry(key, now()) !== undefined;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    },\n  };\n}\n",
+      "codeSha256": "48e511d094847c30c684c21b58ace79377e5d6e0ed648244d384d0140f7c73af",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 3,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "0bd7e8ec-e9e3-40b4-bfa2-4a73c9dd79d2",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1583,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 808
+      },
+      "numTurns": 2,
+      "costUsd": 0.0384724,
+      "latencyMs": 16253,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (now === undefined) {\n    now = Date.now;\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  // Map preserves insertion order: first entry is LRU, last entry is MRU.\n  const entries = new Map();\n\n  function purge(time) {\n    for (const [key, entry] of entries) {\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n      }\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const time = now();\n      purge(time);\n      if (ttl === 0) {\n        entries.delete(key);\n        return undefined;\n      }\n      entries.delete(key);\n      entries.set(key, { value, expiresAt: time + ttl });\n      while (entries.size > capacity) {\n        const lruKey = entries.keys().next().value;\n        entries.delete(lruKey);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const time = now();\n      if (!entries.has(key)) {\n        return undefined;\n      }\n      const entry = entries.get(key);\n      entries.delete(key);\n      if (time >= entry.expiresAt) {\n        return undefined;\n      }\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const time = now();\n      if (!entries.has(key)) {\n        return false;\n      }\n      const entry = entries.get(key);\n      if (time >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    },\n  };\n}\n",
+      "codeSha256": "ef84828c24fd36cd8ab3bfd7075691042e529b136b101c49c14ea87ba1b368d0",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 4,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "525461da-f595-4345-b671-6d69cabf266f",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 3491,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 919
+      },
+      "numTurns": 2,
+      "costUsd": 0.0775204,
+      "latencyMs": 32121,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== 'object') {\n    throw new RangeError('initial must be an object');\n  }\n\n  const balances = new Map();\n  for (const key of Object.keys(initial)) {\n    const value = initial[key];\n    if (!Number.isSafeInteger(value) || value < 0) {\n      throw new RangeError(`Invalid balance for account ${key}`);\n    }\n    balances.set(key, value);\n  }\n\n  const seen = new Map();\n\n  function readTransfer(transfer) {\n    if (transfer === null || typeof transfer !== 'object') {\n      throw new RangeError('Transfer must be an object');\n    }\n    const id = transfer.id;\n    const from = transfer.from;\n    const to = transfer.to;\n    const amount = transfer.amount;\n    if (typeof id !== 'string' || id.length === 0) {\n      throw new RangeError('Transfer id must be a nonempty string');\n    }\n    if (typeof from !== 'string' || !balances.has(from)) {\n      throw new RangeError(`Unknown source account ${String(from)}`);\n    }\n    if (typeof to !== 'string' || !balances.has(to)) {\n      throw new RangeError(`Unknown destination account ${String(to)}`);\n    }\n    if (!Number.isSafeInteger(amount) || amount <= 0) {\n      throw new RangeError('Transfer amount must be a positive safe integer');\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new RangeError('Batch must be an array');\n    }\n\n    const pendingBalances = new Map();\n    const pendingIds = new Map();\n    const getBalance = (name) =>\n      pendingBalances.has(name) ? pendingBalances.get(name) : balances.get(name);\n\n    const results = [];\n    const length = batch.length;\n    for (let i = 0; i < length; i++) {\n      const { id, from, to, amount } = readTransfer(batch[i]);\n\n      const prior = pendingIds.has(id) ? pendingIds.get(id) : seen.get(id);\n      if (prior !== undefined) {\n        if (prior.from === from && prior.to === to && prior.amount === amount) {\n          results.push('duplicate');\n          continue;\n        }\n        throw new RangeError(`Transfer id ${id} reused with different fields`);\n      }\n\n      const fromBalance = getBalance(from);\n      if (fromBalance < amount) {\n        throw new RangeError(`Insufficient balance in account ${from}`);\n      }\n\n      if (from !== to) {\n        const toBalance = getBalance(to);\n        if (toBalance > Number.MAX_SAFE_INTEGER - amount) {\n          throw new RangeError(`Balance overflow in account ${to}`);\n        }\n        pendingBalances.set(from, fromBalance - amount);\n        pendingBalances.set(to, toBalance + amount);\n      }\n\n      pendingIds.set(id, { from, to, amount });\n      results.push('applied');\n    }\n\n    for (const [name, value] of pendingBalances) {\n      balances.set(name, value);\n    }\n    for (const [id, record] of pendingIds) {\n      seen.set(id, record);\n    }\n\n    return results;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [name, value] of balances) {\n      out[name] = value;\n    }\n    return out;\n  }\n\n  return { apply, snapshot };\n}\n",
+      "codeSha256": "cbc78a27fb4ddc8247588d49ba89e4af77cf9d8098fbefc3e96d9db9a305ff9f",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 5,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "high",
+      "recordedEfforts": [
+        "high",
+        "high"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "73ac5b39-139c-47df-8dad-884ef42326d3",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1818,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 919
+      },
+      "numTurns": 2,
+      "costUsd": 0.04406039999999999,
+      "latencyMs": 19205,
+      "code": "export function createLedger(initial) {\n  if (initial === null || (typeof initial !== 'object' && typeof initial !== 'function')) {\n    throw new RangeError('initial must be an object');\n  }\n  const balances = new Map();\n  for (const key of Object.keys(initial)) {\n    const value = initial[key];\n    if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) {\n      throw new RangeError('Invalid balance for account ' + key);\n    }\n    balances.set(key, value);\n  }\n  let seen = new Map();\n\n  function readTransfer(t) {\n    if (t === null || typeof t !== 'object') {\n      throw new RangeError('Transfer must be an object');\n    }\n    const id = t.id;\n    const from = t.from;\n    const to = t.to;\n    const amount = t.amount;\n    if (typeof id !== 'string' || id.length === 0) {\n      throw new RangeError('Invalid transfer id');\n    }\n    if (typeof from !== 'string' || !balances.has(from)) {\n      throw new RangeError('Invalid from account');\n    }\n    if (typeof to !== 'string' || !balances.has(to)) {\n      throw new RangeError('Invalid to account');\n    }\n    if (typeof amount !== 'number' || !Number.isSafeInteger(amount) || amount <= 0) {\n      throw new RangeError('Invalid amount');\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new RangeError('Batch must be an array');\n    }\n    const length = batch.length;\n    const working = new Map(balances);\n    const batchSeen = new Map();\n    const results = [];\n    for (let i = 0; i < length; i++) {\n      const t = readTransfer(batch[i]);\n      const prior = batchSeen.has(t.id) ? batchSeen.get(t.id) : seen.get(t.id);\n      if (prior !== undefined) {\n        if (prior.from === t.from && prior.to === t.to && prior.amount === t.amount) {\n          results.push('duplicate');\n          continue;\n        }\n        throw new RangeError('Conflicting transfer for id ' + t.id);\n      }\n      const fromBal = working.get(t.from);\n      if (fromBal < t.amount) {\n        throw new RangeError('Insufficient balance');\n      }\n      if (t.from !== t.to) {\n        const toBal = working.get(t.to);\n        const next = toBal + t.amount;\n        if (!Number.isSafeInteger(next)) {\n          throw new RangeError('Destination balance overflow');\n        }\n        working.set(t.from, fromBal - t.amount);\n        working.set(t.to, next);\n      }\n      batchSeen.set(t.id, { from: t.from, to: t.to, amount: t.amount });\n      results.push('applied');\n    }\n    for (const [k, v] of working) balances.set(k, v);\n    for (const [k, v] of batchSeen) seen.set(k, v);\n    return results;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [k, v] of balances) {\n      Object.defineProperty(out, k, {\n        value: v,\n        writable: true,\n        enumerable: true,\n        configurable: true,\n      });\n    }\n    return out;\n  }\n\n  return { apply, snapshot };\n}\n",
+      "codeSha256": "0fef9dbb59ea93145a109d07ab2f0cd349d016164d22f20dda43234b5d249bc5",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "recommended",
+      "order": 6,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "f2d571d1-1055-4935-bf7d-a56df7887060",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1134,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 712
+      },
+      "numTurns": 2,
+      "costUsd": 0.0287244,
+      "latencyMs": 13850,
+      "code": "function validate(list, name) {\n  if (!Array.isArray(list)) {\n    throw new TypeError(name + \" must be an array of [start, end] pairs\");\n  }\n  const out = [];\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError(name + \"[\" + i + \"] must be a [start, end] pair\");\n    }\n    const s = pair[0];\n    const e = pair[1];\n    if (typeof s !== \"number\" || typeof e !== \"number\" || !Number.isFinite(s) || !Number.isFinite(e)) {\n      throw new RangeError(name + \"[\" + i + \"] endpoints must be finite numbers\");\n    }\n    if (s > e) {\n      throw new RangeError(name + \"[\" + i + \"] start must be <= end\");\n    }\n    if (s < e) out.push([s, e]);\n  }\n  return out;\n}\n\nfunction normalize(list) {\n  list.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const [s, e] of list) {\n    const last = merged[merged.length - 1];\n    if (last && s <= last[1]) {\n      if (e > last[1]) last[1] = e;\n    } else {\n      merged.push([s, e]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  const b = normalize(validate(base, \"base\"));\n  const c = normalize(validate(cuts, \"cuts\"));\n  const result = [];\n  let j = 0;\n  for (const [bs, be] of b) {\n    let cur = bs;\n    while (j < c.length && c[j][1] <= cur) j++;\n    let k = j;\n    while (k < c.length && c[k][0] < be) {\n      const [cs, ce] = c[k];\n      if (cs > cur) result.push([cur, cs]);\n      if (ce > cur) cur = ce;\n      if (cur >= be) break;\n      k++;\n    }\n    if (cur < be) result.push([cur, be]);\n  }\n  return result;\n}\n",
+      "codeSha256": "48a032076beeee4dd407e43ed9d2a8384933a653398bae2db13c57883244281e",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 0,
+      "arm": "baseline",
+      "order": 7,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "f73a4dab-d50d-479d-aae2-fb273a7645d9",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1885,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 713
+      },
+      "numTurns": 2,
+      "costUsd": 0.0437524,
+      "latencyMs": 21238,
+      "code": "function validate(list, name) {\n  if (!Array.isArray(list)) {\n    throw new RangeError(`${name} must be an array of [start, end] pairs`);\n  }\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError(`${name}[${i}] must be a [start, end] pair`);\n    }\n    const [start, end] = pair;\n    if (typeof start !== \"number\" || typeof end !== \"number\" ||\n        !Number.isFinite(start) || !Number.isFinite(end)) {\n      throw new RangeError(`${name}[${i}] endpoints must be finite numbers`);\n    }\n    if (start > end) {\n      throw new RangeError(`${name}[${i}] start must be <= end`);\n    }\n  }\n}\n\nfunction normalize(list) {\n  const items = [];\n  for (let i = 0; i < list.length; i++) {\n    const start = list[i][0];\n    const end = list[i][1];\n    if (start < end) items.push([start, end]);\n  }\n  items.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const item of items) {\n    const last = merged[merged.length - 1];\n    if (last && item[0] <= last[1]) {\n      if (item[1] > last[1]) last[1] = item[1];\n    } else {\n      merged.push([item[0], item[1]]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  validate(base, \"base\");\n  validate(cuts, \"cuts\");\n\n  const b = normalize(base);\n  const c = normalize(cuts);\n  const result = [];\n  let j = 0;\n\n  for (let i = 0; i < b.length; i++) {\n    const end = b[i][1];\n    let cur = b[i][0];\n\n    while (j < c.length && c[j][1] <= cur) j++;\n\n    for (let k = j; k < c.length && c[k][0] < end; k++) {\n      if (c[k][0] > cur) result.push([cur, c[k][0]]);\n      if (c[k][1] > cur) cur = c[k][1];\n      if (cur >= end) break;\n    }\n\n    if (cur < end) result.push([cur, end]);\n  }\n\n  return result;\n}\n",
+      "codeSha256": "9cac712e918b450ae2dbd6c883f6854307a3bac99f5ba505df586b7f45494ccb",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 8,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "751f5d45-3caf-446a-b187-6196ef68af3f",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1111,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 733
+      },
+      "numTurns": 2,
+      "costUsd": 0.028432400000000004,
+      "latencyMs": 12601,
+      "code": "const NUM = '([+-]?[0-9]+)';\nconst SINGLE_RE = new RegExp('^\\\\s*' + NUM + '\\\\s*$');\nconst RANGE_RE = new RegExp('^\\\\s*' + NUM + '\\\\s*\\\\.\\\\.\\\\s*' + NUM + '\\\\s*$');\nconst MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);\nconst MIN_SAFE = BigInt(Number.MIN_SAFE_INTEGER);\nconst MAX_RANGE_MEMBERS = 1000n;\n\nfunction parseSafeInt(str) {\n  const big = BigInt(str);\n  if (big > MAX_SAFE || big < MIN_SAFE) {\n    throw new RangeError('Integer out of safe range: ' + str);\n  }\n  return big;\n}\n\nexport function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('parseRanges expects a string');\n  }\n  if (text.trim() === '') {\n    return [];\n  }\n\n  const seen = new Set();\n  const items = text.split(',');\n\n  for (const item of items) {\n    if (item.trim() === '') {\n      throw new RangeError('Empty item in list');\n    }\n\n    let m = RANGE_RE.exec(item);\n    if (m) {\n      const start = parseSafeInt(m[1]);\n      const end = parseSafeInt(m[2]);\n      if (start > end) {\n        throw new RangeError('Descending range: ' + item.trim());\n      }\n      if (end - start + 1n > MAX_RANGE_MEMBERS) {\n        throw new RangeError('Range has more than 1000 members: ' + item.trim());\n      }\n      for (let v = start; v <= end; v++) {\n        seen.add(Number(v));\n      }\n      continue;\n    }\n\n    m = SINGLE_RE.exec(item);\n    if (m) {\n      seen.add(Number(parseSafeInt(m[1])));\n      continue;\n    }\n\n    throw new RangeError('Malformed item: ' + item.trim());\n  }\n\n  return Array.from(seen).sort((a, b) => a - b);\n}\n",
+      "codeSha256": "611cf9f08e323a8644016bc48aded79740d4c207398dc6d15b12a37ac1cdf58c",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 9,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "dca93430-7634-4c5c-a8f1-3c36d8f5d415",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 2013,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 733
+      },
+      "numTurns": 2,
+      "costUsd": 0.046472400000000004,
+      "latencyMs": 23613,
+      "code": "const ITEM_PATTERN = /^\\s*([+-]?\\d+)\\s*(?:\\.\\.\\s*([+-]?\\d+)\\s*)?$/;\nconst MAX_RANGE_MEMBERS = 1000;\n\nfunction parseInteger(token) {\n  const value = Number(token);\n  if (!Number.isSafeInteger(value)) {\n    throw new RangeError(`Integer out of safe range: ${token}`);\n  }\n  // Normalize -0 to 0.\n  return value === 0 ? 0 : value;\n}\n\nexport function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('parseRanges expects a string');\n  }\n  if (text.trim() === '') {\n    return [];\n  }\n\n  const seen = new Set();\n  const items = text.split(',');\n\n  for (const item of items) {\n    if (item.trim() === '') {\n      throw new RangeError('Empty item in range list');\n    }\n    const match = ITEM_PATTERN.exec(item);\n    if (match === null) {\n      throw new RangeError(`Malformed item: ${JSON.stringify(item)}`);\n    }\n\n    const start = parseInteger(match[1]);\n    const end = match[2] === undefined ? start : parseInteger(match[2]);\n\n    if (start > end) {\n      throw new RangeError(`Descending range: ${item.trim()}`);\n    }\n    if (end - start + 1 > MAX_RANGE_MEMBERS) {\n      throw new RangeError(\n        `Range exceeds ${MAX_RANGE_MEMBERS} members: ${item.trim()}`\n      );\n    }\n\n    for (let n = start; n <= end; n++) {\n      seen.add(n);\n    }\n  }\n\n  return Array.from(seen).sort((a, b) => a - b);\n}\n",
+      "codeSha256": "c7d3ed925597f7be5e99b18d75b4c05d8e429d833db9d3aa2ed44c4fa3b53a0b",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 10,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "9d1b251d-3aaa-4b21-a332-5a3228890cfd",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1668,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 808
+      },
+      "numTurns": 2,
+      "costUsd": 0.0401724,
+      "latencyMs": 20362,
+      "code": "export function createCache(capacity, now) {\n  if (!Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  // Map preserves insertion order: first entry is LRU, last entry is MRU.\n  const entries = new Map();\n\n  function purge(t) {\n    for (const [key, entry] of entries) {\n      if (t >= entry.expiresAt) {\n        entries.delete(key);\n      }\n    }\n  }\n\n  function lookupLive(key, t) {\n    const entry = entries.get(key);\n    if (entry === undefined) return undefined;\n    if (t >= entry.expiresAt) {\n      entries.delete(key);\n      return undefined;\n    }\n    return entry;\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const t = now();\n      if (ttl === 0) {\n        entries.delete(key);\n        purge(t);\n        return undefined;\n      }\n      purge(t);\n      entries.delete(key);\n      entries.set(key, { value, expiresAt: t + ttl });\n      while (entries.size > capacity) {\n        const lruKey = entries.keys().next().value;\n        entries.delete(lruKey);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const t = now();\n      const entry = lookupLive(key, t);\n      if (entry === undefined) return undefined;\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const t = now();\n      return lookupLive(key, t) !== undefined;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    },\n  };\n}\n",
+      "codeSha256": "8f5376da082751298ee242f65f59a474a6960e9d984c56dce7a618c4e96104ba",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 11,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "473dc2c5-8029-4dca-9812-bc9649f2f77b",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 916,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 808
+      },
+      "numTurns": 2,
+      "costUsd": 0.025132400000000003,
+      "latencyMs": 11464,
+      "code": "export function createCache(capacity, now) {\n  if (typeof capacity !== \"number\" || !Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  // Map insertion order tracks recency: first = LRU, last = MRU.\n  const entries = new Map();\n\n  function purge(t) {\n    for (const [key, entry] of entries) {\n      if (t >= entry.expires) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const t = now();\n      if (ttl === 0) {\n        entries.delete(key);\n        purge(t);\n        return undefined;\n      }\n      purge(t);\n      entries.delete(key);\n      entries.set(key, { value, expires: t + ttl });\n      while (entries.size > capacity) {\n        entries.delete(entries.keys().next().value);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const t = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      if (t >= entry.expires) {\n        entries.delete(key);\n        return undefined;\n      }\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const t = now();\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      if (t >= entry.expires) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    },\n  };\n}\n",
+      "codeSha256": "a8f8bf6284bee371ea64d5076b00a5450d9c2d835c49376018e5319a22c362b9",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 12,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "high",
+      "recordedEfforts": [
+        "high",
+        "high"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "c2d942d0-ffb5-4548-aa9e-a203b3ebc9f7",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1715,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 917
+      },
+      "numTurns": 2,
+      "costUsd": 0.0419844,
+      "latencyMs": 20375,
+      "code": "export function createLedger(initial) {\n  if (initial === null || typeof initial !== \"object\") {\n    throw new TypeError(\"initial must be an object\");\n  }\n  const isBalance = (v) => typeof v === \"number\" && Number.isSafeInteger(v) && v >= 0;\n  const balances = new Map();\n  for (const key of Object.keys(initial)) {\n    const value = initial[key];\n    if (!isBalance(value)) throw new RangeError(\"Invalid balance for account \" + key);\n    balances.set(key, value);\n  }\n  const seen = new Map();\n\n  function readTransfer(t) {\n    if (t === null || typeof t !== \"object\") throw new RangeError(\"Invalid transfer\");\n    const id = t.id;\n    const from = t.from;\n    const to = t.to;\n    const amount = t.amount;\n    if (typeof id !== \"string\" || id.length === 0) throw new RangeError(\"Invalid id\");\n    if (typeof from !== \"string\" || !balances.has(from)) throw new RangeError(\"Invalid from\");\n    if (typeof to !== \"string\" || !balances.has(to)) throw new RangeError(\"Invalid to\");\n    if (typeof amount !== \"number\" || !Number.isSafeInteger(amount) || amount <= 0) {\n      throw new RangeError(\"Invalid amount\");\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) throw new TypeError(\"batch must be an array\");\n    const work = new Map(balances);\n    const newIds = new Map();\n    const results = [];\n    for (let i = 0; i < batch.length; i++) {\n      const { id, from, to, amount } = readTransfer(batch[i]);\n      const prev = newIds.has(id) ? newIds.get(id) : seen.get(id);\n      if (prev !== undefined) {\n        if (prev.from === from && prev.to === to && prev.amount === amount) {\n          results.push(\"duplicate\");\n          continue;\n        }\n        throw new RangeError(\"Conflicting transfer for id \" + id);\n      }\n      const fromBal = work.get(from);\n      if (fromBal < amount) throw new RangeError(\"Insufficient balance\");\n      if (from !== to) {\n        const toBal = work.get(to);\n        const next = toBal + amount;\n        if (!Number.isSafeInteger(next) || next > Number.MAX_SAFE_INTEGER) {\n          throw new RangeError(\"Destination overflow\");\n        }\n        work.set(from, fromBal - amount);\n        work.set(to, next);\n      }\n      newIds.set(id, { from, to, amount });\n      results.push(\"applied\");\n    }\n    for (const [k, v] of work) balances.set(k, v);\n    for (const [k, v] of newIds) seen.set(k, v);\n    return results;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [k, v] of balances) {\n      Object.defineProperty(out, k, {\n        value: v,\n        writable: true,\n        enumerable: true,\n        configurable: true,\n      });\n    }\n    return out;\n  }\n\n  return { apply, snapshot };\n}\n",
+      "codeSha256": "2232f3e3278c4f827931b5df43ebc270a528fef40eac723636903604a4871f0c",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 13,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "e40c9cdb-70af-4610-97ff-b2df04cadda3",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 2877,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 917
+      },
+      "numTurns": 2,
+      "costUsd": 0.06522439999999999,
+      "latencyMs": 31163,
+      "code": "const MAX = Number.MAX_SAFE_INTEGER;\n\nfunction isObjectLike(value) {\n  return value !== null && (typeof value === 'object' || typeof value === 'function');\n}\n\nfunction isNonNegativeSafeInteger(value) {\n  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;\n}\n\nfunction isPositiveSafeInteger(value) {\n  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;\n}\n\nexport function createLedger(initial) {\n  if (!isObjectLike(initial)) {\n    throw new RangeError('initial must be an object');\n  }\n\n  let balances = new Map();\n  const keys = Object.keys(initial);\n  for (let i = 0; i < keys.length; i++) {\n    const name = keys[i];\n    const value = initial[name];\n    if (!isNonNegativeSafeInteger(value)) {\n      throw new RangeError('invalid balance for account ' + JSON.stringify(name));\n    }\n    balances.set(name, value === 0 ? 0 : value);\n  }\n\n  // id -> { from, to, amount }\n  const seen = new Map();\n\n  function readTransfer(transfer, accounts) {\n    if (!isObjectLike(transfer)) {\n      throw new RangeError('transfer must be an object');\n    }\n    const id = transfer.id;\n    const from = transfer.from;\n    const to = transfer.to;\n    const amount = transfer.amount;\n\n    if (typeof id !== 'string' || id.length === 0) {\n      throw new RangeError('transfer id must be a nonempty string');\n    }\n    if (typeof from !== 'string' || !accounts.has(from)) {\n      throw new RangeError('unknown source account');\n    }\n    if (typeof to !== 'string' || !accounts.has(to)) {\n      throw new RangeError('unknown destination account');\n    }\n    if (!isPositiveSafeInteger(amount)) {\n      throw new RangeError('amount must be a positive safe integer');\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new RangeError('batch must be an array');\n    }\n    const items = Array.prototype.slice.call(batch);\n    const results = [];\n    if (items.length === 0) return results;\n\n    // Work on copies so any error leaves committed state untouched.\n    const working = new Map(balances);\n    const batchIds = new Map();\n\n    for (let i = 0; i < items.length; i++) {\n      const { id, from, to, amount } = readTransfer(items[i], working);\n\n      const previous = batchIds.has(id) ? batchIds.get(id) : seen.get(id);\n      if (previous !== undefined) {\n        if (previous.from === from && previous.to === to && previous.amount === amount) {\n          results.push('duplicate');\n          continue;\n        }\n        throw new RangeError('transfer id ' + JSON.stringify(id) + ' reused with different fields');\n      }\n\n      const fromBalance = working.get(from);\n      if (fromBalance < amount) {\n        throw new RangeError('insufficient balance in ' + JSON.stringify(from));\n      }\n      if (from !== to) {\n        const toBalance = working.get(to);\n        if (toBalance > MAX - amount) {\n          throw new RangeError('destination balance overflow in ' + JSON.stringify(to));\n        }\n        working.set(from, fromBalance - amount);\n        working.set(to, toBalance + amount);\n      }\n\n      batchIds.set(id, { from, to, amount });\n      results.push('applied');\n    }\n\n    balances = working;\n    for (const [id, record] of batchIds) {\n      seen.set(id, record);\n    }\n    return results;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [name, value] of balances) {\n      Object.defineProperty(out, name, {\n        value,\n        writable: true,\n        enumerable: true,\n        configurable: true,\n      });\n    }\n    return out;\n  }\n\n  return Object.freeze({ apply, snapshot });\n}\n",
+      "codeSha256": "8bc14f6a09375afb0e1bb2767ce966210969f56f73b3af20282d99495a601ec5",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "baseline",
+      "order": 14,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "ebc971ea-28a3-441d-8d45-920796c3a768",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1829,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 714
+      },
+      "numTurns": 2,
+      "costUsd": 0.0426404,
+      "latencyMs": 21393,
+      "code": "function validateAndNormalize(list, name) {\n  if (!Array.isArray(list)) {\n    throw new RangeError(name + \" must be an array of [start, end] pairs\");\n  }\n  const items = [];\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError(name + \"[\" + i + \"] must be a [start, end] pair\");\n    }\n    const start = pair[0];\n    const end = pair[1];\n    if (typeof start !== \"number\" || typeof end !== \"number\" ||\n        !Number.isFinite(start) || !Number.isFinite(end)) {\n      throw new RangeError(name + \"[\" + i + \"] endpoints must be finite numbers\");\n    }\n    if (start > end) {\n      throw new RangeError(name + \"[\" + i + \"] start must be <= end\");\n    }\n    if (start < end) {\n      items.push([start, end]);\n    }\n  }\n  items.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const item of items) {\n    const last = merged[merged.length - 1];\n    if (last && item[0] <= last[1]) {\n      if (item[1] > last[1]) last[1] = item[1];\n    } else {\n      merged.push([item[0], item[1]]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  const b = validateAndNormalize(base, \"base\");\n  const c = validateAndNormalize(cuts, \"cuts\");\n  const out = [];\n  let j = 0;\n  for (const [s, e] of b) {\n    let cur = s;\n    while (j < c.length && c[j][1] <= cur) j++;\n    let k = j;\n    while (k < c.length && c[k][0] < e) {\n      if (c[k][0] > cur) out.push([cur, c[k][0]]);\n      if (c[k][1] > cur) cur = c[k][1];\n      if (cur >= e) break;\n      k++;\n    }\n    if (cur < e) out.push([cur, e]);\n    j = k;\n  }\n  return out;\n}\n",
+      "codeSha256": "44b8fc7d6241ad4aec7834551d6f9b76c348ab47a8ad5391add4e13c03782775",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 1,
+      "arm": "recommended",
+      "order": 15,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "f8990f45-45b7-476a-92c4-54330928a195",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1111,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 714
+      },
+      "numTurns": 2,
+      "costUsd": 0.028280400000000004,
+      "latencyMs": 13122,
+      "code": "function validate(list, name) {\n  if (!Array.isArray(list)) {\n    throw new RangeError(name + \" must be an array of [start, end] pairs\");\n  }\n  const out = [];\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError(name + \"[\" + i + \"] must be a [start, end] pair\");\n    }\n    const s = pair[0];\n    const e = pair[1];\n    if (typeof s !== \"number\" || typeof e !== \"number\" || !Number.isFinite(s) || !Number.isFinite(e)) {\n      throw new RangeError(name + \"[\" + i + \"] endpoints must be finite numbers\");\n    }\n    if (s > e) {\n      throw new RangeError(name + \"[\" + i + \"] start must be <= end\");\n    }\n    if (s < e) out.push([s, e]);\n  }\n  return out;\n}\n\nfunction normalize(intervals) {\n  intervals.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const [s, e] of intervals) {\n    const last = merged[merged.length - 1];\n    if (last && s <= last[1]) {\n      if (e > last[1]) last[1] = e;\n    } else {\n      merged.push([s, e]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  const b = normalize(validate(base, \"base\"));\n  const c = normalize(validate(cuts, \"cuts\"));\n  const result = [];\n  let j = 0;\n  for (const [bs, be] of b) {\n    let cur = bs;\n    while (j < c.length && c[j][1] <= cur) j++;\n    let k = j;\n    while (k < c.length && c[k][0] < be) {\n      const [cs, ce] = c[k];\n      if (cs > cur) result.push([cur, cs]);\n      if (ce > cur) cur = ce;\n      if (cur >= be) break;\n      k++;\n    }\n    if (cur < be) result.push([cur, be]);\n    j = k;\n  }\n  return result;\n}\n",
+      "codeSha256": "a2010e9920740073ff2bd8a539d730e96eb4897b151e30f257639d1dac0d8cb9",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 16,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "86eb4289-73ec-4102-ad44-782a737e63c4",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 2277,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 733
+      },
+      "numTurns": 2,
+      "costUsd": 0.0517524,
+      "latencyMs": 24138,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('parseRanges expects a string');\n  }\n  if (text.trim() === '') {\n    return [];\n  }\n\n  const NUM = '[+-]?[0-9]+';\n  const singleRe = new RegExp('^(' + NUM + ')$');\n  const rangeRe = new RegExp('^(' + NUM + ')\\\\s*\\\\.\\\\.\\\\s*(' + NUM + ')$');\n\n  const toInt = (str) => {\n    const n = Number(str);\n    if (!Number.isSafeInteger(n)) {\n      throw new RangeError('Integer out of safe range: ' + str);\n    }\n    return n === 0 ? 0 : n;\n  };\n\n  const seen = new Set();\n  const items = text.split(',');\n\n  for (let i = 0; i < items.length; i++) {\n    const item = items[i].trim();\n    if (item === '') {\n      throw new RangeError('Empty item at position ' + i);\n    }\n\n    let m = singleRe.exec(item);\n    if (m) {\n      seen.add(toInt(m[1]));\n      continue;\n    }\n\n    m = rangeRe.exec(item);\n    if (!m) {\n      throw new RangeError('Malformed item: ' + JSON.stringify(item));\n    }\n\n    const a = toInt(m[1]);\n    const b = toInt(m[2]);\n    if (a > b) {\n      throw new RangeError('Descending range: ' + item);\n    }\n    if (b - a + 1 > 1000) {\n      throw new RangeError('Range has more than 1000 members: ' + item);\n    }\n    for (let v = a; v <= b; v++) {\n      seen.add(v);\n    }\n  }\n\n  return Array.from(seen).sort((x, y) => x - y);\n}\n",
+      "codeSha256": "6083c237e8138f744589f08a13ff12a00ba45073f58c0f571110a9788bd960b3",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 17,
+      "task": "ranges",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "sessionId": "a16d7c10-b00b-4817-8598-af4ce65e9223",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 976,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 732
+      },
+      "numTurns": 2,
+      "costUsd": 0.0257244,
+      "latencyMs": 11492,
+      "code": "export function parseRanges(text) {\n  if (typeof text !== 'string') {\n    throw new TypeError('parseRanges expects a string');\n  }\n  if (text.trim() === '') {\n    return [];\n  }\n\n  const itemRe = /^([+-]?\\d+)(?:\\s*\\.\\.\\s*([+-]?\\d+))?$/;\n  const toInt = (str) => {\n    const n = Number(str);\n    if (!Number.isSafeInteger(n)) {\n      throw new RangeError(`Integer out of safe range: ${str}`);\n    }\n    return n === 0 ? 0 : n; // normalize -0\n  };\n\n  const seen = new Set();\n  for (const raw of text.split(',')) {\n    const item = raw.trim();\n    if (item === '') {\n      throw new RangeError('Empty item in list');\n    }\n    const m = itemRe.exec(item);\n    if (!m) {\n      throw new RangeError(`Malformed item: ${item}`);\n    }\n    const start = toInt(m[1]);\n    if (m[2] === undefined) {\n      seen.add(start);\n      continue;\n    }\n    const end = toInt(m[2]);\n    if (start > end) {\n      throw new RangeError(`Descending range: ${item}`);\n    }\n    if (end - start + 1 > 1000) {\n      throw new RangeError(`Range has more than 1000 members: ${item}`);\n    }\n    for (let n = start; n <= end; n++) {\n      seen.add(n);\n    }\n  }\n\n  return Array.from(seen).sort((a, b) => a - b);\n}\n",
+      "codeSha256": "5d6c4922aac422e8f196b76cf3478d15ce2dee6690a6ad14c88b1f535f5f9ff0",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 18,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "87de5056-9bbb-4fa9-9597-2e893e425397",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1044,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 808
+      },
+      "numTurns": 2,
+      "costUsd": 0.027692400000000002,
+      "latencyMs": 12655,
+      "code": "export function createCache(capacity, now) {\n  if (typeof capacity !== \"number\" || !Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  const entries = new Map();\n\n  function purge(t) {\n    for (const [key, entry] of entries) {\n      if (t >= entry.expiresAt) entries.delete(key);\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const t = now();\n      if (ttl === 0) {\n        entries.delete(key);\n        purge(t);\n        return undefined;\n      }\n      purge(t);\n      entries.delete(key);\n      entries.set(key, { value, expiresAt: t + ttl });\n      while (entries.size > capacity) {\n        const oldest = entries.keys().next().value;\n        entries.delete(oldest);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return undefined;\n      const t = now();\n      if (t >= entry.expiresAt) {\n        entries.delete(key);\n        return undefined;\n      }\n      entries.delete(key);\n      entries.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const entry = entries.get(key);\n      if (entry === undefined) return false;\n      const t = now();\n      if (t >= entry.expiresAt) {\n        entries.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return entries.size;\n    },\n  };\n}\n",
+      "codeSha256": "3da623809728982fdada1c01b9bf30a714ec19ce523286b60a584332cc152cfd",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 19,
+      "task": "ttl-lru",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "sessionId": "21680dd3-3dc9-4f6f-86a9-d4623f52633f",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1801,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 807
+      },
+      "numTurns": 2,
+      "costUsd": 0.0428244,
+      "latencyMs": 20099,
+      "code": "export function createCache(capacity, now) {\n  if (typeof capacity !== \"number\" || !Number.isSafeInteger(capacity) || capacity <= 0) {\n    throw new RangeError(\"capacity must be a positive safe integer\");\n  }\n  if (typeof now !== \"function\") {\n    throw new TypeError(\"now must be a function\");\n  }\n\n  // Map preserves insertion order: first entry is LRU, last is MRU.\n  const map = new Map();\n\n  function isExpired(entry, t) {\n    return t >= entry.expires;\n  }\n\n  function purge(t) {\n    for (const [key, entry] of map) {\n      if (isExpired(entry, t)) {\n        map.delete(key);\n      }\n    }\n  }\n\n  return {\n    set(key, value, ttl) {\n      if (typeof ttl !== \"number\" || !Number.isFinite(ttl) || ttl < 0) {\n        throw new RangeError(\"ttl must be a finite number >= 0\");\n      }\n      const t = now();\n      purge(t);\n      if (ttl === 0) {\n        map.delete(key);\n        return undefined;\n      }\n      map.delete(key);\n      map.set(key, { value, expires: t + ttl });\n      while (map.size > capacity) {\n        const lruKey = map.keys().next().value;\n        map.delete(lruKey);\n      }\n      return undefined;\n    },\n\n    get(key) {\n      const t = now();\n      if (!map.has(key)) {\n        return undefined;\n      }\n      const entry = map.get(key);\n      if (isExpired(entry, t)) {\n        map.delete(key);\n        return undefined;\n      }\n      map.delete(key);\n      map.set(key, entry);\n      return entry.value;\n    },\n\n    has(key) {\n      const t = now();\n      if (!map.has(key)) {\n        return false;\n      }\n      const entry = map.get(key);\n      if (isExpired(entry, t)) {\n        map.delete(key);\n        return false;\n      }\n      return true;\n    },\n\n    get size() {\n      purge(now());\n      return map.size;\n    },\n  };\n}\n",
+      "codeSha256": "404fe1cd6a86b70c0215837d88e68b85bf144221c38c097bcb15e386db3f4d14",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 20,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "f88fd025-c6c1-487e-9b32-6f13169c7ceb",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 3149,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 918
+      },
+      "numTurns": 2,
+      "costUsd": 0.0706724,
+      "latencyMs": 31948,
+      "code": "const MAX = Number.MAX_SAFE_INTEGER;\n\nfunction isBalance(value) {\n  return typeof value === \"number\" && Number.isSafeInteger(value) && value >= 0;\n}\n\nfunction isAmount(value) {\n  return typeof value === \"number\" && Number.isSafeInteger(value) && value > 0;\n}\n\nexport function createLedger(initial) {\n  if (typeof initial !== \"object\" || initial === null) {\n    throw new TypeError(\"initial must be an object\");\n  }\n\n  const balances = new Map();\n  for (const key of Object.keys(initial)) {\n    const value = initial[key];\n    if (!isBalance(value)) {\n      throw new RangeError(`invalid balance for account ${JSON.stringify(key)}`);\n    }\n    balances.set(key, value + 0); // normalize -0\n  }\n\n  // id -> { from, to, amount }\n  const seen = new Map();\n\n  function readTransfer(raw, index) {\n    if (typeof raw !== \"object\" || raw === null) {\n      throw new RangeError(`transfer at index ${index} must be an object`);\n    }\n    const id = raw.id;\n    const from = raw.from;\n    const to = raw.to;\n    const amount = raw.amount;\n    if (typeof id !== \"string\" || id.length === 0) {\n      throw new RangeError(`transfer at index ${index} has invalid id`);\n    }\n    if (typeof from !== \"string\" || !balances.has(from)) {\n      throw new RangeError(`transfer ${JSON.stringify(id)} has invalid from account`);\n    }\n    if (typeof to !== \"string\" || !balances.has(to)) {\n      throw new RangeError(`transfer ${JSON.stringify(id)} has invalid to account`);\n    }\n    if (!isAmount(amount)) {\n      throw new RangeError(`transfer ${JSON.stringify(id)} has invalid amount`);\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new TypeError(\"batch must be an array\");\n    }\n\n    // Work on copies; commit only if the whole batch succeeds.\n    const working = new Map(balances);\n    const batchSeen = new Map();\n    const statuses = [];\n    const length = batch.length;\n\n    for (let i = 0; i < length; i++) {\n      const t = readTransfer(batch[i], i);\n\n      const prior = batchSeen.has(t.id) ? batchSeen.get(t.id) : seen.get(t.id);\n      if (prior !== undefined) {\n        if (prior.from === t.from && prior.to === t.to && prior.amount === t.amount) {\n          statuses.push(\"duplicate\");\n          continue;\n        }\n        throw new RangeError(`transfer id ${JSON.stringify(t.id)} reused with different fields`);\n      }\n\n      const fromBalance = working.get(t.from);\n      if (fromBalance < t.amount) {\n        throw new RangeError(`insufficient balance in account ${JSON.stringify(t.from)}`);\n      }\n\n      if (t.from !== t.to) {\n        const toBalance = working.get(t.to);\n        if (toBalance > MAX - t.amount) {\n          throw new RangeError(`balance overflow in account ${JSON.stringify(t.to)}`);\n        }\n        working.set(t.from, fromBalance - t.amount);\n        working.set(t.to, toBalance + t.amount);\n      }\n\n      batchSeen.set(t.id, { from: t.from, to: t.to, amount: t.amount });\n      statuses.push(\"applied\");\n    }\n\n    for (const [key, value] of working) {\n      balances.set(key, value);\n    }\n    for (const [id, record] of batchSeen) {\n      seen.set(id, record);\n    }\n    return statuses;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [key, value] of balances) {\n      Object.defineProperty(out, key, {\n        value,\n        writable: true,\n        enumerable: true,\n        configurable: true,\n      });\n    }\n    return out;\n  }\n\n  return Object.freeze({ apply, snapshot });\n}\n",
+      "codeSha256": "467c820f8bc9304aec0d2b8dce195c33d37fc1a02b5378cf28ee882476187b68",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 21,
+      "task": "ledger",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "high",
+      "recordedEfforts": [
+        "high",
+        "high"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "sessionId": "2f8d5328-6d00-4cf7-85b4-6a19dfa3ae94",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1671,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 916
+      },
+      "numTurns": 2,
+      "costUsd": 0.0410964,
+      "latencyMs": 17516,
+      "code": "export function createLedger(initial) {\n  if (initial === null || (typeof initial !== 'object' && typeof initial !== 'function')) {\n    throw new RangeError('initial must be an object');\n  }\n  let balances = new Map();\n  for (const key of Object.keys(initial)) {\n    const value = initial[key];\n    if (!Number.isSafeInteger(value) || value < 0) {\n      throw new RangeError('invalid balance for account ' + key);\n    }\n    balances.set(key, value);\n  }\n  const seen = new Map();\n\n  function readTransfer(t) {\n    if (t === null || typeof t !== 'object') {\n      throw new RangeError('transfer must be an object');\n    }\n    const id = t.id;\n    const from = t.from;\n    const to = t.to;\n    const amount = t.amount;\n    if (typeof id !== 'string' || id.length === 0) {\n      throw new RangeError('invalid id');\n    }\n    if (typeof from !== 'string' || !balances.has(from)) {\n      throw new RangeError('invalid from account');\n    }\n    if (typeof to !== 'string' || !balances.has(to)) {\n      throw new RangeError('invalid to account');\n    }\n    if (!Number.isSafeInteger(amount) || amount <= 0) {\n      throw new RangeError('invalid amount');\n    }\n    return { id, from, to, amount };\n  }\n\n  function apply(batch) {\n    if (!Array.isArray(batch)) {\n      throw new RangeError('batch must be an array');\n    }\n    const length = batch.length;\n    const working = new Map(balances);\n    const pending = new Map();\n    const results = [];\n    for (let i = 0; i < length; i++) {\n      const t = readTransfer(batch[i]);\n      const prior = pending.has(t.id) ? pending.get(t.id) : seen.get(t.id);\n      if (prior !== undefined) {\n        if (prior.from === t.from && prior.to === t.to && prior.amount === t.amount) {\n          results.push('duplicate');\n          continue;\n        }\n        throw new RangeError('conflicting transfer for id ' + t.id);\n      }\n      const fromBal = working.get(t.from);\n      if (fromBal < t.amount) {\n        throw new RangeError('insufficient balance');\n      }\n      if (t.from !== t.to) {\n        const toBal = working.get(t.to);\n        const next = toBal + t.amount;\n        if (!Number.isSafeInteger(next)) {\n          throw new RangeError('destination balance overflow');\n        }\n        working.set(t.from, fromBal - t.amount);\n        working.set(t.to, next);\n      }\n      pending.set(t.id, { from: t.from, to: t.to, amount: t.amount });\n      results.push('applied');\n    }\n    balances = working;\n    for (const [id, rec] of pending) {\n      seen.set(id, rec);\n    }\n    return results;\n  }\n\n  function snapshot() {\n    const out = Object.create(null);\n    for (const [key, value] of balances) {\n      Object.defineProperty(out, key, {\n        value,\n        writable: true,\n        enumerable: true,\n        configurable: true,\n      });\n    }\n    return out;\n  }\n\n  return { apply, snapshot };\n}\n",
+      "codeSha256": "d2a7cec3086af78f54df8f9408d824d43a7819e6debe62cb672258ba2d55a817",
+      "grade": {
+        "passed": true,
+        "passedChecks": 4,
+        "totalChecks": 4,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          },
+          {
+            "index": 3,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "recommended",
+      "order": 22,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "medium",
+      "recordedEfforts": [
+        "medium",
+        "medium"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "970020b2-48fd-44f5-b77e-c74d32e6b8f9",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 1197,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 714
+      },
+      "numTurns": 2,
+      "costUsd": 0.030000400000000003,
+      "latencyMs": 11816,
+      "code": "function validate(list, name) {\n  if (!Array.isArray(list)) {\n    throw new TypeError(`${name} must be an array of [start, end] pairs`);\n  }\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      throw new RangeError(`${name}[${i}] must be a [start, end] pair`);\n    }\n    const [start, end] = pair;\n    if (typeof start !== \"number\" || typeof end !== \"number\" ||\n        !Number.isFinite(start) || !Number.isFinite(end)) {\n      throw new RangeError(`${name}[${i}] endpoints must be finite numbers`);\n    }\n    if (start > end) {\n      throw new RangeError(`${name}[${i}] start must be <= end`);\n    }\n  }\n}\n\nfunction normalize(list) {\n  const items = [];\n  for (const [start, end] of list) {\n    if (start < end) items.push([start, end]);\n  }\n  items.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (const [start, end] of items) {\n    const last = merged[merged.length - 1];\n    if (last && start <= last[1]) {\n      if (end > last[1]) last[1] = end;\n    } else {\n      merged.push([start, end]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  validate(base, \"base\");\n  validate(cuts, \"cuts\");\n  const b = normalize(base);\n  const c = normalize(cuts);\n  const result = [];\n  let j = 0;\n  for (const [bStart, bEnd] of b) {\n    let cur = bStart;\n    while (j < c.length && c[j][1] <= cur) j++;\n    let k = j;\n    while (k < c.length && c[k][0] < bEnd) {\n      const [cStart, cEnd] = c[k];\n      if (cStart > cur) result.push([cur, cStart]);\n      if (cEnd > cur) cur = cEnd;\n      if (cur >= bEnd) break;\n      k++;\n    }\n    if (cur < bEnd) result.push([cur, bEnd]);\n  }\n  return result;\n}\n",
+      "codeSha256": "a6796240b4532cd2dbd948ac6d0996e684013915ae7a89b975ef17cc5e275886",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "round": 2,
+      "arm": "baseline",
+      "order": 23,
+      "task": "intervals",
+      "model": "claude-opus-5-5",
+      "requestedEffort": "xhigh",
+      "recordedEfforts": [
+        "xhigh",
+        "xhigh",
+        "xhigh"
+      ],
+      "effortEvidence": "explicit --effort; transcript perTurnEffort; wire-unobserved",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "sessionId": "9da806dc-52c2-4868-98cb-a94be58f7381",
+      "usage": {
+        "input_tokens": 2,
+        "output_tokens": 3039,
+        "cache_read_input_tokens": 1702,
+        "cache_creation_input_tokens": 713
+      },
+      "numTurns": 2,
+      "costUsd": 0.0668324,
+      "latencyMs": 29757,
+      "code": "function fail(message) {\n  throw new RangeError(message);\n}\n\nfunction normalize(list, name) {\n  if (!Array.isArray(list)) {\n    fail(name + ' must be an array of [start, end] pairs');\n  }\n  const items = [];\n  for (let i = 0; i < list.length; i++) {\n    const pair = list[i];\n    if (!Array.isArray(pair) || pair.length !== 2) {\n      fail(name + '[' + i + '] must be a [start, end] pair');\n    }\n    const start = pair[0];\n    const end = pair[1];\n    if (\n      typeof start !== 'number' ||\n      typeof end !== 'number' ||\n      !Number.isFinite(start) ||\n      !Number.isFinite(end)\n    ) {\n      fail(name + '[' + i + '] endpoints must be finite numbers');\n    }\n    if (start > end) {\n      fail(name + '[' + i + '] start must be <= end');\n    }\n    if (start < end) {\n      items.push([start, end]);\n    }\n  }\n  items.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  const merged = [];\n  for (let i = 0; i < items.length; i++) {\n    const item = items[i];\n    const last = merged.length ? merged[merged.length - 1] : null;\n    if (last !== null && item[0] <= last[1]) {\n      if (item[1] > last[1]) {\n        last[1] = item[1];\n      }\n    } else {\n      merged.push([item[0], item[1]]);\n    }\n  }\n  return merged;\n}\n\nexport function subtractIntervals(base, cuts) {\n  const b = normalize(base, 'base');\n  const c = normalize(cuts, 'cuts');\n  const result = [];\n  let j = 0;\n  for (let i = 0; i < b.length; i++) {\n    const start = b[i][0];\n    const end = b[i][1];\n    let cur = start;\n    while (j < c.length && c[j][1] <= cur) {\n      j++;\n    }\n    let k = j;\n    while (k < c.length && c[k][0] < end) {\n      if (c[k][0] > cur) {\n        result.push([cur, c[k][0]]);\n      }\n      if (c[k][1] > cur) {\n        cur = c[k][1];\n      }\n      if (cur >= end) {\n        break;\n      }\n      k++;\n    }\n    if (cur < end) {\n      result.push([cur, end]);\n    }\n    j = k;\n  }\n  return result;\n}\n",
+      "codeSha256": "8196b8b433a7fd038d4095320a606143b17ea631db718d1523ef3c6eacdd3336",
+      "grade": {
+        "passed": true,
+        "passedChecks": 3,
+        "totalChecks": 3,
+        "checks": [
+          {
+            "index": 0,
+            "passed": true
+          },
+          {
+            "index": 1,
+            "passed": true
+          },
+          {
+            "index": 2,
+            "passed": true
+          }
+        ]
+      },
+      "passed": true
+    }
+  ],
+  "complete": true,
+  "finishedAt": "2026-09-28T05:05:36.206Z"
+}

@@ -1,0 +1,66 @@
+{
+  "baseline": "xhigh",
+  "model": "claude-opus-5-5",
+  "host": "claude-code",
+  "router": "jet-router 0.3.2 shadow · provider jev · interactive --effort xhigh",
+  "routedAt": "2026-09-28T04:57:38.309Z",
+  "taskSha256": "d64a4302dfc2bd73476a929fc4e6435365361a6a6cb626278c2dffd09908590f",
+  "graderSha256": "2a8624d09d58f6a378941b10b015719d03d961eaec0ec6c7259398248ff38a34",
+  "routes": [
+    {
+      "task": "ranges",
+      "promptSha256": "c93cfd9d667c46a2b2bf7c62ddc5e977688a1971faa6d529c3f66f1d0fd194c7",
+      "choice": "medium",
+      "probability": 0.71,
+      "latencyMs": 353,
+      "display": "Jev.shadow(): xhigh → medium",
+      "eligible": true
+    },
+    {
+      "task": "ttl-lru",
+      "promptSha256": "93c196006fa73a49b53ad8a0f45f1bddd47dce2484c0cecc2a81e77ebe2ac82f",
+      "choice": "medium",
+      "probability": 0.77,
+      "latencyMs": 277,
+      "display": "Jev.shadow(): xhigh → medium",
+      "eligible": true
+    },
+    {
+      "task": "async-memo",
+      "promptSha256": "762646240d80df80d1a5dde0a6cef562f05427d4ae32c27832bfd5791b1564c0",
+      "choice": "xhigh",
+      "probability": 0.87,
+      "latencyMs": 304,
+      "display": "Jev.shadow(): xhigh → xhigh",
+      "eligible": false
+    },
+    {
+      "task": "ledger",
+      "promptSha256": "6fe77714039ec381aefc090f3e3637e4e63d74ded734aa70fec6aa685f6d1552",
+      "choice": "high",
+      "probability": 0.47,
+      "latencyMs": 309,
+      "display": "Jev.shadow(): xhigh → high",
+      "eligible": true
+    },
+    {
+      "task": "keyed-queue",
+      "promptSha256": "f47a81ec862c530d90458aebb546742e17bcc07b8a826ede18c6b48cadc3223f",
+      "choice": "xhigh",
+      "probability": 0.7,
+      "latencyMs": 302,
+      "display": "Jev.shadow(): xhigh → xhigh",
+      "eligible": false
+    },
+    {
+      "task": "intervals",
+      "promptSha256": "de388c713b7c953771046432b34e0de347b4188c06cc5a68ff29c34285878f64",
+      "choice": "medium",
+      "probability": 0.6,
+      "latencyMs": 324,
+      "display": "Jev.shadow(): xhigh → medium",
+      "eligible": true
+    }
+  ],
+  "complete": true
+}

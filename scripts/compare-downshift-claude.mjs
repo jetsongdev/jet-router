@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, realpathSync, readdirSync } from 'node:fs';
 import { tmpdir, homedir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { tasks } from '../eval/task-quality/tasks.mjs';
 import { taskPrompt, runProcess, gradeCode } from './run-task-quality.mjs';
@@ -56,7 +57,8 @@ export async function generateClaude(task, effort) {
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 
-const [mode, path] = process.argv.slice(2);
+const main = process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url;
+const [mode, path] = main ? process.argv.slice(2) : [];
 if (mode === 'prompts') {
   for (const task of tasks) console.log(JSON.stringify({ task: task.id, promptSha256: sha(claudePrompt(task)), prompt: claudePrompt(task) }));
 } else if (mode === 'run') {
