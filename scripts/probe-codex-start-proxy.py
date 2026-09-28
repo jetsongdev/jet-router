@@ -5,7 +5,7 @@ Routes only PROBE_LOW markers to a fixed low effort. No Jev or paid model calls.
 Requires installed Codex 0.158.0, Python 3 and macOS/Linux PTY/Unix sockets.
 """
 import os, json, time, tempfile, subprocess, threading, http.server, socket, base64, hashlib, struct
-import select, pty, fcntl, termios
+import select, pty, fcntl, termios, sys
 from pathlib import Path
 
 class WS:
@@ -97,6 +97,7 @@ def accept_ws(conn):
     return ws
 
 
+adapter = '--adapter' in sys.argv
 root = Path(tempfile.mkdtemp(prefix='jet-start-proxy-'))
 home = root / 'home'
 home.mkdir()
@@ -256,14 +257,18 @@ child = cli = client = None
 master = None
 try:
     env = {**os.environ, 'CODEX_HOME': str(home), 'TERM': 'xterm-256color'}
-    child = subprocess.Popen(['codex', 'app-server', '--listen', 'unix://' + backend_path],
-                             cwd=root, env=env, stdout=log, stderr=log)
+    command = ['node', str(Path(__file__).resolve().parents[1] / 'codex/tests/proxy-fixture.mjs'), str(root)] if adapter else ['codex', 'app-server', '--listen', 'unix://' + backend_path]
+    child = subprocess.Popen(command, cwd=root, env=env, stdout=log, stderr=log)
     for _ in range(100):
-        if Path(backend_path).exists():
+        if adapter and (root / 'adapter-socket.txt').exists():
+            proxy_path = (root / 'adapter-socket.txt').read_text()
+            break
+        if not adapter and Path(backend_path).exists():
             break
         assert child.poll() is None, 'backend exited'
         time.sleep(.05)
-    threading.Thread(target=serve, daemon=True).start()
+    if not adapter:
+        threading.Thread(target=serve, daemon=True).start()
     client = WS(proxy_path)
     started = client.req('thread/start', {'cwd': str(root), 'ephemeral': True, 'sandbox': 'read-only',
                                         'approvalPolicy': 'never', 'baseInstructions': 'Reply ok; no tools.'})
@@ -281,6 +286,12 @@ try:
     print('protocol: first requests low/medium/low/high; baseline medium/medium/high/high', flush=True)
     client.s.close()
     client = None
+    if adapter:
+        for _ in range(100):
+            if (root / 'adapter-backend-exited').exists():
+                break
+            time.sleep(.05)
+        assert (root / 'adapter-backend-exited').exists(), 'backend cleanup incomplete'
 
     # Exercise the real TUI, not a replacement input UI. CPR replies support terminal startup.
     master, slave = pty.openpty()
@@ -292,6 +303,8 @@ try:
     terminal = bytearray()
     deadline = time.monotonic() + 35
     while time.monotonic() < deadline and len(completions) < 5:
+        if adapter and (root / 'adapter-events.json').exists():
+            completions[:] = json.loads((root / 'adapter-events.json').read_text())
         ready, _, _ = select.select([master], [], [], .2)
         if ready:
             try:
@@ -311,7 +324,7 @@ try:
     assert not errors, errors
     evidence = {'codexVersion': subprocess.check_output(['codex', '--version'], text=True).strip(),
                 'provider': 'local fake Responses server', 'wire': captures, 'baselineAfter': states,
-                'routes': routes, 'completed': completions, 'realCliRemote': True, 'errors': errors}
+                'routes': routes, 'completed': completions, 'realCliRemote': True, 'adapter': adapter, 'errors': errors}
     (root / 'evidence.json').write_text(json.dumps(evidence, indent=2))
     print('real CLI --remote: first request low; completed', flush=True)
 finally:

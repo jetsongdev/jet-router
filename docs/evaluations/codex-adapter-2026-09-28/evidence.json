@@ -1,0 +1,43 @@
+{
+  "codexVersion": "codex-cli 0.158.0",
+  "provider": "local fake Responses server",
+  "wire": [
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "medium"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "high"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    }
+  ],
+  "baselineAfter": [
+    "medium",
+    "medium",
+    "high",
+    "high"
+  ],
+  "routes": [],
+  "completed": [
+    "completed",
+    "completed",
+    "completed",
+    "completed",
+    "completed"
+  ],
+  "realCliRemote": true,
+  "adapter": true,
+  "errors": []
+}
