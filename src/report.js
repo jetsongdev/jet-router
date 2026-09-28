@@ -1,5 +1,6 @@
 // Only normalized router records reach these formatters, never provider text.
-// Same shape as the Codex MCP shadow messages (mcp/shadow.mjs).
+// Same shape as the Codex MCP shadow messages (mcp/shadow.mjs) minus the
+// [jet-router] tag: Claude Code already prefixes plugin output with `jet-router:`.
 export function summary(record, outcome) {
   const provider = record.provider === 'jev' ? 'Jev' : 'fake';
   const skipped = {
@@ -28,14 +29,14 @@ export function summary(record, outcome) {
   const parts = [];
   const mode = record.mode === 'enforce' ? 'enforce' : 'shadow';
   if (skipped) {
-    parts.push(`[jet-router] ${provider} 생략: ${skipped}`, mode);
+    parts.push(`${provider} 생략: ${skipped}`, mode);
   } else {
     const original = record.original === 'unsupported' ? '미확인' : record.original;
     const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
     const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
     const applied = record.applied ? ' 적용' : record.holdout ? ' 대조군 미적용' : '';
-    parts.push(`[jet-router] ${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
+    parts.push(`${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
     if (record.original !== record.forwarded) {
       parts.push(`마지막 요청 ${record.forwarded === 'unsupported' ? '확인 불가' : record.forwarded}`);
@@ -49,13 +50,12 @@ export function summary(record, outcome) {
 
 export function sessionNotice(mode, provider) {
   const classifier = provider === 'jev' ? 'Jev' : 'fake(외부 전송 없음)';
-  if (mode === 'shadow') return `[jet-router] 세션 시작 · 관찰(shadow) · ${classifier} · 적용: /jet-router enforce`;
-  return `[jet-router] 세션 시작 · 꺼짐(off) · ${classifier} · 켜기: /jet-router shadow(관찰) · enforce(적용)`;
+  if (mode === 'shadow') return `세션 시작 · 관찰(shadow) · ${classifier} · 적용: /jet-router enforce`;
+  return `세션 시작 · 꺼짐(off) · ${classifier} · 켜기: /jet-router shadow(관찰) · enforce(적용)`;
 }
 
 export function status(mode, locked, lastSummary, provider = 'fake', cloudConsent = false) {
   return [
-    'jet-router',
     `모드: ${{ off: '꺼짐(off)', shadow: '관찰(shadow) — 추천만 표시', enforce: '적용(enforce) — 추천 effort를 해당 턴에만 적용' }[mode]}`,
     provider === 'jev'
       ? `분류기: Jev · 외부 전송: ${cloudConsent ? (mode !== 'off' && !locked ? '허용(분류 대상 입력)' : '중지(동의됨)') : '차단(미동의)'}`

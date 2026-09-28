@@ -98,8 +98,8 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 `defaultMode` 옵션은 세션을 시작·재개할 때의 모드를 정합니다. `off`(기본값) 또는 `shadow`를 받습니다. `shadow`를 고르면 fake·Jev 모두 shadow로 시작합니다. Jev에서는 전송 동의(`cloudConsent`) 후 **모든 세션의 분류 대상 프롬프트가 Jev로 전송**되므로 명시적으로 고른 경우에만 적용되며, 기본값은 off입니다. enforce는 시작 모드로 둘 수 없고 세션마다 `/jet-router enforce`로 켭니다. `/reload-plugins`로 새 버전을 불러오면 새 모듈이 세션 시작 처리를 다시 하므로 이 시작 모드로 돌아가며, enforce는 다시 켜야 합니다. 시작 시 표시 예시입니다.
 
 ```text
-[jet-router] 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce
-[jet-router] 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)
+jet-router: 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce
+jet-router: 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)
 ```
 
 
@@ -131,57 +131,56 @@ Node 22+ 실행 파일이 Claude 프로세스의 PATH에 있어야 합니다. `/
 
 응답 본문을 수정하지 않고 메인 턴 종료 후 별도의 로그 한 줄을 출력합니다. 도구 요청마다 중복 출력하지 않습니다. 아래 시간은 예시입니다.
 
-형식은 Codex MCP shadow 안내([Codex MCP 가이드](codex-mcp.md))와 같습니다. 화살표 왼쪽은 이 턴의 요청 effort, 오른쪽은 추천값입니다. 추천이 keep이면 화살표 대신 `<요청 effort> 유지`로 표시합니다. 추천이 있어도 shadow에서는 원래 effort를 유지합니다. fake 결과에는 `(고정값)`이 붙습니다.
+형식은 Codex MCP shadow 안내([Codex MCP 가이드](codex-mcp.md))와 같고, Claude Code가 플러그인 출력 앞에 `jet-router:`를 붙이므로 본문의 `[jet-router]` 태그는 생략합니다(0.11.1~). 화살표 왼쪽은 이 턴의 요청 effort, 오른쪽은 추천값입니다. 추천이 keep이면 화살표 대신 `<요청 effort> 유지`로 표시합니다. 추천이 있어도 shadow에서는 원래 effort를 유지합니다. fake 결과에는 `(고정값)`이 붙습니다.
 
 ```text
-[jet-router] fake.shadow(): high → low(고정값) · 12ms
-[jet-router] fake.shadow(): medium → xhigh(고정값) · 9ms
-[jet-router] fake.shadow(): high 유지(고정값) · 8ms
+jet-router: fake.shadow(): high → low(고정값) · 12ms
+jet-router: fake.shadow(): medium → xhigh(고정값) · 9ms
+jet-router: fake.shadow(): high 유지(고정값) · 8ms
 ```
 
 분류를 생략·실패한 경우는 `생략:`으로 구분하고 지연값을 표시하지 않습니다.
 
 ```text
-[jet-router] fake 생략: max 보호 · shadow
-[jet-router] fake 생략: 시간 초과 · shadow
-[jet-router] fake 생략: 요청 연결 불확실 · shadow
+jet-router: fake 생략: max 보호 · shadow
+jet-router: fake 생략: 시간 초과 · shadow
+jet-router: fake 생략: 요청 연결 불확실 · shadow
 ```
 
 timeout은 실패 경로의 표시 예시이며 정상 fake는 즉시 결과를 반환합니다. 분류할 수 없는 입력은 생략 사유를 표시합니다: `입력 겹침`(턴 도중·동시 제출), `대기 중 입력`, `첨부 포함`, `숨은 문맥 포함`, `빈 입력`, `6,000자 초과`, `스킬·명령 입력`(`/`로 시작해 턴 시작 전에 펼쳐지는 입력), `입력 변경됨`(다른 훅이 입력을 바꿈). 어느 것에도 해당하지 않는 연결 실패만 `요청 연결 불확실`로 표시합니다. subagent 보고·백그라운드 작업 완료 알림처럼 사용자가 입력하지 않은 턴은 요약을 출력하지 않습니다. 턴 도중 요청 effort가 바뀌면 `마지막 요청 …`이, 턴이 중단되면 끝에 `중단`(`오류`·`거절`)이 붙습니다. 분류 완료 전에 중단되었거나 off·잠금·세션 전환으로 결과가 무효화됐다면 요약은 생략될 수 있습니다.
 
 ```text
-[jet-router] fake.shadow(): high → low(고정값) · 12ms · 마지막 요청 medium
-[jet-router] fake.shadow(): high → low(고정값) · 12ms · 중단
+jet-router: fake.shadow(): high → low(고정값) · 12ms · 마지막 요청 medium
+jet-router: fake.shadow(): high → low(고정값) · 12ms · 중단
 ```
 
 상태 조회 예시입니다.
 
 ```text
-jet-router
-모드: 관찰(shadow) — 추천만 표시
+jet-router: 모드: 관찰(shadow) — 추천만 표시
 분류기: fake(고정 테스트 결과) · 외부 전송: 없음
 수동 잠금: 꺼짐
 effort 자동 변경: 꺼짐 — 켜기: /jet-router enforce
-최근 완료: [jet-router] fake.shadow(): high → low(고정값) · 12ms
+최근 완료: fake.shadow(): high → low(고정값) · 12ms
 ```
 
 Jev shadow의 표시 예시입니다. Jev 추천은 응답 형식만 검증했으며 추천 정확도와 정책 임계값은 아직 미평가입니다. 맥락·위험 점수에 임의의 기준값을 적용하지 않습니다. `(70%)`는 선택된 후보의 `selectedProbability`를 반올림한 값이며, 응답에 없으면 생략합니다. 신뢰도나 작업 성공 확률이 아닙니다.
 
 ```text
-[jet-router] Jev.shadow(): medium → low (70%) · 180ms
-[jet-router] Jev.shadow(): medium 유지 (66%) · 376ms
-[jet-router] Jev 생략: 전송 미동의 · shadow
-[jet-router] Jev 생략: redirect 차단 · shadow
+jet-router: Jev.shadow(): medium → low (70%) · 180ms
+jet-router: Jev.shadow(): medium 유지 (66%) · 376ms
+jet-router: Jev 생략: 전송 미동의 · shadow
+jet-router: Jev 생략: redirect 차단 · shadow
 ```
 
 enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 바꿨다는 뜻입니다.
 
 ```text
-[jet-router] Jev.enforce(): xhigh → medium 적용 (71%) · 353ms
-[jet-router] Jev.enforce(): medium → xhigh 적용 (80%) · 310ms
-[jet-router] Jev.enforce(): high 유지 (66%) · 376ms
-[jet-router] Jev.enforce(): xhigh → medium 적용 (71%) · 353ms · 마지막 요청 high · 사용자 변경으로 적용 중단
-[jet-router] Jev 생략: 시간 초과 · enforce
+jet-router: Jev.enforce(): xhigh → medium 적용 (71%) · 353ms
+jet-router: Jev.enforce(): medium → xhigh 적용 (80%) · 310ms
+jet-router: Jev.enforce(): high 유지 (66%) · 376ms
+jet-router: Jev.enforce(): xhigh → medium 적용 (71%) · 353ms · 마지막 요청 high · 사용자 변경으로 적용 중단
+jet-router: Jev 생략: 시간 초과 · enforce
 ```
 
 `유지`는 라우터가 다음 훅에 넘긴 요청값을 설명합니다. 서버 수신이나 모델 내부 추론량을 증명하지 않습니다. 지연은 전체 Claude 응답 시간이 아니라 분류 대기 시간입니다. 신뢰도·비용 절감량은 현재 표시하지 않습니다.
