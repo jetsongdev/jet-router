@@ -56,6 +56,7 @@
 - [ ] 새 세션은 enforce가 아니라 off(또는 fake shadow 기본값)로 시작한다.
 - [ ] shadow·enforce 턴 후 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 한 줄이 추가되고, 프롬프트 원문이 없다.
 - [ ] `node scripts/usage.mjs report --by day`가 방금 턴을 집계한다.
+- [ ] `node scripts/usage.mjs report --html`로 만든 파일이 브라우저에서 열리고, 필터를 바꾸면 카드·차트·표가 CLI 결과와 같게 바뀐다.
 - [ ] enforce에서 적용 대상 턴 일부가 `대조군 미적용`으로 표시되고, 기록에 `holdout: true`가 남는다.
 
 ## 4. Jev 설정과 최소 실호출

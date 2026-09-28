@@ -185,7 +185,9 @@ export function accumulate(totals, r, measured = []) {
   return t;
 }
 
-export function report(records, { by = ['day'], from, to } = {}) {
+// factorRecords lets a filtered view (one project, one mode) keep the ratios
+// measured on every record of the period.
+export function report(records, { by = ['day'], from, to, factorRecords } = {}) {
   const inRange = r => (!from || localDay(r.ts) >= from) && (!to || localDay(r.ts) <= to);
   const keys = by.map(name => {
     if (!GROUPS[name]) throw new Error(`unknown group: ${name}`);
@@ -195,7 +197,7 @@ export function report(records, { by = ['day'], from, to } = {}) {
   const total = emptyTotals();
   const selected = records.filter(inRange);
   // Ratios come from the whole selected period, not from each group.
-  const factors = measuredFactors(selected);
+  const factors = measuredFactors(factorRecords ? factorRecords.filter(inRange) : selected);
   for (const r of selected) {
     const key = keys.map(k => k(r)).join(' · ');
     if (!groups.has(key)) groups.set(key, emptyTotals());
