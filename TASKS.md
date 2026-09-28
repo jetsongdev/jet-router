@@ -48,7 +48,10 @@
 - 2026-09-28 / Codex 0.158.0: 턴 한정 `turn/settings/update` 실험적 계약을 확인했다.
   proxy의 WebSocket 전송 형식을 확인해 기존 세션 metadata 조회에 성공했다.
   격리 HTTP 캡처는 `applied` 이후에도 첫 요청 medium, 도구 후 low, 다음 턴 medium이었다.
-  **hook 이후 변경으로 첫 요청까지 적용하는 요구는 충족하지 못했다. 다음은 turn/start 이전 어댑터 검증이다.**
+  **hook 이후 변경으로 첫 요청까지 적용하는 요구는 충족하지 못했다.**
+  후속 격리 프록시에서 기존 CLI `--remote` 연결·첫 요청 low·다음 턴 medium·수동 high 보존을 확인했다.
+  [프록시 검증 결과](docs/evaluations/codex-start-proxy-2026-09-28/README.md).
+  다음은 Jev 연결과 복귀 실패·취소·동시 설정 변경을 처리하는 최소 제품 어댑터다.
   [격리 재현 결과](docs/evaluations/codex-turn-effort-2026-09-28/README.md),
   [이전 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 현재 제품 enforce는 미구현이다.
 

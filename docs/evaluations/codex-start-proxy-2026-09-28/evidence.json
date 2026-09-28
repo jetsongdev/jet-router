@@ -1,0 +1,73 @@
+{
+  "codexVersion": "codex-cli 0.158.0",
+  "provider": "local fake Responses server",
+  "wire": [
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "medium"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "high"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    }
+  ],
+  "baselineAfter": [
+    "medium",
+    "medium",
+    "high",
+    "high"
+  ],
+  "routes": [
+    {
+      "baseline": "medium",
+      "chosen": "low",
+      "collaborationMode": false,
+      "prompt": "PROBE_LOW first"
+    },
+    {
+      "baseline": "medium",
+      "chosen": "medium",
+      "collaborationMode": false,
+      "prompt": "keep baseline"
+    },
+    {
+      "baseline": "high",
+      "chosen": "low",
+      "collaborationMode": false,
+      "prompt": "PROBE_LOW manual high"
+    },
+    {
+      "baseline": "high",
+      "chosen": "high",
+      "collaborationMode": false,
+      "prompt": "keep manual high"
+    },
+    {
+      "baseline": "medium",
+      "chosen": "low",
+      "collaborationMode": true,
+      "prompt": "PROBE_LOW reply ok"
+    }
+  ],
+  "completed": [
+    "completed",
+    "completed",
+    "completed",
+    "completed",
+    "completed"
+  ],
+  "realCliRemote": true,
+  "errors": []
+}
