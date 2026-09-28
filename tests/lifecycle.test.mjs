@@ -41,8 +41,8 @@ test('off does not classify; shadow is explicit and delegates identical requests
   assert.equal(w.calls.length, 1); assert.equal(w.logs.length, 0);
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(w.logs.length, 1);
-  assert.match(w.logs[0], /추천 low/);
-  assert.match(w.logs[0], /high 유지/);
+  assert.match(w.logs[0], /fake\.shadow\(\): high → low\(고정값\)/);
+  assert.ok(!w.logs[0].includes('마지막 요청'));
   assert.ok(!w.logs[0].includes('CANARY_SECRET'));
 });
 
@@ -244,7 +244,7 @@ test('Jev passes sensitive data only via stdin and labels the unchanged result u
   assert.equal(init.timeoutMs, 4000); assert.equal(init.env.NODE_DEBUG, '');
   assert.equal(init.env.NODE_OPTIONS, ''); assert.equal(init.env.NODE_TLS_REJECT_UNAUTHORIZED, '1');
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.match(w.logs[0], /Jev · high 유지 · 추천 low\(미평가\)/);
+  assert.match(w.logs[0], /^\[jet-router\] Jev\.shadow\(\): high → low/);
   assert.ok(!w.logs[0].includes('CANARY'));
   assert.equal(w.calls.length, 0); // Never falls back to fake.
 });
@@ -258,7 +258,7 @@ test('Jev failure has no fallback and timeout keeps only one outstanding helper'
   assert.match(w.logs[0], /시간 초과/);
   await w.submit('t2', 'next'); await w.step({ turnId: 't2' });
   await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
-  assert.match(w.logs[1], /이전 요청 정리 중/); assert.equal(processes, 1);
+  assert.match(w.logs[1], /Jev 생략: 이전 분류 진행 중 · shadow/); assert.equal(processes, 1);
   pending.resolve(jevResult); await new Promise(resolve => setImmediate(resolve));
   assert.equal(w.logs.length, 2);
   await w.submit('t3', 'next'); await w.step({ turnId: 't3' }); assert.equal(processes, 2);

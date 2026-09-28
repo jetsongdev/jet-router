@@ -1,28 +1,35 @@
 // Only normalized router records reach these formatters, never provider text.
+// Same shape as the Codex MCP shadow messages (mcp/shadow.mjs).
 export function summary(record, outcome) {
-  const effort = record.forwarded === 'unsupported' ? 'effort 확인 불가'
-    : record.original === record.forwarded ? `${record.forwarded} 유지`
-    : `시작 ${record.original === 'unsupported' ? '미확인' : record.original} → 마지막 요청 ${record.forwarded}`;
-  const reasons = {
-    'no-consent': '분류 생략(외부 전송 미동의)',
-    'missing-key': '분류 생략(API 키 없음 또는 형식 오류)',
-    busy: '분류 생략(이전 요청 정리 중)',
-    redirect: '추천 없음(redirect 차단)',
-    'http-error': '추천 없음(API 오류)',
-    'response-too-large': '추천 없음(응답 크기 초과)',
-    'invalid-input': '분류 생략(입력 형식 오류)',
-    unevaluated: `추천 ${record.recommendation === 'keep' ? '유지' : record.recommendation}(미평가)`,
-    context: '추천 보류(맥락 부족)',
-    timeout: '추천 없음(시간 초과)',
-    'provider-error': '추천 없음(분류 실패)',
-    'invalid-response': '추천 없음(응답 형식 오류)',
-    correlation: '분류 생략(요청 연결 불확실)',
-    max: '분류 생략(max 보호)',
-    unsupported: '분류 생략(effort 미지원)',
-  };
-  const recommendation = reasons[record.reasonCode] ?? `추천 ${record.recommendation === 'keep' ? '유지' : record.recommendation}`;
-  const parts = ['[jet-router] 관찰', record.provider === 'jev' ? 'Jev' : 'fake(테스트)', effort, recommendation];
-  if (record.latencyMs !== null) parts.push(`분류 ${Math.round(record.latencyMs)}ms`);
+  const provider = record.provider === 'jev' ? 'Jev' : 'fake';
+  const skipped = {
+    'no-consent': '전송 미동의',
+    'missing-key': 'API 키 누락 또는 형식 오류',
+    busy: '이전 분류 진행 중',
+    redirect: 'redirect 차단',
+    'http-error': 'API 오류',
+    'response-too-large': '응답 크기 초과',
+    'invalid-input': '입력 형식 오류',
+    timeout: '시간 초과',
+    'provider-error': '분류 실패',
+    'invalid-response': '응답 형식 오류',
+    correlation: '요청 연결 불확실',
+    max: 'max 보호',
+    unsupported: 'effort 미지원',
+  }[record.reasonCode];
+  const parts = [];
+  if (skipped) {
+    parts.push(`[jet-router] ${provider} 생략: ${skipped}`, 'shadow');
+  } else {
+    const original = record.original === 'unsupported' ? '미확인' : record.original;
+    const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
+    const fixture = provider === 'fake' ? '(고정값)' : '';
+    parts.push(`[jet-router] ${provider}.shadow(): ${original} → ${record.recommendation}${fixture}${percentage}`);
+    if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
+    if (record.original !== record.forwarded) {
+      parts.push(`마지막 요청 ${record.forwarded === 'unsupported' ? '확인 불가' : record.forwarded}`);
+    }
+  }
   const ending = { aborted: '중단', error: '오류', refusal: '거절' }[outcome];
   if (ending) parts.push(ending);
   return parts.join(' · ');
