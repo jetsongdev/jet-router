@@ -160,7 +160,7 @@ npm run test:hooks
 - [공식 계약·호환성 조사](docs/compatibility.md)
 - [구현 범위·검증 기록·남은 제한](docs/implementation.md)
 
-코드는 [공개 저장소](https://github.com/jetsongdev/jet-router)에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`이며 정식 release/tag는 없습니다. 배포 라이선스는 아직 선택하지 않았습니다.
+코드는 [공개 저장소](https://github.com/jetsongdev/jet-router)에 게시했습니다. 현재 원격 기본 브랜치는 `main`이며 정식 release/tag는 없습니다. 배포 라이선스는 아직 선택하지 않았습니다.
 
 Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했고 선택적 모델 지원 목록 조회를 연결했습니다. Claude 실제 UI 검증은 토큰 부족으로 보류했습니다. [검증 범위·남은 작업](docs/evaluations/shadow-closeout-2026-09-27.md), [모델 조회 설정](docs/codex-mcp.md#모델별-추천-후보-조회-선택)을 참고하세요.
 
