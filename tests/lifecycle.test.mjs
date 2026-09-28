@@ -419,7 +419,7 @@ test('model change during Jev classification cancels the stale result without ch
 
 test('session start announces the mode and only fake honors a shadow default', async () => {
   const plain = world(); await plain.start();
-  assert.deepEqual(plain.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow']);
+  assert.deepEqual(plain.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   await plain.submit(); await plain.step();
   assert.equal(plain.calls.length, 0);
 
@@ -431,7 +431,7 @@ test('session start announces the mode and only fake honors a shadow default', a
 
   const jev = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY', defaultMode: 'shadow' });
   await jev.start();
-  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow']);
+  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   await jev.submit(); await jev.step();
   await jev.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(jev.logs.length, 0);

@@ -78,7 +78,7 @@ Jev helper가 실행되는 머신에 Node 22+가 필요합니다. 플러그인�
 
 키는 채팅·명령 인자·Git 파일에 넣지 마세요. 키 입력 UI와 secure storage 재로드는 아직 수동 검증하지 않았습니다. Configure options의 세부 위치는 Claude 버전에 따라 달라질 수 있습니다. 저장 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. [공식 플러그인 설정 안내](https://code.claude.com/docs/en/plugins-reference#user-configuration)
 
-Jev를 쓰는 세션은 시작·재개할 때 항상 off입니다. 모든 세션의 프롬프트가 자동으로 전송되지 않도록 `defaultMode=shadow`도 Jev에는 적용하지 않습니다. 세션을 시작할 때 `[jet-router] 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow`처럼 현재 모드가 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰을 켭니다.
+Jev를 쓰는 세션은 시작·재개할 때 항상 off입니다. 모든 세션의 프롬프트가 자동으로 전송되지 않도록 `defaultMode=shadow`도 Jev에는 적용하지 않습니다. 세션을 시작할 때 `[jet-router] 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)`처럼 현재 모드와 켜는 명령이 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰 또는 적용을 켭니다.
 
 ```text
 /jet-router status
