@@ -18,7 +18,8 @@ requests, secret lookup or project-prompt transmission were performed.
 - Pure policy guards: supported enums, keep, max, manual lock, subagents, risk
   downgrade and insufficient context. A candidate is not an approved application.
 - Loadable Claude plugin and marketplace manifests, default off and explicit
-  fake/opt-in Jev shadow, status/off/lock/unlock commands, enforce refusal.
+  fake/opt-in Jev shadow, status/off/lock/unlock commands, enforce refusal
+  (superseded: per-turn enforce since 0.4.0, see the section at the end).
 - Conservative prompt/turn matching, bounded wait, cancellation on lifecycle
   changes and rejection of stale outcomes; identical request delegation.
 - One sanitized summary after main-turn completion, with no prompt/key/error body
@@ -274,3 +275,27 @@ Codex의 활성 모델 조회 및 변경 감지는 여전히 후속 작업이다
 ## Shadow 마무리 (2026-09-27)
 
 MCP 취소 신호를 helper까지 전달하고 4초 정리 제한을 추가했다. 선택적 Codex model/list 시작 조회, hook 모델 입력, 지원 범위별 후보 검사와 관측된 모델 변경 시 이전 결과 폐기를 연결했다. 기본은 조회 비활성이고 effort 변경은 없다. [검증 및 남은 한계](evaluations/shadow-closeout-2026-09-27.md).
+
+
+## Claude enforce와 사용량 모니터링 (2026-09-28, 0.2.1~0.7.1)
+
+같은 날 실제 세션 확인과 함께 다음을 순서대로 반영했다. 각 항목은 PR 단위이며 버전을 올렸다.
+
+| 버전 | PR | 내용 |
+| --- | --- | --- |
+| 0.2.1 | #3 | Claude 요약을 Codex MCP 형식(`Jev.shadow(): a → b (NN%) · ms`)으로 통일 |
+| 0.2.2 | #4 | keep 추천을 `<effort> 유지`로 표시 |
+| 0.3.0 | #5 | `defaultMode` 설정(fake만 shadow 시작 허용), 세션 시작 모드 알림 |
+| 0.3.1 | #6 | subagent 보고·작업 완료 알림 등 사용자가 입력하지 않은 턴은 요약 생략 |
+| 0.3.2 | #7 | 생략 사유 세분화(입력 겹침·대기 중 입력·첨부·숨은 문맥·스킬 명령 등) |
+| – | #8, #9 | [적용 경로 확인](evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](evaluations/downshift-claude-2026-09-28/README.md) |
+| 0.4.0 | #10 | enforce: 추천 effort를 해당 턴에만 적용(하향·상향, 최대 xhigh), 턴 도중 사용자 변경에 양보 |
+| 0.5.0 | #11 | `turn.complete` usage 기반 로컬 사용량 기록, `scripts/usage.mjs report` |
+| 0.6.0 | #12 | 대조군(`holdoutRate`, 기본 0.1)과 조합별 실측 비율·95% 구간 |
+| 0.7.0 | #13 | 필터·2단 배치 HTML 대시보드(`report --html`) |
+| 0.7.1 | #14, #15 | 세션 시작 알림에 enforce 켜는 명령 표시 |
+
+확인한 host 계약(Claude Code 2.1.283): `turn.step` effort 재작성은 해당 요청과 서버 동작에 반영되고 설정에 남지 않는다. `/effort`는 실행 중인 턴의 다음 요청부터 반영된다. `turn.complete`의 usage는 턴 전체 합계다. `session.start`는 `cwd`를 주지만 세션 ID는 주지 않는다. 훅 모듈의 `on()` 이벤트 이름은 문자열 리터럴이어야 한다.
+
+남은 한계: 절감 추정은 평가 비율(합성 과제) 또는 대조군 표본이 쌓인 조합만 가능하다. wire 요청 본문은 직접 관측하지 않았다. Codex enforce는 미착수다.
+

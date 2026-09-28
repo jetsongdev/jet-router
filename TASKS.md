@@ -6,6 +6,8 @@
 [검증 범위와 남은 항목](docs/evaluations/shadow-closeout-2026-09-27.md).
 Claude 실사용은 토큰 부족으로 보류, 추천 품질 비교·enforce는 후속 범위다.
 
+2026-09-28 갱신: Claude 실사용 확인, Claude 하향 비교(합격선 통과), **Claude enforce(0.4.0)**와 사용량 기록·대조군·HTML 대시보드(0.5.0~0.7.1)를 반영했다. 아래 [CLAUDE-ENFORCE-001](#claude-enforce-001--턴-단위-적용과-절감-모니터링) 참고. Codex enforce는 여전히 후속 범위다.
+
 ## 권장 진행 순서
 
 1. **지금 병렬 진행 가능:** 실제 Claude/Codex shadow 설치·hook·표시 확인과
@@ -214,4 +216,21 @@ Jev에 제공하는 후보와 사용자에게 표시하는 유효 추천은 활�
 - [x] [설치·비교 체크리스트](docs/claude-quality-checklist.md), smoke/full 설정, 무과금 plan, Jev route, 독립 CLI run, 오프라인 report 구현.
 - [x] 환경변수 effort 우선순위, 모델별 후보 제한, 세션 분리, 캐시 읽기/쓰기, 실패 중단·부분 결과 검증을 mock으로 확인.
 - [ ] 토큰 확보 후 Claude smoke 및 full 실제 실행. 설치 UI·서버 effort 적용은 아직 미검증.
-- 제품 enforce 자동 적용은 미구현 상태 유지.
+- 이 비교 준비와 별개로 제품 enforce는 0.4.0에서 Claude에 구현했다([CLAUDE-ENFORCE-001](#claude-enforce-001--턴-단위-적용과-절감-모니터링)).
+
+## CLAUDE-ENFORCE-001 — 턴 단위 적용과 절감 모니터링
+
+- 상태: 구현 완료(0.4.0~0.7.1), 실측 표본 누적 중
+- 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md)(출력 −47.3%, 회귀 0)
+- [x] `/jet-router enforce`: 추천 effort를 해당 턴의 모든 요청에만 적용, 설정·기본값 불변
+- [x] 하향·상향 적용(최대 xhigh), keep·같은 effort·생략·max·subagent·잠금 제외
+- [x] 턴 도중 `/effort` 변경 시 남은 요청 양보, off·잠금·모델 변경 시 즉시 중단
+- [x] 턴별 로컬 사용량 기록(원문 없음, `usageLog`로 끄기)과 기간·프로젝트·조합별 리포트
+- [x] 대조군(`holdoutRate` 기본 0.1)으로 조합별 실측 비율·95% 구간, 표본 부족 시 평가 비율
+- [x] HTML 대시보드(필터·2단 배치)
+- [x] 세션 시작 알림에 shadow·enforce 켜는 명령 표시
+- [ ] 실제 작업에서 주요 조합(예: medium→low, xhigh→medium)의 대조군 표본 각 10턴 이상 확보
+- [ ] 실측 비율이 평가 비율과 크게 다르거나 상향 조합의 순증가가 크면 적용 정책(상향 허용 범위 등) 재검토
+- [ ] 충분히 측정된 뒤 `holdoutRate`를 낮추거나 0으로 끄는 기준 정리
+- 범위 밖: Codex enforce, 세션 시작 기본값으로 enforce 두기, 금액 환산
+

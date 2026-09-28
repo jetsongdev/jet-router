@@ -1,6 +1,6 @@
 # 실제 Claude 테스트 체크리스트
 
-대상: 현재 off/shadow 버전. 아래 체크박스는 **미실행** 상태이며 테스트를 직접 확인한 뒤 표시한다. enforce는 `/jet-router enforce`로 켤 때만 동작한다.
+대상: 0.7.1 이상(off/shadow/enforce, 사용량 기록·대조군·HTML 대시보드). 아래 체크박스는 **미실행** 상태이며 테스트를 직접 확인한 뒤 표시한다. enforce는 `/jet-router enforce`로 켤 때만 동작한다.
 
 설치·설정 절차는 [README](../README.md#jev-사용-설정), 세부 명령은 [사용 가이드](usage.md)를 참고한다. 비민감 테스트 폴더와 합성 문장으로 진행한다. fake라도 일반 Claude 응답의 사용량은 발생하며 Jev는 별도 API 비용이 발생할 수 있다.
 

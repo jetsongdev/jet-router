@@ -62,7 +62,7 @@ flowchart TD
 - `ready`: 정규화 입력, 준비된 요청, 후보 목록, 버전 정보를 반환한다.
   **shadow 평가 요청을 만들 수 있다는 뜻이며 자동 적용 승인이 아니다.**
 - `skip`: 고정 reason과 버전만 반환하며 요청·정규화 입력을 포함하지 않는다.
-- 모든 결과는 `enforceEligible: false`다. 모델 허용 목록이나 실제 적용은 구현하지 않았다.
+- 모든 결과는 `enforceEligible: false`다. 하네스는 모델 허용 목록이나 실제 적용을 담당하지 않는다. Claude 플러그인 enforce는 이 값을 쓰지 않고 자체 적용 규칙([사용 설명서](usage.md) 2절)으로 턴 단위 적용한다.
 - 후보는 기존 평가 기준이 있는 low/medium/high/xhigh와 host 지원값의 교집합에 keep을 더한다.
   max는 보호 대상으로 생략한다. none 기준은 아직 없으므로 현재 effort가 none이면 생략한다.
 - 모델·지원값·맥락·세션 ID 미확인은 `uncertainties`로 기록하고 shadow 판정을 허용한다.
