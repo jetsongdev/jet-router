@@ -1,8 +1,9 @@
-import { appendFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseLine, report, GROUPS, MIN_SAMPLES } from '../src/usage.js';
+import { renderHtml } from '../src/usage-html.js';
 
 // record: the hook pipes one record on stdin; report: aggregates the monthly files.
 export const usageDir = () => process.env.JET_ROUTER_USAGE_DIR || join(homedir(), '.claude/jet-router/usage');
@@ -66,6 +67,11 @@ function parseArgs(argv) {
     else if (flag === '--to') { args.to = value; i++; }
     else if (flag === '--dir') { args.dir = value; i++; }
     else if (flag === '--json') args.json = true;
+    else if (flag === '--html') {
+      // The path is optional; a following flag starts the next option.
+      args.html = value && !value.startsWith('--') ? value : 'jet-router-usage.html';
+      if (args.html === value) i++;
+    }
     else throw new Error(`unknown option: ${flag}`);
   }
   for (const date of [args.from, args.to]) if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('dates are YYYY-MM-DD');
@@ -81,10 +87,18 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   } else if (command === 'report') {
     try {
       const args = parseArgs(rest);
-      const result = report(readRecords(args.dir), args);
-      console.log(args.json ? JSON.stringify(result, null, 2) : formatReport(result));
+      const records = readRecords(args.dir);
+      if (args.html) {
+        // Filters in the page start from --from/--to; all records stay embedded for re-filtering.
+        const inRange = r => (!args.from || GROUPS.day(r) >= args.from) && (!args.to || GROUPS.day(r) <= args.to);
+        writeFileSync(args.html, renderHtml(records.filter(inRange), { home }));
+        console.log(`HTML 리포트: ${resolve(args.html)}`);
+      } else {
+        const result = report(records, args);
+        console.log(args.json ? JSON.stringify(result, null, 2) : formatReport(result));
+      }
     } catch (error) {
-      console.error(`사용법: node scripts/usage.mjs report [--by day|week|month|project|model|mode|pair|all[,...]] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--dir 경로] [--json]\n${error.message}`);
+      console.error(`사용법: node scripts/usage.mjs report [--by day|week|month|project|model|mode|pair|all[,...]] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--dir 경로] [--json | --html [파일]]\n${error.message}`);
       process.exitCode = 1;
     }
   } else {
