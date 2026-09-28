@@ -62,3 +62,14 @@ test('report --html writes the dashboard file', () => {
     assert.match(readFileSync(out, 'utf8'), /jet-router 사용량/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('report --html expands ~/ and creates the folder', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'jet-router-home-'));
+  try {
+    const run = spawnSync(process.execPath, ['scripts/usage.mjs', 'report', '--html', '~/.claude/jet-router/usage-report.html'],
+      { env: { ...process.env, HOME: dir, JET_ROUTER_USAGE_DIR: join(dir, 'none') }, encoding: 'utf8' });
+    assert.equal(run.status, 0);
+    assert.match(readFileSync(join(dir, '.claude/jet-router/usage-report.html'), 'utf8'), /jet-router 사용량/);
+    assert.match(run.stdout, /열기: open ~\/.claude\/jet-router\/usage-report\.html/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

@@ -87,6 +87,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 | `/jet-router lock` | 현재 모드를 유지하며 분류 일시 정지 |
 | `/jet-router unlock` | 잠금 해제. off였다면 계속 off |
 | `/jet-router enforce` | 추천 effort를 해당 턴에만 적용 (세션 기본값 변경 없음) |
+| `/jet-router report [기준] [html]` | 사용량·절감 리포트. 기준 `day`(기본)·`week`·`month`·`project`·`model`·`mode`·`pair`·`all`, `html`이면 `~/.claude/jet-router/usage-report.html` 생성 |
 
 `on` 명령은 없습니다. 잠금 상태에서 shadow를 선택해도 잠금은 유지됩니다. 상태의 “최근 완료”는 이전 턴 기록이며 현재 모드와 다를 수 있습니다. 새 세션에서 초기화됩니다.
 
@@ -191,7 +192,7 @@ shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.c
 - 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, subagent·알림 턴.
 - 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.
 
-리포트는 네트워크 호출 없이 로컬 파일만 읽습니다.
+리포트는 네트워크 호출 없이 로컬 파일만 읽습니다. 세션 안에서는 `/jet-router report`(`project`·`week` 등 기준, `html` 옵션)로, 터미널에서는 아래 스크립트로 봅니다. 설치본 경로는 [README](../README.md#절감-현황-보기)를 참고합니다.
 
 ```text
 node scripts/usage.mjs report --by day
