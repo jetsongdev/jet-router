@@ -293,7 +293,7 @@ claude-opus-5-5 · xhigh>medium        2          2      1,035        1,970  0.5
 /plugin install jet-router@jet-router
 ```
 
-코드와 manifest는 공개 저장소에 게시했습니다. 현재 원격 기본 브랜치는 `feat/effort-router`입니다. Claude 세션 안에서 다음 형태로 설치합니다.
+코드와 manifest는 공개 저장소에 게시했습니다. 현재 원격 기본 브랜치는 `main`입니다. Claude 세션 안에서 다음 형태로 설치합니다.
 
 ```text
 /plugin marketplace add jetsongdev/jet-router

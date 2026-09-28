@@ -18,9 +18,13 @@
 [Claude 적용 경로](docs/evaluations/enforce-path-2026-09-28.md),
 [subagent 경로](docs/evaluations/subagent-step-2026-09-28.md).
 
+현재 환경에서는 Claude 토큰 한도로 추가 실호출 검증을 스킵한다(2026-09-28, 사용자 지정).
+기존 평가 기록은 유지하며, 아래 Claude 표본 수집·실행 검증은 완료가 아닌 보류다.
+한도 복구 후 재개하고, 그동안 실호출이 필요 없는 검증과 Codex 후속 작업을 진행할 수 있다.
+
 ## 권장 진행 순서
 
-1. **Claude 실사용 측정:** CLAUDE-ENFORCE-001의 주요 조합별 대조군을 각 10턴 이상 모으고,
+1. **Claude 실사용 측정(현재 환경에서 보류):** CLAUDE-ENFORCE-001의 주요 조합별 대조군을 각 10턴 이상 모으고,
    메인/subagent를 구분해 실측 비율과 표본 부족을 확인한다.
 2. **평가 확대:** HARNESS-001에서 새로운 실제 저장소 과제·다른 모델/기본 effort를 비교한다.
    실패 후 수정 비용과 Jev 호출 비용을 포함해 순절감 여부를 검증한다.
@@ -236,7 +240,7 @@ Jev에 제공하는 후보와 사용자에게 표시하는 유효 추천은 활�
 
 ## CLAUDE-ENFORCE-001 — 턴 단위 적용과 절감 모니터링
 
-- 상태: 구현 완료(0.4.0~0.11.1), 실측 표본 누적 중
+- 상태: 구현 완료(0.4.0~0.11.1), 추가 실측은 현재 환경의 토큰 한도로 보류
 - 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md)(출력 −47.3%, 회귀 0)
 - [x] `/jet-router enforce`: 추천 effort를 해당 턴의 모든 요청에만 적용, 설정·기본값 불변
 - [x] 하향·상향 적용(최대 xhigh), keep·같은 effort·생략·max·잠금 제외. subagent 전파는 아래 별도 항목
