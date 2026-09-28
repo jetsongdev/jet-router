@@ -54,7 +54,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     expect(completed.text).toBe('done');
     expect(logs).toHaveLength(1);
     expect(processes).toBe(jev ? 1 : 0);
-    expect(logs[0]).toContain(jev ? '[jet-router] Jev.shadow(): high → low' : '[jet-router] fake.shadow(): high → keep(고정값)');
+    expect(logs[0]).toContain(jev ? '[jet-router] Jev.shadow(): high → low' : '[jet-router] fake.shadow(): high 유지(고정값)');
     expect(logs[0]).toContain(' · 0ms');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
     expect((await command('enforce')).text).toContain('아직 사용할 수 없습니다');
