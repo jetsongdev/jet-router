@@ -45,13 +45,13 @@ export function registerRouter(on, classify, options = {}) {
 
   on('session.start', async ($, e, next) => {
     invalidate();
-    mode = startMode(options, provider);
+    mode = startMode(options);
     locked = false;
     lastSummary = undefined;
     project = typeof e.cwd === 'string' ? e.cwd : null;
     await $.command.register({ name: 'jet-router', description: 'Effort routing: observe (shadow) or apply per turn (enforce)',
       argumentHint: 'status|shadow|enforce|off|lock|unlock|report', immediate: true });
-    publish($, sessionNotice(mode, provider, options.defaultMode === 'shadow'));
+    publish($, sessionNotice(mode, provider));
     return next(e);
   });
 
@@ -262,9 +262,11 @@ function invalidateTurn(turn) {
   turn.cancel?.();
 }
 
-// Jev never starts in shadow: a default would send prompts from every session.
-function startMode(options, provider) {
-  return options.defaultMode === 'shadow' && provider === 'fake' ? 'shadow' : 'off';
+// shadow only when explicitly chosen; with Jev that sends every session's
+// prompts (after cloud consent), so the default stays off. enforce is never a
+// start mode and always needs /jet-router enforce.
+function startMode(options) {
+  return options.defaultMode === 'shadow' ? 'shadow' : 'off';
 }
 
 const REPORT_GROUPS = ['day', 'week', 'month', 'project', 'model', 'mode', 'pair', 'all'];

@@ -417,25 +417,30 @@ test('model change during Jev classification cancels the stale result without ch
   assert.deepEqual(w.sent.map(e => e.model).sort(), ['changed-model', 'unchanged']);
 });
 
-test('session start announces the mode and only fake honors a shadow default', async () => {
+test('session start announces the mode and an explicit shadow default applies to both classifiers', async () => {
   const plain = world(); await plain.start();
   assert.deepEqual(plain.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   await plain.submit(); await plain.step();
   assert.equal(plain.calls.length, 0);
 
   const fake = world(undefined, undefined, { defaultMode: 'shadow' }); await fake.start();
-  assert.deepEqual(fake.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음)']);
+  assert.deepEqual(fake.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음) · 적용: /jet-router enforce']);
   await fake.submit(); await fake.step();
   await fake.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(fake.calls.length, 1); assert.equal(fake.logs.length, 1);
 
   const jev = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY', defaultMode: 'shadow' });
   await jev.start();
-  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
-  await jev.submit(); await jev.step();
-  await jev.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.equal(jev.logs.length, 0);
-  assert.match(jev.command('status').text, /꺼짐\(off\)/);
+  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce']);
+  assert.match(jev.command('status').text, /관찰\(shadow\)/);
+  // A shadow start never applies effort; enforce still needs the command.
+  const jevOff = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY' });
+  await jevOff.start();
+  assert.deepEqual(jevOff.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
+  for (const value of ['enforce', 'ENFORCE', 'on']) {
+    const x = world(undefined, undefined, { defaultMode: value }); await x.start();
+    assert.match(x.command('status').text, /꺼짐\(off\)/);
+  }
 });
 
 test('usage logging sends decisions and token counts, never prompt text, only when enabled', async () => {
