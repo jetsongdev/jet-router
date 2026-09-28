@@ -59,7 +59,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /absolute/path/to/jet-ro
 기본 테스트 결과는 `keep`입니다. 응답 종료 후 다음 형태의 별도 로그 한 줄을 출력합니다. 시간은 예시이며 실제 터미널의 배치는 아직 수동 검증하지 않았습니다.
 
 ```text
-[jet-router] fake.shadow(): high 유지(고정값) · 0ms
+jet-router: fake.shadow(): high 유지(고정값) · 0ms
 ```
 
 이 문구는 실제 난도 분석 결과가 아니라 fake의 고정 결과입니다. 일반 Claude 응답에는 구독 사용량/API 비용이 발생할 수 있습니다. 기본 fake는 외부 요청을 보내지 않습니다. Jev는 별도 선택·전송 동의·키 설정 후 shadow에서만 현재 입력을 전송합니다.
@@ -78,7 +78,7 @@ Jev helper가 실행되는 머신에 Node 22+가 필요합니다. 플러그인�
 
 키는 채팅·명령 인자·Git 파일에 넣지 마세요. 키 입력 UI와 secure storage 재로드는 아직 수동 검증하지 않았습니다. Configure options의 세부 위치는 Claude 버전에 따라 달라질 수 있습니다. 저장 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. [공식 플러그인 설정 안내](https://code.claude.com/docs/en/plugins-reference#user-configuration)
 
-세션은 기본적으로 off로 시작합니다. Configure의 `Mode at session start`를 `shadow`로 고르면 새 세션과 `/reload-plugins` 후 모두 shadow로 시작합니다(Jev는 전송 동의 후 모든 세션의 분류 대상 프롬프트를 전송). enforce는 세션마다 `/jet-router enforce`로 켭니다. 세션을 시작할 때 `[jet-router] 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce`처럼 현재 모드와 켜는 명령이 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰 또는 적용을 켭니다.
+세션은 기본적으로 off로 시작합니다. Configure의 `Mode at session start`를 `shadow`로 고르면 새 세션과 `/reload-plugins` 후 모두 shadow로 시작합니다(Jev는 전송 동의 후 모든 세션의 분류 대상 프롬프트를 전송). enforce는 세션마다 `/jet-router enforce`로 켭니다. 세션을 시작할 때 `jet-router: 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce`처럼 현재 모드와 켜는 명령이 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰 또는 적용을 켭니다.
 
 ```text
 /jet-router status
@@ -90,7 +90,7 @@ Jev 선택·전송 동의·키가 모두 있어야 분류합니다. 현재 프�
 응답 종료 후 다음과 같은 별도 요약이 나옵니다. 시간은 예시입니다.
 
 ```text
-[jet-router] Jev.shadow(): medium → low (70%) · 180ms
+jet-router: Jev.shadow(): medium → low (70%) · 180ms
 ```
 
 shadow는 추천만 표시합니다. 세션 기본 effort와 실제 요청 effort는 변경하지 않습니다. 추천 품질은 자동 적용에 필요한 본격 품질·정책 평가를 마치지 않은 미평가 상태입니다. `(70%)`는 선택된 후보의 확률이며 신뢰도나 성공 확률이 아닙니다.

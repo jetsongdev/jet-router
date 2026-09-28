@@ -88,7 +88,7 @@ test('enforce applies downshifts and upshifts to every step of that turn only', 
     assert.equal(first.seen.effort, chosen); assert.equal(loop.seen.effort, chosen);
     assert.equal(first.seen.messageCount, 1); assert.equal(first.e.effort, original);
     await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-    assert.deepEqual(w.logs, [`[jet-router] fake.enforce(): ${original} → ${chosen} 적용(고정값) · 0ms`]);
+    assert.deepEqual(w.logs, [`fake.enforce(): ${original} → ${chosen} 적용(고정값) · 0ms`]);
     await w.submit('t2', 'next');
     const after = await forward(w, { turnId: 't2', effort: original });
     assert.equal(after.seen, after.e); assert.equal(w.calls.length, 2);
@@ -102,7 +102,7 @@ test('enforce yields to a mid-turn effort change for the rest of the turn', asyn
   const back = await forward(w, { index: 2, effort: 'high' });
   assert.equal(changed.seen, changed.e); assert.equal(back.seen, back.e);
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.deepEqual(w.logs, ['[jet-router] fake.enforce(): high → low 적용(고정값) · 0ms · 사용자 변경으로 적용 중단']);
+  assert.deepEqual(w.logs, ['fake.enforce(): high → low 적용(고정값) · 0ms · 사용자 변경으로 적용 중단']);
 });
 
 test('enforce leaves keep, same effort, max, subagents, lock and skipped turns unchanged', async () => {
@@ -282,7 +282,7 @@ test('turns nobody typed stay silent while queued user input still reports the s
   await w.event('turn.start', { turnId: 't2', text: 'queued' }); await w.step({ turnId: 't2' });
   await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
   assert.equal(w.calls.length, 0);
-  assert.deepEqual(w.logs, ['[jet-router] fake 생략: 대기 중 입력 · shadow']);
+  assert.deepEqual(w.logs, ['fake 생략: 대기 중 입력 · shadow']);
 });
 
 test('skipped turns name the specific reason instead of a generic correlation miss', async () => {
@@ -297,7 +297,7 @@ test('skipped turns name the specific reason instead of a generic correlation mi
     const w = world(); await w.start(); await w.command('shadow');
     await w.submit('t1', text, extra); await w.step();
     await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-    assert.deepEqual(w.logs, [`[jet-router] fake 생략: ${label} · shadow`]);
+    assert.deepEqual(w.logs, [`fake 생략: ${label} · shadow`]);
   }
   for (const [text, label] of [['/probe', '스킬·명령 입력'], ['before', '입력 변경됨']]) {
     const w = world(); await w.start(); await w.command('shadow');
@@ -305,7 +305,7 @@ test('skipped turns name the specific reason instead of a generic correlation mi
       () => w.event('turn.start', { turnId: 't1', text: '<command-name>expanded</command-name>' }));
     await w.step(); await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
     assert.equal(w.calls.length, 0);
-    assert.deepEqual(w.logs, [`[jet-router] fake 생략: ${label} · shadow`]);
+    assert.deepEqual(w.logs, [`fake 생략: ${label} · shadow`]);
   }
 });
 
@@ -439,7 +439,7 @@ test('Jev passes sensitive data only via stdin and labels the unchanged result u
   assert.equal(init.timeoutMs, 4000); assert.equal(init.env.NODE_DEBUG, '');
   assert.equal(init.env.NODE_OPTIONS, ''); assert.equal(init.env.NODE_TLS_REJECT_UNAUTHORIZED, '1');
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.match(w.logs[0], /^\[jet-router\] Jev\.shadow\(\): high → low/);
+  assert.match(w.logs[0], /^Jev\.shadow\(\): high → low/);
   assert.ok(!w.logs[0].includes('CANARY'));
   assert.equal(w.calls.length, 0); // Never falls back to fake.
 });
@@ -456,7 +456,7 @@ test('a context-variant model name like claude-opus-5-5[1m] classifies and logs 
   await w.event('turn.complete', { turnId: 't1', reason: 'answer', usage: { output_tokens: 10 } });
   const [jev, usage] = runs;
   assert.equal(JSON.parse(jev.stdin).routingInput.target.model, 'claude-opus-5-5');
-  assert.match(w.logs[0], /^\[jet-router\] Jev\.enforce\(\): high → low 적용/);
+  assert.match(w.logs[0], /^Jev\.enforce\(\): high → low 적용/);
   assert.equal(JSON.parse(usage.stdin).model, 'claude-opus-5-5');
   assert.deepEqual([seen.model, seen.effort], ['claude-opus-5-5[1m]', 'low']); // The host request keeps its own model.
 });
@@ -521,24 +521,24 @@ test('model change during Jev classification cancels the stale result without ch
 
 test('session start announces the mode and an explicit shadow default applies to both classifiers', async () => {
   const plain = world(); await plain.start();
-  assert.deepEqual(plain.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
+  assert.deepEqual(plain.notices, ['세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   await plain.submit(); await plain.step();
   assert.equal(plain.calls.length, 0);
 
   const fake = world(undefined, undefined, { defaultMode: 'shadow' }); await fake.start();
-  assert.deepEqual(fake.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음) · 적용: /jet-router enforce']);
+  assert.deepEqual(fake.notices, ['세션 시작 · 관찰(shadow) · fake(외부 전송 없음) · 적용: /jet-router enforce']);
   await fake.submit(); await fake.step();
   await fake.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(fake.calls.length, 1); assert.equal(fake.logs.length, 1);
 
   const jev = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY', defaultMode: 'shadow' });
   await jev.start();
-  assert.deepEqual(jev.notices, ['[jet-router] 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce']);
+  assert.deepEqual(jev.notices, ['세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce']);
   assert.match(jev.command('status').text, /관찰\(shadow\)/);
   // A shadow start never applies effort; enforce still needs the command.
   const jevOff = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY' });
   await jevOff.start();
-  assert.deepEqual(jevOff.notices, ['[jet-router] 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
+  assert.deepEqual(jevOff.notices, ['세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   for (const value of ['enforce', 'ENFORCE', 'on']) {
     const x = world(undefined, undefined, { defaultMode: value }); await x.start();
     assert.match(x.command('status').text, /꺼짐\(off\)/);
@@ -578,7 +578,7 @@ test('holdout leaves a random share of applicable enforce turns unchanged and ma
   const held = await forward(w);
   assert.equal(held.seen, held.e);
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
-  assert.equal(w.logs.at(-1), '[jet-router] fake.enforce(): high → low 대조군 미적용(고정값) · 0ms');
+  assert.equal(w.logs.at(-1), 'fake.enforce(): high → low 대조군 미적용(고정값) · 0ms');
   await w.submit('t2', 'next');
   assert.equal((await forward(w, { turnId: 't2' })).seen.effort, 'low');
   await w.event('turn.complete', { turnId: 't2', reason: 'answer' });

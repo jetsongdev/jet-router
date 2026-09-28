@@ -49,7 +49,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     });
     await $.session.start({ cwd: '/offline-no-sdd', surface: 'terminal', isInteractive: true });
     expect(logs).toHaveLength(1);
-    expect(logs[0]).toContain('[jet-router] 세션 시작 · 꺼짐(off)');
+    expect(logs[0]).toContain('세션 시작 · 꺼짐(off)');
     logs.length = 0;
     const command = (args: string) => $.command.run({ command: 'jet-router', args, origin: { kind: 'composer' } });
     const initialStatus = (await command('status')).text;
@@ -67,7 +67,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     expect(completed.text).toBe('done');
     expect(logs).toHaveLength(1);
     expect(processes).toBe(jev ? 1 : 0);
-    expect(logs[0]).toContain(jev ? '[jet-router] Jev.shadow(): high → low' : '[jet-router] fake.shadow(): high 유지(고정값)');
+    expect(logs[0]).toContain(jev ? 'Jev.shadow(): high → low' : 'fake.shadow(): high 유지(고정값)');
     expect(logs[0]).toContain(' · 0ms');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
     // enforce rewrites effort for the downstream request of this turn only.
@@ -80,7 +80,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     expect(requests).toHaveLength(2);
     expect((requests[1] as { effort: string }).effort).toBe(jev ? 'low' : 'high');
     await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
-    expect(logs[0]).toContain(jev ? '[jet-router] Jev.enforce(): high → low 적용' : '[jet-router] fake.enforce(): high 유지(고정값)');
+    expect(logs[0]).toContain(jev ? 'Jev.enforce(): high → low 적용' : 'fake.enforce(): high 유지(고정값)');
     expect(processes).toBe(jev ? 2 : 0);
     // One local usage line per routed turn, with decisions but no prompt text.
     expect(usageLines.map(line => line.mode)).toEqual(['shadow', 'enforce']);
