@@ -1,11 +1,13 @@
 import { appendFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseLine, report, GROUPS, MIN_SAMPLES } from '../src/usage.js';
 import { renderHtml } from '../src/usage-html.js';
 
 // record: the hook pipes one record on stdin; report: aggregates the monthly files.
+// Hooks cannot see the home directory, so they pass paths as ~/...
+const expandHome = path => (path.startsWith('~/') ? join(homedir(), path.slice(2)) : path);
 export const usageDir = () => process.env.JET_ROUTER_USAGE_DIR || join(homedir(), '.claude/jet-router/usage');
 
 export function recordLine(input, dir = usageDir(), now = new Date()) {
@@ -91,8 +93,10 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
       if (args.html) {
         // Filters in the page start from --from/--to; all records stay embedded for re-filtering.
         const inRange = r => (!args.from || GROUPS.day(r) >= args.from) && (!args.to || GROUPS.day(r) <= args.to);
-        writeFileSync(args.html, renderHtml(records.filter(inRange), { home }));
-        console.log(`HTML 리포트: ${resolve(args.html)}`);
+        const file = resolve(expandHome(args.html));
+        mkdirSync(dirname(file), { recursive: true });
+        writeFileSync(file, renderHtml(records.filter(inRange), { home }));
+        console.log(`HTML 리포트: ${file}\n열기: open ${file.replace(home, '~')}`);
       } else {
         const result = report(records, args);
         console.log(args.json ? JSON.stringify(result, null, 2) : formatReport(result));

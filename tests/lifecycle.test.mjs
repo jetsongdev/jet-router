@@ -486,3 +486,26 @@ test('holdout leaves a random share of applicable enforce turns unchanged and ma
     assert.equal((await forward(x)).seen.effort, 'low');
   }
 });
+
+test('report runs the loaded plugin version of the usage script with fixed arguments only', async () => {
+  const runs = [];
+  let reply = { exitCode: 0, stdout: 'TABLE\n', stderr: '' };
+  const run = async (argv, init) => { runs.push({ argv, cwd: init.cwd }); return reply; };
+  const w = world(undefined, undefined, {}, run); await w.start();
+  assert.equal((await w.command('report')).text, 'TABLE');
+  assert.equal((await w.command('report project')).text, 'TABLE');
+  assert.equal((await w.command('report week html')).text, 'TABLE');
+  assert.deepEqual(runs.map(r => r.argv.slice(1)), [
+    ['/plugin with spaces/scripts/usage.mjs', 'report', '--by', 'day'],
+    ['/plugin with spaces/scripts/usage.mjs', 'report', '--by', 'project'],
+    ['/plugin with spaces/scripts/usage.mjs', 'report', '--html', '~/.claude/jet-router/usage-report.html'],
+  ]);
+  assert.equal(runs[0].cwd, '/plugin with spaces');
+  for (const bad of ['report ; rm -rf /', 'report day week', 'report --dir /tmp']) {
+    assert.match((await w.command(bad)).text, /절감 리포트: \/jet-router report/);
+  }
+  assert.equal(runs.length, 3);
+  reply = { exitCode: 1, stdout: '', stderr: 'boom' };
+  assert.match((await w.command('report')).text, /리포트 생성 실패/);
+  assert.match(w.command('status').text, /모드/);
+});

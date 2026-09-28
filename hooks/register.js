@@ -50,13 +50,15 @@ export function registerRouter(on, classify, options = {}) {
     lastSummary = undefined;
     project = typeof e.cwd === 'string' ? e.cwd : null;
     await $.command.register({ name: 'jet-router', description: 'Effort routing: observe (shadow) or apply per turn (enforce)',
-      argumentHint: 'status|shadow|enforce|off|lock|unlock', immediate: true });
+      argumentHint: 'status|shadow|enforce|off|lock|unlock|report', immediate: true });
     publish($, sessionNotice(mode, provider, options.defaultMode === 'shadow'));
     return next(e);
   });
 
   on('command.run', { command: 'jet-router' }, ($, e) => {
     const action = e.args.trim() || 'status';
+    // Only report is asynchronous; the other commands answer synchronously.
+    if (action === 'report' || action.startsWith('report ')) return runReport($, action.split(/\s+/).slice(1)).then(text => ({ text }));
     if (action === 'off' || action === 'shadow' || action === 'enforce') {
       invalidate();
       mode = action;
@@ -64,7 +66,7 @@ export function registerRouter(on, classify, options = {}) {
       invalidate();
       locked = action === 'lock';
     } else if (action !== 'status') {
-      return { text: '사용법: /jet-router status|shadow|enforce|off|lock|unlock' };
+      return { text: `사용법: /jet-router status|shadow|enforce|off|lock|unlock\n${REPORT_USAGE}` };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
     return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true) };
@@ -263,6 +265,24 @@ function invalidateTurn(turn) {
 // Jev never starts in shadow: a default would send prompts from every session.
 function startMode(options, provider) {
   return options.defaultMode === 'shadow' && provider === 'fake' ? 'shadow' : 'off';
+}
+
+const REPORT_GROUPS = ['day', 'week', 'month', 'project', 'model', 'mode', 'pair', 'all'];
+const REPORT_HTML = '~/.claude/jet-router/usage-report.html';
+const REPORT_USAGE = `절감 리포트: /jet-router report [${REPORT_GROUPS.join('|')}] [html]`;
+
+// Runs the report script of the loaded plugin version, so the path always
+// follows updates. Only fixed tokens reach the argv; nothing is interpolated.
+async function runReport($, tokens) {
+  const html = tokens.includes('html');
+  const groups = tokens.filter(token => token !== 'html');
+  if (groups.length > 1 || (groups.length && !REPORT_GROUPS.includes(groups[0]))) return REPORT_USAGE;
+  const argv = ['node', `${$.plugin.root}/scripts/usage.mjs`, 'report', ...(html ? ['--html', REPORT_HTML] : ['--by', groups[0] ?? 'day'])];
+  try {
+    const result = await $.process.run(argv, { cwd: $.plugin.root, timeoutMs: 10000, env: { ...PROCESS_ENV } });
+    if (result.exitCode !== 0) return `리포트 생성 실패\n${REPORT_USAGE}`;
+    return String(result.stdout).trim() || '기록이 없습니다.';
+  } catch { return `리포트 생성 실패\n${REPORT_USAGE}`; }
 }
 
 // Local token log for savings reports; a failure never affects the session.

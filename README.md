@@ -113,6 +113,32 @@ node scripts/evaluate-jev.mjs --live --key-file /absolute/path/to/project/.env
 
 합성 입력 최대 12건을 순차 호출하며 첫 통신·응답 오류에서 중단하고 재시도하지 않습니다. 이 명령은 플러그인을 설치하거나 설정을 저장하지 않습니다.
 
+## 절감 현황 보기
+
+enforce·shadow로 분류한 턴은 `~/.claude/jet-router/usage/`에 기록됩니다(원문 없음). 세 가지 방법으로 볼 수 있습니다.
+
+**1. 세션 안에서 (권장).** 로드된 플러그인 버전의 스크립트를 쓰므로 업데이트해도 경로를 신경 쓸 필요가 없습니다.
+
+```text
+/jet-router report                # 일자별 표
+/jet-router report project        # day|week|month|project|model|mode|pair|all
+/jet-router report html           # HTML 대시보드 생성 후 경로 안내
+```
+
+HTML은 `~/.claude/jet-router/usage-report.html`에 만들어지며, 안내된 `open` 명령으로 엽니다.
+
+**2. 터미널에서 설치본으로.** 버전이 바뀌어도 최신 설치본을 찾습니다.
+
+```bash
+JR=$(ls -d ~/.claude/plugins/cache/jet-router/jet-router/*/ | sort -V | tail -1)
+node "$JR/scripts/usage.mjs" report --by day
+node "$JR/scripts/usage.mjs" report --html ~/jet-router-usage.html && open ~/jet-router-usage.html
+```
+
+**3. 저장소에서.** `pnpm usage:report --by week` 또는 `node scripts/usage.mjs report --html`.
+
+옵션·열 설명·추정 방식은 [사용 설명서 7절](docs/usage.md#7-사용량-기록과-절감-리포트)에 있습니다.
+
 ## 검증과 지원 범위
 
 Claude Code **2.1.283**에서 manifest와 오프라인 hook 테스트를 검증했습니다. Function hooks는 early access이며 다른 버전은 미검증입니다. Herdr와 SDD 문서는 실행에 필요하지 않습니다.

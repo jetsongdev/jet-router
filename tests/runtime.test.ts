@@ -11,6 +11,9 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     let processes = 0;
     const usageLines: Record<string, unknown>[] = [];
     on('process.run', ($, e) => {
+      if (e.argv[1].endsWith('/scripts/usage.mjs') && e.argv[2] === 'report') {
+        return { value: { exitCode: 0, stdout: 'REPORT_TABLE\n', stderr: '' } };
+      }
       if (e.argv[1].endsWith('/scripts/usage.mjs')) {
         expect(e.argv[2]).toBe('record');
         expect(e.init?.stdin ?? '').not.toContain('CANARY');
@@ -83,5 +86,7 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     expect(usageLines.map(line => line.mode)).toEqual(['shadow', 'enforce']);
     expect(usageLines[1].applied).toBe(jev ? 'low' : null);
     expect(usageLines[0].project).toBe('/offline-no-sdd');
+    // The report command resolves the script from the loaded plugin root.
+    expect((await command('report')).text).toBe('REPORT_TABLE');
   });
 });
