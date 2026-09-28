@@ -37,8 +37,9 @@ recognition is not claimed.
 
 The user's function-hook env setting is present as `1`. Offline runner tests
 prove this module loads and its off/shadow path delegates unchanged in 2.1.283.
-They do not prove activation in an already running Herdr session, request-level
-effort mutation, or server acceptance. Restart/resume behavior remains untested.
+They do not prove activation in an already running Herdr session. A later
+disposable probe confirmed request-level effort mutation, server-side effect and
+resume behavior; see [the enforce path record](evaluations/enforce-path-2026-09-28.md).
 
 The source scanner requires helpers receiving `$` to be declared at module scope.
 The initial nested helper was rejected and corrected. Manifest validation against

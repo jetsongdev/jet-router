@@ -185,7 +185,10 @@ Jev 후보는 `low / medium / high / xhigh / keep`이며, `keep`은 effort 이�
 현재 shadow는 값을 바꾸지 않으므로 **턴 종료 후 복귀시킬 effort 자체가 없다.**
 
 Claude의 향후 목표는 해당 턴의 요청만 선택한 effort로 실행하면서 사용자 기본 설정을
-보존하는 것이다. 아직 실제 변경·복귀 검증을 구현한 상태는 아니다.
+보존하는 것이다. 일회용 프로브로 `turn.step` effort 재작성이 도구 루프를 포함한 해당 턴에만
+반영되고, 서버 동작이 바뀌며, 설정에 남지 않음을 확인했다. 턴 도중 `/effort` 변경은 즉시
+들어오므로 덮어쓰지 않아야 한다. 제품 enforce는 아직 구현하지 않았다
+([경로 확인 기록](evaluations/enforce-path-2026-09-28.md)).
 
 Codex의 MCP hook 출력에는 effort 변경 계약이 없다. 실제 적용에는 별도 제어 클라이언트가
 필요하며, [App Server](https://learn.chatgpt.com/docs/app-server)의 `turn/start.effort`는
