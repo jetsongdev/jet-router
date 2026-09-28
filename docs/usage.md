@@ -94,7 +94,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 
 설치된 플러그인은 `/plugin`의 Installed에서 jet-router를 선택하고 **Configure options**에서 값을 바꿀 수 있습니다. 변경 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. 이 플러그인의 설정 UI 경로는 아직 수동 실행하지 않았습니다. [공식 관리 방법](https://code.claude.com/docs/en/discover-plugins#manage-installed-plugins)
 
-기본 `keep` fixture는 맥락 충분 여부를 false로 반환하므로 “추천 보류(맥락 부족)”라고 표시합니다. `low`로 설정하면 모든 분류 대상에 low를 추천합니다. 어느 쪽도 실제 요청의 난도를 판단한 결과는 아닙니다.
+기본 `keep` fixture는 맥락 충분 여부를 false로 반환하므로 `→ keep(고정값)`으로 표시합니다. `low`로 설정하면 모든 분류 대상에 low를 추천합니다. 어느 쪽도 실제 요청의 난도를 판단한 결과는 아닙니다.
 
 ### Jev shadow 설정
 
@@ -118,25 +118,27 @@ Node 22+ 실행 파일이 Claude 프로세스의 PATH에 있어야 합니다. `/
 
 응답 본문을 수정하지 않고 메인 턴 종료 후 별도의 로그 한 줄을 출력합니다. 도구 요청마다 중복 출력하지 않습니다. 아래 시간은 예시입니다.
 
-추천이 있어도 shadow에서는 원래 effort를 유지합니다.
+형식은 Codex MCP shadow 안내([Codex MCP 가이드](codex-mcp.md))와 같습니다. 화살표 왼쪽은 이 턴의 요청 effort, 오른쪽은 추천값입니다. 추천이 있어도 shadow에서는 원래 effort를 유지합니다. fake 결과에는 `(고정값)`이 붙습니다.
 
 ```text
-[jet-router] 관찰 · fake(테스트) · high 유지 · 추천 low · 분류 12ms
-[jet-router] 관찰 · fake(테스트) · medium 유지 · 추천 xhigh · 분류 9ms
+[jet-router] fake.shadow(): high → low(고정값) · 12ms
+[jet-router] fake.shadow(): medium → xhigh(고정값) · 9ms
+[jet-router] fake.shadow(): high → keep(고정값) · 8ms
 ```
 
-분류를 보류·생략·실패한 경우를 구분합니다. 분류를 생략했으면 지연값도 표시하지 않습니다.
+분류를 생략·실패한 경우는 `생략:`으로 구분하고 지연값을 표시하지 않습니다.
 
 ```text
-[jet-router] 관찰 · fake(테스트) · high 유지 · 추천 보류(맥락 부족) · 분류 8ms
-[jet-router] 관찰 · fake(테스트) · max 유지 · 분류 생략(max 보호)
-[jet-router] 관찰 · fake(테스트) · high 유지 · 추천 없음(시간 초과) · 분류 1000ms
+[jet-router] fake 생략: max 보호 · shadow
+[jet-router] fake 생략: 시간 초과 · shadow
+[jet-router] fake 생략: 요청 연결 불확실 · shadow
 ```
 
-timeout은 실패 경로의 표시 예시이며 정상 fake는 즉시 결과를 반환합니다. 분류 이후 턴이 중단되면 끝에 `중단`이 붙습니다. 분류 완료 전에 중단되었거나 off·잠금·세션 전환으로 결과가 무효화됐다면 요약은 생략될 수 있습니다.
+timeout은 실패 경로의 표시 예시이며 정상 fake는 즉시 결과를 반환합니다. 첨부파일·추가 컨텍스트가 있거나 제출이 겹친 입력은 `요청 연결 불확실`로 분류를 생략합니다. 턴 도중 요청 effort가 바뀌면 `마지막 요청 …`이, 턴이 중단되면 끝에 `중단`(`오류`·`거절`)이 붙습니다. 분류 완료 전에 중단되었거나 off·잠금·세션 전환으로 결과가 무효화됐다면 요약은 생략될 수 있습니다.
 
 ```text
-[jet-router] 관찰 · fake(테스트) · high 유지 · 추천 low · 분류 12ms · 중단
+[jet-router] fake.shadow(): high → low(고정값) · 12ms · 마지막 요청 medium
+[jet-router] fake.shadow(): high → low(고정값) · 12ms · 중단
 ```
 
 상태 조회 예시입니다.
@@ -147,15 +149,15 @@ jet-router
 분류기: fake(고정 테스트 결과) · 외부 전송: 없음
 수동 잠금: 꺼짐
 effort 자동 변경: 미지원
-최근 완료: [jet-router] 관찰 · fake(테스트) · high 유지 · 추천 low · 분류 12ms
+최근 완료: [jet-router] fake.shadow(): high → low(고정값) · 12ms
 ```
 
-Jev shadow의 표시 예시입니다. “미평가”는 응답 형식만 검증했으며 추천 정확도와 정책 임계값을 아직 평가하지 않았다는 뜻입니다. 맥락·위험 점수에 임의의 기준값을 적용하지 않습니다.
+Jev shadow의 표시 예시입니다. Jev 추천은 응답 형식만 검증했으며 추천 정확도와 정책 임계값은 아직 미평가입니다. 맥락·위험 점수에 임의의 기준값을 적용하지 않습니다. `(70%)`는 선택된 후보의 `selectedProbability`를 반올림한 값이며, 응답에 없으면 생략합니다. 신뢰도나 작업 성공 확률이 아닙니다.
 
 ```text
-[jet-router] 관찰 · Jev · medium 유지 · 추천 low(미평가) · 분류 180ms
-[jet-router] 관찰 · Jev · high 유지 · 분류 생략(외부 전송 미동의)
-[jet-router] 관찰 · Jev · high 유지 · 추천 없음(redirect 차단) · 분류 35ms
+[jet-router] Jev.shadow(): medium → low (70%) · 180ms
+[jet-router] Jev 생략: 전송 미동의 · shadow
+[jet-router] Jev 생략: redirect 차단 · shadow
 ```
 
 향후 enforce 표시안은 다음과 같습니다. **현재 출력되거나 적용되는 기능은 아닙니다.**

@@ -171,7 +171,8 @@ function classificationResult(provider, outcome) {
     else if (provider === 'jev') reasonCode = 'unevaluated';
     else reasonCode = decision.contextSufficient ? 'shadow' : 'context';
   }
-  return { recommendation: decision?.choice ?? 'keep', reasonCode };
+  const probability = provider === 'jev' ? decision?.selectedProbability : undefined;
+  return { recommendation: decision?.choice ?? 'keep', reasonCode, ...(probability !== undefined ? { probability } : {}) };
 }
 
 function safeEffort(value) {
