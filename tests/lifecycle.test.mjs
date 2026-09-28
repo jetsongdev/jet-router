@@ -437,3 +437,26 @@ test('session start announces the mode and only fake honors a shadow default', a
   assert.equal(jev.logs.length, 0);
   assert.match(jev.command('status').text, /꺼짐\(off\)/);
 });
+
+test('usage logging sends decisions and token counts, never prompt text, only when enabled', async () => {
+  const runs = [];
+  const run = async (argv, init) => { runs.push({ argv, stdin: init.stdin }); return { exitCode: 0, stdout: '', stderr: '' }; };
+  const w = world(undefined, undefined, { usageLog: true }, run);
+  await w.event('session.start', { cwd: '/work/icp' }); await w.command('enforce');
+  await w.submit(); await forward(w);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer', durationMs: 900,
+    usage: { input_tokens: 2, output_tokens: 40, cache_read_input_tokens: 5, cache_creation_input_tokens: 1 } });
+  assert.equal(runs.length, 1);
+  assert.ok(runs[0].argv[1].endsWith('/scripts/usage.mjs')); assert.equal(runs[0].argv[2], 'record');
+  assert.ok(!runs[0].stdin.includes('CANARY_SECRET'));
+  const line = JSON.parse(runs[0].stdin);
+  assert.deepEqual([line.project, line.mode, line.original, line.applied, line.usage.output, line.durationMs],
+    ['/work/icp', 'enforce', 'high', 'low', 40, 900]);
+  await w.submit('t2', 'report', { origin: { kind: 'task-notification' } }); await forward(w, { turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  assert.equal(runs.length, 1);
+  const off = world(undefined, undefined, {}, run);
+  await off.start(); await off.command('enforce'); await off.submit(); await forward(off);
+  await off.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(runs.length, 1);
+});

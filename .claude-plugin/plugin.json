@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -24,6 +24,12 @@
       "description": "off (default) or shadow. shadow applies only with the fake classifier; Jev always starts off to avoid sending prompts from every session.",
       "options": ["off", "shadow"],
       "default": "off"
+    },
+    "usageLog": {
+      "type": "boolean",
+      "title": "Record local token usage",
+      "description": "Append one line per routed turn (effort decision and token counts, never prompt text) to ~/.claude/jet-router/usage for savings reports.",
+      "default": true
     },
     "cloudConsent": {
       "type": "boolean",

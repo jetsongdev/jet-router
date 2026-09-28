@@ -183,7 +183,28 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 `유지`는 라우터가 다음 훅에 넘긴 요청값을 설명합니다. 서버 수신이나 모델 내부 추론량을 증명하지 않습니다. 지연은 전체 Claude 응답 시간이 아니라 분류 대기 시간입니다. 신뢰도·비용 절감량은 현재 표시하지 않습니다.
 
-## 7. 로컬·공개 marketplace 설치
+## 7. 사용량 기록과 절감 리포트
+
+shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용).
+
+- 기록 항목: 시각, 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
+- 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, subagent·알림 턴.
+- 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.
+
+리포트는 네트워크 호출 없이 로컬 파일만 읽습니다.
+
+```text
+node scripts/usage.mjs report --by day
+node scripts/usage.mjs report --by week --from 2026-10-01 --to 2026-10-31
+node scripts/usage.mjs report --by project,pair
+node scripts/usage.mjs report --by month --json
+```
+
+`--by`는 `day|week|month|project|model|mode|pair|all`을 쉼표로 조합합니다. 날짜는 로컬 시간 기준입니다.
+
+**추정 절감의 범위.** 적용하지 않았을 때의 토큰은 관측할 수 없으므로 추정합니다. [Claude 하향 비교](evaluations/downshift-claude-2026-09-28/README.md)에서 측정한 조합(Opus 5.5의 xhigh→medium 출력 비율 0.517, xhigh→high 0.547)만 `실제 출력 ÷ 비율 − 실제 출력`으로 계산합니다. 측정하지 않은 조합, 상향 적용, 턴 도중 사용자 변경으로 양보한 턴은 `미추정`으로 따로 세며 절감에 넣지 않습니다. shadow 턴은 원래 effort로 실행됐으므로 `실제 출력 × (1 − 비율)`을 잠재 절감으로만 표시합니다. 합성 과제 4개에서 얻은 비율이라 실제 작업의 절감률을 보장하지 않습니다. 금액은 표시하지 않습니다.
+
+## 8. 로컬·공개 marketplace 설치
 
 폴더 직접 로드가 아닌 설치 방식이 필요할 때만 사용합니다. 다음은 Claude 세션 안에서 실행하는 명령이며 사용자 설정·설치 상태를 변경합니다.
 
@@ -201,7 +222,7 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 설치 범위를 확인하고, 로드가 보류되면 화면의 안내를 따릅니다. GitHub marketplace 추가 및 설치 형식의 근거는 [공식 설치 문서](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace)입니다. 원격 새 clone의 테스트·manifest 검증은 통과했지만 이 두 marketplace 설치 절차는 jet-router에서 실제 실행하지 않았습니다.
 
-## 8. 중지와 문제 해결
+## 9. 중지와 문제 해결
 
 | 상황 | 확인할 내용 |
 | --- | --- |
@@ -220,7 +241,7 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 실제 설치 후에는 [테스트 체크리스트](test-checklist.md)를 순서대로 진행하고 결과를 기록합니다.
 
-## 9. 개발 검증
+## 10. 개발 검증
 
 플러그인 폴더에서 실행합니다. Node 22+가 필요하며 의존성 설치는 필요하지 않습니다.
 
