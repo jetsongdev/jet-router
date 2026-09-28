@@ -96,7 +96,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 
 ```text
 [jet-router] 세션 시작 · 관찰(shadow) · fake(외부 전송 없음)
-[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow
+[jet-router] 세션 시작 · 꺼짐(off) · Jev · Jev는 기본 shadow 미적용 · 켜기: /jet-router shadow(관찰) · enforce(적용)
 ```
 
 
