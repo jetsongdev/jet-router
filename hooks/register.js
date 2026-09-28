@@ -2,7 +2,7 @@ import { prepareRoutingRequest } from '../src/harness.js';
 import { parseDecision, EFFORTS } from '../src/policy.js';
 import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
-import { summary, status } from '../src/report.js';
+import { summary, status, sessionNotice } from '../src/report.js';
 
 export function register(on, options) {
   registerRouter(on, fakeProvider(options.fakeChoice), options);
@@ -31,11 +31,12 @@ export function registerRouter(on, classify, options = {}) {
 
   on('session.start', async ($, e, next) => {
     invalidate();
-    mode = 'off';
+    mode = startMode(options, provider);
     locked = false;
     lastSummary = undefined;
     await $.command.register({ name: 'jet-router', description: 'Effort routing observation (no automatic changes)',
       argumentHint: 'status|shadow|off|lock|unlock', immediate: true });
+    publish($, sessionNotice(mode, provider, options.defaultMode === 'shadow'));
     return next(e);
   });
 
@@ -184,6 +185,11 @@ function invalidateTurn(turn) {
   turn.record = undefined;
   turn.text = '';
   turn.cancel?.();
+}
+
+// Jev never starts in shadow: a default would send prompts from every session.
+function startMode(options, provider) {
+  return options.defaultMode === 'shadow' && provider === 'fake' ? 'shadow' : 'off';
 }
 
 function publish($, text) {

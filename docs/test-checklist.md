@@ -46,7 +46,9 @@
 - [ ] shadow에서 `/jet-router lock` 후 새 프롬프트에는 새 분류 요약이 나오지 않는다.
 - [ ] `/jet-router unlock` 후 다음 분류 대상 프롬프트에서 추천이 재개된다.
 - [ ] off 상태에서 lock/unlock해도 자동으로 shadow가 켜지지 않는다.
-- [ ] 새 세션 시작 시 off와 최근 완료 없음으로 초기화된다.
+- [ ] 새 세션 시작 시 off와 최근 완료 없음으로 초기화되고, `[jet-router] 세션 시작 · 꺼짐(off)` 알림이 한 번 나온다.
+- [ ] fake에서 `defaultMode=shadow`로 reload·재시작하면 새 세션이 `세션 시작 · 관찰(shadow)`로 시작한다.
+- [ ] Jev에서 `defaultMode=shadow`여도 새 세션은 off로 시작하고 `Jev는 기본 shadow 미적용`이 표시된다.
 - [ ] 기존 대화를 재개했을 때도 초기 상태를 확인한다. 재개 방법·결과는 별도 기록한다.
 - [ ] `/jet-router enforce`는 미지원 안내만 표시한다.
 
