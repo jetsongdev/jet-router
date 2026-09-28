@@ -6,17 +6,17 @@
 
 현재는 **fake 또는 선택적 Jev의 off/shadow 관찰**을 지원합니다. 기본 `fake`는 API 키 없이 설정된 고정값만 반환합니다. Jev는 별도 선택·외부 전송 동의·키가 모두 필요하며, 실패 시 다른 provider로 전환하지 않습니다.
 
-Jev 연결은 로컬 mock과 [합성 입력 12건 실호출](evaluations/jev-smoke-2026-09-27.md)로 확인했습니다. 실제 Claude 세션 연결과 본격 품질 평가는 남아 있습니다. 자동 적용(enforce)은 미지원입니다. 아래 자동 적용 설명은 목표 동작입니다.
+Jev 연결은 로컬 mock과 [합성 입력 12건 실호출](evaluations/jev-smoke-2026-09-27.md)로 확인했습니다. 실제 Claude 세션 연결과 본격 품질 평가는 남아 있습니다. 자동 적용(enforce)은 `/jet-router enforce`로 켤 때만 동작합니다. 세션 시작 기본값은 항상 off 또는 shadow이며 enforce로 시작하지 않습니다.
 
 ## 2. 기본 effort와 프롬프트별 적용
 
 기본 effort는 사용자 설정에 따라 `medium`, `high`, `xhigh` 등이 될 수 있습니다. 라우터는 설정 파일에서 기본값을 추측하지 않고 각 `turn.step`에 들어온 값을 읽습니다.
 
-향후 enforce는 **기본 설정을 바꾸지 않고 한 프롬프트의 턴에만 적용**합니다. “1회 적용”은 모델 HTTP 요청 한 번이 아니라, 해당 프롬프트의 답변이 끝날 때까지 이어지는 도구 루프를 포함합니다.
+enforce는 **기본 설정을 바꾸지 않고 한 프롬프트의 턴에만 적용**합니다. “1회 적용”은 모델 HTTP 요청 한 번이 아니라, 해당 프롬프트의 답변이 끝날 때까지 이어지는 도구 루프를 포함합니다.
 
-예를 들어 세션 설정이 `high`인 경우의 목표 동작입니다.
+예를 들어 세션 설정이 `high`인 경우입니다. 하향·상향 추천을 모두 적용하며, 최대 `xhigh`까지입니다(`max`는 추천 후보가 아님).
 
-| 프롬프트 | 요청에 들어온 기준값 | 정책 통과 후 턴별 적용 예 |
+| 프롬프트 | 요청에 들어온 기준값 | 턴별 적용 예 |
 | --- | --- | --- |
 | 오타 수정 | high | low |
 | 일반 기능 구현 | high | medium |
@@ -24,9 +24,11 @@ Jev 연결은 로컬 mock과 [합성 입력 12건 실호출](evaluations/jev-smo
 
 첫 턴에 `low`를 적용해도 다음 프롬프트의 기본값이 `low`로 바뀌지는 않습니다. 사용자가 세션 설정을 `medium`으로 바꾸면 이후 요청에 들어오는 `medium`을 기준으로 판단합니다.
 
-같은 턴에서는 선택한 effort를 재사용하되 수동 조작을 존중해야 합니다. 현재 계약에서는 수동 설정의 출처를 완전히 식별하지 못하므로, 수동 제어가 필요하면 먼저 `/jet-router lock` 또는 `/jet-router off`를 사용합니다. 실제 자동 적용과 수동 변경의 우선순위는 enforce 구현·검증 단계에서 확인해야 합니다.
+같은 턴의 도구 루프 요청에는 선택한 effort를 계속 적용합니다. 턴 도중 `/effort`로 값을 바꾸면 다음 요청부터 바뀐 값이 들어오므로, 그 턴의 남은 요청에는 적용을 멈추고 사용자의 값을 그대로 넘깁니다. 다음 턴은 새로 분류합니다. 턴 전체를 수동으로 제어하려면 `/jet-router lock` 또는 `/jet-router off`를 사용합니다.
 
-현재 shadow에서는 위 표의 적용을 하지 않고 요청 effort를 그대로 유지합니다.
+다음 경우에는 적용하지 않고 요청 effort를 그대로 넘깁니다: `keep`·현재 값과 같은 추천, 분류 생략(시간 초과·오류·전송 미동의 등), `max` 요청, subagent, 잠금, 사용자가 입력하지 않은 턴. 적용 경로와 서버 반영은 [경로 확인 기록](evaluations/enforce-path-2026-09-28.md)에서 확인했습니다.
+
+shadow에서는 위 표의 적용을 하지 않고 요청 effort를 그대로 유지합니다.
 
 ## 3. 로컬 폴더에서 적용하기
 
@@ -84,7 +86,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 | `/jet-router off` | 분류 중지, 진행 중 판단 무효화 |
 | `/jet-router lock` | 현재 모드를 유지하며 분류 일시 정지 |
 | `/jet-router unlock` | 잠금 해제. off였다면 계속 off |
-| `/jet-router enforce` | 아직 사용할 수 없다는 안내만 출력 |
+| `/jet-router enforce` | 추천 effort를 해당 턴에만 적용 (세션 기본값 변경 없음) |
 
 `on` 명령은 없습니다. 잠금 상태에서 shadow를 선택해도 잠금은 유지됩니다. 상태의 “최근 완료”는 이전 턴 기록이며 현재 모드와 다를 수 있습니다. 새 세션에서 초기화됩니다.
 
@@ -156,7 +158,7 @@ jet-router
 모드: 관찰(shadow) — 추천만 표시
 분류기: fake(고정 테스트 결과) · 외부 전송: 없음
 수동 잠금: 꺼짐
-effort 자동 변경: 미지원
+effort 자동 변경: 꺼짐 — 켜기: /jet-router enforce
 최근 완료: [jet-router] fake.shadow(): high → low(고정값) · 12ms
 ```
 
@@ -169,12 +171,14 @@ Jev shadow의 표시 예시입니다. Jev 추천은 응답 형식만 검증했�
 [jet-router] Jev 생략: redirect 차단 · shadow
 ```
 
-향후 enforce 표시안은 다음과 같습니다. **현재 출력되거나 적용되는 기능은 아닙니다.**
+enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 바꿨다는 뜻입니다.
 
 ```text
-[jet-router] 자동 · Jev · medium → low 적용 · 분류 180ms
-[jet-router] 자동 · Jev · xhigh → high 적용 · 분류 140ms
-[jet-router] 자동 · Jev · high 유지 · 추천 low 미적용(위험 작업) · 분류 170ms
+[jet-router] Jev.enforce(): xhigh → medium 적용 (71%) · 353ms
+[jet-router] Jev.enforce(): medium → xhigh 적용 (80%) · 310ms
+[jet-router] Jev.enforce(): high 유지 (66%) · 376ms
+[jet-router] Jev.enforce(): xhigh → medium 적용 (71%) · 353ms · 마지막 요청 high · 사용자 변경으로 적용 중단
+[jet-router] Jev 생략: 시간 초과 · enforce
 ```
 
 `유지`는 라우터가 다음 훅에 넘긴 요청값을 설명합니다. 서버 수신이나 모델 내부 추론량을 증명하지 않습니다. 지연은 전체 Claude 응답 시간이 아니라 분류 대기 시간입니다. 신뢰도·비용 절감량은 현재 표시하지 않습니다.

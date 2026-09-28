@@ -26,18 +26,21 @@ export function summary(record, outcome) {
     unsupported: 'effort 미지원',
   }[record.reasonCode];
   const parts = [];
+  const mode = record.mode === 'enforce' ? 'enforce' : 'shadow';
   if (skipped) {
-    parts.push(`[jet-router] ${provider} 생략: ${skipped}`, 'shadow');
+    parts.push(`[jet-router] ${provider} 생략: ${skipped}`, mode);
   } else {
     const original = record.original === 'unsupported' ? '미확인' : record.original;
     const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
     const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
-    parts.push(`[jet-router] ${provider}.shadow(): ${target}${fixture}${percentage}`);
+    const applied = record.applied ? ' 적용' : '';
+    parts.push(`[jet-router] ${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
     if (record.original !== record.forwarded) {
       parts.push(`마지막 요청 ${record.forwarded === 'unsupported' ? '확인 불가' : record.forwarded}`);
     }
+    if (record.yielded) parts.push('사용자 변경으로 적용 중단');
   }
   const ending = { aborted: '중단', error: '오류', refusal: '거절' }[outcome];
   if (ending) parts.push(ending);
@@ -54,14 +57,14 @@ export function sessionNotice(mode, provider, requestedShadow = false) {
 export function status(mode, locked, lastSummary, provider = 'fake', cloudConsent = false) {
   return [
     'jet-router',
-    `모드: ${mode === 'off' ? '꺼짐(off)' : '관찰(shadow) — 추천만 표시'}`,
+    `모드: ${{ off: '꺼짐(off)', shadow: '관찰(shadow) — 추천만 표시', enforce: '적용(enforce) — 추천 effort를 해당 턴에만 적용' }[mode]}`,
     provider === 'jev'
-      ? `분류기: Jev · 외부 전송: ${cloudConsent ? (mode === 'shadow' && !locked ? '허용(분류 대상 입력)' : '중지(동의됨)') : '차단(미동의)'}`
+      ? `분류기: Jev · 외부 전송: ${cloudConsent ? (mode !== 'off' && !locked ? '허용(분류 대상 입력)' : '중지(동의됨)') : '차단(미동의)'}`
       : '분류기: fake(고정 테스트 결과) · 외부 전송: 없음',
     ...(provider === 'jev' ? ['전송 대상: api.typesafe.ai · 현재 프롬프트·effort만 전송',
       '취소 한계: 대기 종료 후에도 이미 시작한 요청·비용이 남을 수 있음'] : []),
     `수동 잠금: ${locked ? '켜짐 — 분류 일시 정지' : '꺼짐'}`,
-    'effort 자동 변경: 미지원',
+    `effort 자동 변경: ${mode === 'enforce' ? (locked ? '잠금으로 정지' : '켜짐 — 해당 턴만, subagent·max 제외, 턴 도중 /effort 변경 시 양보') : '꺼짐 — 켜기: /jet-router enforce'}`,
     `최근 완료: ${lastSummary ?? '없음'}`,
   ].join('\n');
 }
