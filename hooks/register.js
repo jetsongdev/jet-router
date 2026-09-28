@@ -21,8 +21,13 @@ export function registerRouter(on, classify, options = {}) {
   const turns = new Map();
   const submissions = new Set();
 
+  // shadow and enforce share classification; only enforce rewrites effort.
+  function routing() {
+    return (mode === 'shadow' || mode === 'enforce') && !locked;
+  }
+
   function isActiveTurn(turnId, turn) {
-    return turn.valid && turns.get(turnId) === turn && mode === 'shadow' && !locked;
+    return turn.valid && turns.get(turnId) === turn && routing();
   }
 
   function invalidate() {
@@ -37,23 +42,22 @@ export function registerRouter(on, classify, options = {}) {
     mode = startMode(options, provider);
     locked = false;
     lastSummary = undefined;
-    await $.command.register({ name: 'jet-router', description: 'Effort routing observation (no automatic changes)',
-      argumentHint: 'status|shadow|off|lock|unlock', immediate: true });
+    await $.command.register({ name: 'jet-router', description: 'Effort routing: observe (shadow) or apply per turn (enforce)',
+      argumentHint: 'status|shadow|enforce|off|lock|unlock', immediate: true });
     publish($, sessionNotice(mode, provider, options.defaultMode === 'shadow'));
     return next(e);
   });
 
   on('command.run', { command: 'jet-router' }, ($, e) => {
     const action = e.args.trim() || 'status';
-    if (action === 'enforce') return { text: '자동 적용(enforce)은 아직 사용할 수 없습니다. 실제 요청 검증과 평가 기준 승인이 필요합니다.' };
-    if (action === 'off' || action === 'shadow') {
+    if (action === 'off' || action === 'shadow' || action === 'enforce') {
       invalidate();
       mode = action;
     } else if (action === 'lock' || action === 'unlock') {
       invalidate();
       locked = action === 'lock';
     } else if (action !== 'status') {
-      return { text: '사용법: /jet-router status|shadow|off|lock|unlock' };
+      return { text: '사용법: /jet-router status|shadow|enforce|off|lock|unlock' };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
     return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true) };
@@ -97,7 +101,7 @@ export function registerRouter(on, classify, options = {}) {
   on('turn.start', ($, e, next) => {
     const ticket = pending;
     pending = undefined;
-    const valid = mode === 'shadow' && !locked && turns.size === 0 &&
+    const valid = routing() && turns.size === 0 &&
       ticket && !ticket.ambiguous && ticket.text === e.text;
     // Turns opened by subagent reports or task notifications stay tracked for
     // overlap checks but never produce a summary: nobody typed them.
@@ -109,7 +113,7 @@ export function registerRouter(on, classify, options = {}) {
     queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
-    if (mode === 'shadow' && !locked) {
+    if (routing()) {
       turns.set(e.turnId, { valid: Boolean(valid), silent, reason, text: valid ? e.text : '', started: false });
     }
     return next(e);
@@ -123,7 +127,7 @@ export function registerRouter(on, classify, options = {}) {
     turn.cancel?.();
     try {
       const result = await next(e);
-      if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn && turn.record) {
+      if (routing() && turns.get(e.turnId) === turn && turn.record) {
         lastSummary = summary(turn.record, e.reason);
         publish($, lastSummary);
       }
@@ -134,18 +138,23 @@ export function registerRouter(on, classify, options = {}) {
   });
 
   on('turn.step', async function* ($, e, next) {
-    if (mode !== 'shadow' || locked || e.agentId !== undefined) return yield* next(e);
+    if (!routing() || e.agentId !== undefined) return yield* next(e);
     const turn = turns.get(e.turnId);
     if (!turn || turn.completing || turn.silent) return yield* next(e);
     if (turn.started) {
       if (turn.model !== (e.model ?? null)) invalidateTurn(turn);
       if (turn.record) turn.record.forwarded = safeEffort(e.effort);
-      return yield* next(e);
+      if (turn.applied && e.effort !== turn.requested) {
+        // The user changed effort mid-turn; their choice wins for the rest of it.
+        turn.applied = undefined;
+        if (turn.record) turn.record.yielded = true;
+      }
+      return yield* next(turn.applied ? { ...e, effort: turn.applied } : e);
     }
     turn.started = true;
     turn.model = e.model ?? null;
     const effort = safeEffort(e.effort);
-    const record = { provider, mode: 'shadow', original: effort,
+    const record = { provider, mode, original: effort,
       recommendation: 'keep', forwarded: effort, reasonCode: turn.valid ? 'correlation' : turn.reason, latencyMs: null };
     if (turn.valid && e.index === 0 && effort !== 'max' && effort !== 'unsupported') {
       const timer = new AbortController();
@@ -185,7 +194,14 @@ export function registerRouter(on, classify, options = {}) {
       if (!turn.valid) return yield* next(e);
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (effort === 'unsupported') record.reasonCode = 'unsupported';
-    if (mode === 'shadow' && !locked && turns.get(e.turnId) === turn) turn.record = record;
+    if (!routing() || turns.get(e.turnId) !== turn) return yield* next(e);
+    turn.record = record;
+    if (mode === 'enforce' && applicable(record)) {
+      record.applied = record.recommendation;
+      turn.applied = record.recommendation;
+      turn.requested = e.effort;
+      return yield* next({ ...e, effort: turn.applied });
+    }
     // Shadow always delegates the exact original object, including all fields.
     return yield* next(e);
   });
@@ -204,12 +220,21 @@ function classificationResult(provider, outcome) {
   return { recommendation: decision?.choice ?? 'keep', reasonCode, ...(probability !== undefined ? { probability } : {}) };
 }
 
+// Only a validated, different effort is applied; keep, skips, max and
+// unsupported efforts leave the request unchanged.
+function applicable(record) {
+  return ['unevaluated', 'shadow'].includes(record.reasonCode) && record.recommendation !== 'keep' &&
+    EFFORTS.includes(record.recommendation) && record.recommendation !== 'max' &&
+    EFFORTS.includes(record.original) && record.original !== 'max' && record.recommendation !== record.original;
+}
+
 function safeEffort(value) {
   return EFFORTS.includes(value) ? value : 'unsupported';
 }
 
 function invalidateTurn(turn) {
   turn.valid = false;
+  turn.applied = undefined;
   turn.record = undefined;
   turn.text = '';
   turn.cancel?.();

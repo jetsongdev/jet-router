@@ -60,12 +60,79 @@ test('protected, ambiguous and unsupported requests never reach provider', async
   }
 });
 
-test('lock and session restart stop classification; enforce is unavailable', async () => {
+test('lock and session restart stop classification; enforce is a mode', async () => {
   const w = world(); await w.start(); await w.command('shadow'); await w.command('lock');
   await w.submit(); await w.step(); assert.equal(w.calls.length, 0);
   await w.command('unlock'); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
   await w.start(); await w.submit(); await w.step(); assert.equal(w.calls.length, 1);
-  assert.match((await w.command('enforce')).text, /아직 사용할 수 없습니다/);
+  assert.match((await w.command('enforce')).text, /적용\(enforce\)/);
+  assert.match((await w.command('enforce')).text, /켜짐 — 해당 턴만/);
+});
+
+// Steps capture the object handed downstream so enforce rewrites are visible.
+async function forward(w, extra = {}) {
+  const e = { turnId: 't1', index: 0, effort: 'high', model: 'unchanged', messageCount: 1, ...extra };
+  let seen;
+  const stream = w.event('turn.step', e, async function* (value) { seen = value; yield 'chunk'; return 'result'; });
+  for (let item = await stream.next(); !item.done; item = await stream.next()) void item;
+  return { e, seen };
+}
+
+test('enforce applies downshifts and upshifts to every step of that turn only', async () => {
+  for (const [original, chosen] of [['high', 'low'], ['medium', 'xhigh']]) {
+    let calls = 0; // The next turn's own decision is keep, so nothing may carry over.
+    const w = world(async () => ({ ...choice, choice: calls++ ? 'keep' : chosen })); await w.start(); await w.command('enforce');
+    await w.submit();
+    const first = await forward(w, { effort: original });
+    const loop = await forward(w, { effort: original, index: 1 });
+    assert.equal(first.seen.effort, chosen); assert.equal(loop.seen.effort, chosen);
+    assert.equal(first.seen.messageCount, 1); assert.equal(first.e.effort, original);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.deepEqual(w.logs, [`[jet-router] fake.enforce(): ${original} → ${chosen} 적용(고정값) · 0ms`]);
+    await w.submit('t2', 'next');
+    const after = await forward(w, { turnId: 't2', effort: original });
+    assert.equal(after.seen, after.e); assert.equal(w.calls.length, 2);
+  }
+});
+
+test('enforce yields to a mid-turn effort change for the rest of the turn', async () => {
+  const w = world(); await w.start(); await w.command('enforce'); await w.submit();
+  assert.equal((await forward(w)).seen.effort, 'low');
+  const changed = await forward(w, { index: 1, effort: 'xhigh' });
+  const back = await forward(w, { index: 2, effort: 'high' });
+  assert.equal(changed.seen, changed.e); assert.equal(back.seen, back.e);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.deepEqual(w.logs, ['[jet-router] fake.enforce(): high → low 적용(고정값) · 0ms · 사용자 변경으로 적용 중단']);
+});
+
+test('enforce leaves keep, same effort, max, subagents, lock and skipped turns unchanged', async () => {
+  for (const [provider, extra, before] of [
+    [async () => ({ ...choice, choice: 'keep' }), {}, null],
+    [async () => ({ ...choice, choice: 'high' }), {}, null],
+    [async () => ({ ...choice, contextSufficient: false }), {}, null],
+    [undefined, { effort: 'max' }, null],
+    [undefined, { agentId: 'child' }, null],
+    [undefined, {}, 'lock'],
+    [async () => { throw new Error('boom'); }, {}, null],
+  ]) {
+    const w = world(provider); await w.start(); await w.command('enforce');
+    if (before) await w.command(before);
+    await w.submit();
+    const { e, seen } = await forward(w, extra);
+    assert.equal(seen, e);
+  }
+  const w = world(); await w.start(); await w.command('enforce');
+  await w.submit('t1', 'CANARY_SECRET', { attachments: [{ type: 'image' }] });
+  const { e, seen } = await forward(w);
+  assert.equal(seen, e); assert.equal(w.calls.length, 0);
+});
+
+test('switching off mid-turn stops applying the enforced effort', async () => {
+  const w = world(); await w.start(); await w.command('enforce'); await w.submit();
+  assert.equal((await forward(w)).seen.effort, 'low');
+  await w.command('off');
+  const later = await forward(w, { index: 1 });
+  assert.equal(later.seen, later.e);
 });
 
 test('off, lock, interruption and session changes invalidate in-flight decisions', async () => {

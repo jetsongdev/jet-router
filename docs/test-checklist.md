@@ -1,6 +1,6 @@
 # 실제 Claude 테스트 체크리스트
 
-대상: 현재 off/shadow 버전. 아래 체크박스는 **미실행** 상태이며 테스트를 직접 확인한 뒤 표시한다. enforce와 MCP는 현재 미구현이다.
+대상: 현재 off/shadow 버전. 아래 체크박스는 **미실행** 상태이며 테스트를 직접 확인한 뒤 표시한다. enforce는 `/jet-router enforce`로 켤 때만 동작한다.
 
 설치·설정 절차는 [README](../README.md#jev-사용-설정), 세부 명령은 [사용 가이드](usage.md)를 참고한다. 비민감 테스트 폴더와 합성 문장으로 진행한다. fake라도 일반 Claude 응답의 사용량은 발생하며 Jev는 별도 API 비용이 발생할 수 있다.
 
@@ -50,7 +50,10 @@
 - [ ] fake에서 `defaultMode=shadow`로 reload·재시작하면 새 세션이 `세션 시작 · 관찰(shadow)`로 시작한다.
 - [ ] Jev에서 `defaultMode=shadow`여도 새 세션은 off로 시작하고 `Jev는 기본 shadow 미적용`이 표시된다.
 - [ ] 기존 대화를 재개했을 때도 초기 상태를 확인한다. 재개 방법·결과는 별도 기록한다.
-- [ ] `/jet-router enforce`는 미지원 안내만 표시한다.
+- [ ] `/jet-router enforce` 후 status가 `적용(enforce)`와 `effort 자동 변경: 켜짐`을 표시한다.
+- [ ] enforce에서 하향 추천 턴은 `… → … 적용`으로 표시되고, statusline·settings의 effort는 바뀌지 않는다.
+- [ ] enforce 턴 도중 `/effort`를 바꾸면 요약 끝에 `사용자 변경으로 적용 중단`이 붙는다.
+- [ ] 새 세션은 enforce가 아니라 off(또는 fake shadow 기본값)로 시작한다.
 
 ## 4. Jev 설정과 최소 실호출
 

@@ -60,6 +60,17 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     expect(logs[0]).toContain(jev ? '[jet-router] Jev.shadow(): high → low' : '[jet-router] fake.shadow(): high 유지(고정값)');
     expect(logs[0]).toContain(' · 0ms');
     expect(logs.join('')).not.toContain('RUNTIME_CANARY');
-    expect((await command('enforce')).text).toContain('아직 사용할 수 없습니다');
+    // enforce rewrites effort for the downstream request of this turn only.
+    expect((await command('enforce')).text).toContain('적용(enforce)');
+    logs.length = 0;
+    await $.prompt.submit({ text: 'RUNTIME_CANARY', origin: { kind: 'composer' }, wait: false });
+    const enforced = $.turn.step(input);
+    for await (const chunk of enforced) void chunk;
+    await enforced.result;
+    expect(requests).toHaveLength(2);
+    expect((requests[1] as { effort: string }).effort).toBe(jev ? 'low' : 'high');
+    await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
+    expect(logs[0]).toContain(jev ? '[jet-router] Jev.enforce(): high → low 적용' : '[jet-router] fake.enforce(): high 유지(고정값)');
+    expect(processes).toBe(jev ? 2 : 0);
   });
 });

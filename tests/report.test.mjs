@@ -39,6 +39,8 @@ test('Jev status distinguishes consent from activity and marks recommendations u
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'unevaluated' }), '[jet-router] Jev.shadow(): high → low · 12ms');
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'unevaluated', probability: 0.704 }), '[jet-router] Jev.shadow(): high → low (70%) · 12ms');
   assert.equal(summary({ ...record, provider: 'jev', recommendation: 'keep', reasonCode: 'unevaluated', probability: 0.66 }), '[jet-router] Jev.shadow(): high 유지 (66%) · 12ms');
+  assert.equal(summary({ ...record, mode: 'enforce', provider: 'jev', reasonCode: 'unevaluated', applied: 'low', probability: 0.71 }), '[jet-router] Jev.enforce(): high → low 적용 (71%) · 12ms');
+  assert.equal(summary({ ...record, mode: 'enforce', provider: 'jev', reasonCode: 'timeout', latencyMs: null }), '[jet-router] Jev 생략: 시간 초과 · enforce');
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'no-consent', latencyMs: null }), '[jet-router] Jev 생략: 전송 미동의 · shadow');
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'correlation', latencyMs: null }, 'aborted'), '[jet-router] Jev 생략: 요청 연결 불확실 · shadow · 중단');
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'command', latencyMs: null }), '[jet-router] Jev 생략: 스킬·명령 입력 · shadow');
