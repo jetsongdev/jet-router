@@ -1,0 +1,57 @@
+# Claude에서 Jev 하향 추천을 실제 적용했을 때의 토큰 비교
+
+## 측정 결과와 결론
+
+**사전 등록한 합격선을 통과했다.** Opus 5.5에서 하향 추천된 네 과제의 12개 비교 쌍 모두 추천값의 출력 토큰이 적었다. 양쪽 모두 12/12가 독립 검사를 통과했고 통과→실패 회귀는 0건이다. 저장한 24개 코드를 다시 채점해 같은 결과를 확인했다. 작은 합성 과제군에서의 파일럿 결과다.
+
+| 항목 | 기본 xhigh | Jev 추천 |
+| --- | ---: | ---: |
+| 검사 통과 | 12/12 | 12/12 |
+| 입력 토큰(캐시 제외) | 24 | 24 |
+| 캐시 읽기 토큰 | 20,424 | 20,424 |
+| 캐시 쓰기 토큰 | 9,517 | 9,514 |
+| 출력 토큰 | 27,815 | 14,671 |
+| CLI 보고 비용 합계 | $0.6366 | $0.3737 |
+| 생성 지연 합계 | 297.4s | 168.2s |
+
+출력 토큰 **47.3% 감소**, CLI가 보고한 비용(`total_cost_usd`) **41.3% 감소**다. 입력·캐시 조건이 두 조건에서 사실상 같아서, Codex 때와 달리 캐시 차이가 비용 차이를 부풀리지 않았다.
+
+| 과제 | 추천 | xhigh 출력 합계 | 추천 출력 합계 | 출력 절감 | 통과 |
+| --- | --- | ---: | ---: | ---: | --- |
+| ranges | medium | 6,493 | 3,098 | 52.3% | 각각 3/3 |
+| ttl-lru | medium | 5,052 | 2,927 | 42.1% | 각각 3/3 |
+| ledger | high | 9,517 | 5,204 | 45.3% | 각각 3/3 |
+| intervals | medium | 6,753 | 3,442 | 49.0% | 각각 3/3 |
+
+**xhigh 유지:** async-memo(87%), keyed-queue(70%). 생성 전에 Jev 추천으로 제외가 정해졌다. 과제별 추천은 [Codex 결과](../downshift-2026-09-28/README.md)와 같다.
+
+과제 단위 단측 sign-flip p=0.0625다. 과제가 넷뿐이라 이 값보다 작아질 수 없다. 통계적으로 확정된 효과라고 표현하지 않는다.
+
+## 그래프
+
+![토큰·품질·지연 비교](comparison.png)
+
+![CLI 보고 비용 비교](costs.png)
+
+[토큰 SVG](comparison.svg) · [비용 SVG](costs.svg). 생성: `uv run --no-project --with matplotlib python scripts/plot-downshift-claude.py docs/evaluations/downshift-claude-2026-09-28` (네트워크 호출 없음, matplotlib 필요).
+
+## 방법
+
+[사전 등록 프로토콜](protocol.md)을 결과 전에 커밋했다(`51c33e0`).
+
+- 분류: 설치된 jet-router 0.3.2 shadow(host `claude-code`, provider Jev)로 `--effort xhigh` 인터랙티브 세션에서 과제마다 1회. 요약이 뜨면 생성을 중단했다. 이 부분 생성은 관측치가 아니라 분류 비용이며 측정하지 않았다. Jev 지연은 6회 평균 311ms(277–353ms).
+- 생성: 과제마다 3쌍, 조건 순서는 과제·라운드별로 번갈아 배치. 매번 새 `claude -p` 세션, `--tools ""`, `--json-schema {code}`, 사용자 설정·CLAUDE.md·자동 메모리·MCP·플러그인 훅 제외, 환경에 Jev 키 없음. 격리하지 않은 확인 호출은 입력 90,273토큰이었고 격리 후 2,928토큰이었다.
+- effort 증거: 모든 요청의 transcript `perTurnEffort`가 요청 effort와 일치했다. wire 요청 본문은 관측하지 않았다.
+- 모든 실행은 2턴이다. `--json-schema`가 답을 `StructuredOutput` 도구 호출 한 번으로 받기 때문이며, 다른 도구 호출은 없다. 요약 스크립트의 처음 가정(1턴)을 결과 확인 후 이 사실에 맞게 고쳤다. 실행 데이터는 바꾸지 않았다.
+- 호출 수: 생성 24회(예산 36회 이내), Jev 6회, 격리 확인 2회.
+
+## 해석 범위
+
+- 절감률의 분모는 하향 추천된 네 과제의 실행이다. xhigh 유지 두 과제와 분류 오버헤드는 포함하지 않았다.
+- CLI 보고 비용은 API 단가 기준 추정치다. Team 구독의 실제 청구·사용량 차감을 확인한 값이 아니다. Jev 비용도 제외했다.
+- 이미 사용한 합성 과제 6개, 과제당 3회. 실제 저장소 작업, 긴 대화, 도구를 쓰는 작업, xhigh가 아닌 기본값으로 일반화하지 않는다.
+- Claude Code에서 추천 적용 경로 자체는 [경로 확인 기록](../enforce-path-2026-09-28.md)에서 확인했다. 이 평가는 `--effort`를 평가자가 직접 지정한 것이며, 제품의 enforce 동작을 검증한 것은 아니다.
+
+## 파일
+
+[고정된 추천](routes.json) · 그래프 `scripts/plot-downshift-claude.py` · [생성 코드와 측정 원본](routes-runs.json) · [요약 JSON](summary.json) · 실행 `node scripts/compare-downshift-claude.mjs run <routes.json>` · 재검증 `node scripts/summarize-downshift-claude.mjs <runs.json> <summary.json>`
