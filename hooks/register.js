@@ -3,6 +3,7 @@ import { parseDecision, EFFORTS } from '../src/policy.js';
 import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status, sessionNotice } from '../src/report.js';
+import { usageRecord } from '../src/usage.js';
 
 export function register(on, options) {
   registerRouter(on, fakeProvider(options.fakeChoice), options);
@@ -18,6 +19,7 @@ export function registerRouter(on, classify, options = {}) {
   // A user submission that was queued and has not started its turn yet.
   let queuedUser = false;
   let lastSummary;
+  let project = null;
   const turns = new Map();
   const submissions = new Set();
 
@@ -42,6 +44,7 @@ export function registerRouter(on, classify, options = {}) {
     mode = startMode(options, provider);
     locked = false;
     lastSummary = undefined;
+    project = typeof e.cwd === 'string' ? e.cwd : null;
     await $.command.register({ name: 'jet-router', description: 'Effort routing: observe (shadow) or apply per turn (enforce)',
       argumentHint: 'status|shadow|enforce|off|lock|unlock', immediate: true });
     publish($, sessionNotice(mode, provider, options.defaultMode === 'shadow'));
@@ -130,6 +133,10 @@ export function registerRouter(on, classify, options = {}) {
       if (routing() && turns.get(e.turnId) === turn && turn.record) {
         lastSummary = summary(turn.record, e.reason);
         publish($, lastSummary);
+        if (options.usageLog === true) {
+          await recordUsage($, usageRecord({ project, model: turn.model, record: turn.record,
+            outcome: e.reason, durationMs: e.durationMs, usage: e.usage }));
+        }
       }
       return result;
     } finally {
@@ -243,6 +250,15 @@ function invalidateTurn(turn) {
 // Jev never starts in shadow: a default would send prompts from every session.
 function startMode(options, provider) {
   return options.defaultMode === 'shadow' && provider === 'fake' ? 'shadow' : 'off';
+}
+
+// Local token log for savings reports; a failure never affects the session.
+async function recordUsage($, record) {
+  try {
+    await $.process.run(['node', `${$.plugin.root}/scripts/usage.mjs`, 'record'], {
+      cwd: $.plugin.root, stdin: JSON.stringify(record), timeoutMs: 3000, env: { ...PROCESS_ENV },
+    });
+  } catch { /* Logging is optional. */ }
 }
 
 function publish($, text) {

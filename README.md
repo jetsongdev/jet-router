@@ -146,6 +146,8 @@ Shadow 마무리 상태: Codex hook·연속 입력·취소 복구를 확인했�
 
 [하향 추천 적용 시 토큰·예상 비용 비교](docs/evaluations/downshift-2026-09-28/README.md): 기본 xhigh와 Jev 추천 medium/high를 24회 실제 실행했습니다. 하향 추천된 4과제에서 검사 통과를 유지하며 출력 토큰 47.9% 감소를 관측했습니다. 공식 단가 예상 비용은 관측 캐시 기준 19.0%, 동일 캐시 비율 가정에서 13.1% 감소했으며 Jev 비용은 제외했습니다.
 
+[사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트): shadow·enforce 턴의 effort 결정과 토큰을 로컬에 기록하고 `node scripts/usage.mjs report --by day|week|project`로 집계합니다. 절감은 측정한 조합만 추정합니다.
+
 [Claude 하향 추천 적용 비교](docs/evaluations/downshift-claude-2026-09-28/README.md): Opus 5.5에서 같은 6과제를 Claude shadow 경로로 분류하고 하향 추천 4과제를 24회 실행했습니다. 검사 통과를 유지하며 출력 토큰 47.3%, CLI 보고 비용 41.3% 감소를 관측해 사전 합격선을 통과했습니다. enforce 활성화 승인은 아닙니다.
 
 [Claude Code 동일 과제 비교 체크리스트·스크립트](docs/claude-quality-checklist.md): shadow 설치 확인과 CLI 명시적 effort 비교를 구분합니다. `node scripts/claude-quality.mjs plan eval/claude-quality/smoke.json`은 모델 호출 없이 실행 계획을 확인합니다. 실제 Claude 생성 검증은 아직 보류이며 enforce 구현을 의미하지 않습니다.

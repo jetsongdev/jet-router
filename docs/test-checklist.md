@@ -54,6 +54,8 @@
 - [ ] enforce에서 하향 추천 턴은 `… → … 적용`으로 표시되고, statusline·settings의 effort는 바뀌지 않는다.
 - [ ] enforce 턴 도중 `/effort`를 바꾸면 요약 끝에 `사용자 변경으로 적용 중단`이 붙는다.
 - [ ] 새 세션은 enforce가 아니라 off(또는 fake shadow 기본값)로 시작한다.
+- [ ] shadow·enforce 턴 후 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 한 줄이 추가되고, 프롬프트 원문이 없다.
+- [ ] `node scripts/usage.mjs report --by day`가 방금 턴을 집계한다.
 
 ## 4. Jev 설정과 최소 실호출
 

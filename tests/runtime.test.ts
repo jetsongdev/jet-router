@@ -9,7 +9,14 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     const logs: string[] = [];
     const engine = $;
     let processes = 0;
+    const usageLines: Record<string, unknown>[] = [];
     on('process.run', ($, e) => {
+      if (e.argv[1].endsWith('/scripts/usage.mjs')) {
+        expect(e.argv[2]).toBe('record');
+        expect(e.init?.stdin ?? '').not.toContain('CANARY');
+        usageLines.push(JSON.parse(e.init?.stdin ?? '{}'));
+        return { value: { exitCode: 0, stdout: '', stderr: '' } };
+      }
       processes++;
       expect(e.argv[0]).toBe('node');
       expect(e.argv[1].endsWith('/scripts/jev-request.mjs')).toBe(true);
@@ -72,5 +79,9 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     await $.turn.complete({ turnId: 'runtime-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
     expect(logs[0]).toContain(jev ? '[jet-router] Jev.enforce(): high → low 적용' : '[jet-router] fake.enforce(): high 유지(고정값)');
     expect(processes).toBe(jev ? 2 : 0);
+    // One local usage line per routed turn, with decisions but no prompt text.
+    expect(usageLines.map(line => line.mode)).toEqual(['shadow', 'enforce']);
+    expect(usageLines[1].applied).toBe(jev ? 'low' : null);
+    expect(usageLines[0].project).toBe('/offline-no-sdd');
   });
 });

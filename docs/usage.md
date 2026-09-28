@@ -183,7 +183,72 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 `유지`는 라우터가 다음 훅에 넘긴 요청값을 설명합니다. 서버 수신이나 모델 내부 추론량을 증명하지 않습니다. 지연은 전체 Claude 응답 시간이 아니라 분류 대기 시간입니다. 신뢰도·비용 절감량은 현재 표시하지 않습니다.
 
-## 7. 로컬·공개 marketplace 설치
+## 7. 사용량 기록과 절감 리포트
+
+shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용).
+
+- 기록 항목: 시각, 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
+- 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, subagent·알림 턴.
+- 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.
+
+리포트는 네트워크 호출 없이 로컬 파일만 읽습니다.
+
+```text
+node scripts/usage.mjs report --by day
+node scripts/usage.mjs report --by week --from 2026-10-01 --to 2026-10-31
+node scripts/usage.mjs report --by project,pair
+node scripts/usage.mjs report --by month --json
+```
+
+`--by`는 `day|week|month|project|model|mode|pair|all`을 쉼표로 조합합니다. 날짜는 로컬 시간 기준입니다.
+
+**예상 출력.** 아래는 예시 기록 9건(2일, 2개 프로젝트)으로 실제 스크립트를 실행한 출력입니다. 예시 데이터는 xhigh→medium 3건(1건은 턴 도중 사용자 변경으로 양보), xhigh→high 1건, medium→low 1건, medium→xhigh 상향 1건, keep 1건, 스킬 명령으로 생략 1건, shadow xhigh→medium 추천 1건입니다.
+
+```text
+$ node scripts/usage.mjs report --by day
+기간: 처음 ~ 끝 · 기준: day · 추정 대상 턴 출력 절감률 47.0%
+구분        턴  적용  상향  양보  생략  출력 토큰    추정 절감  미추정 적용  shadow 잠재 절감
+2026-10-01   4     3     0     0     0      5,820  2,433 (2턴)          1턴           0 (0턴)
+2026-10-02   5     3     1     1     1     10,340    923 (1턴)          2턴       1,038 (1턴)
+합계         9     6     1     1     1     16,160  3,356 (3턴)          3턴       1,038 (1턴)
+추정 절감은 평가에서 측정한 모델·effort 조합(xhigh→medium, xhigh→high)만 계산합니다. 미추정 적용 턴과 상향 턴은 절감에 넣지 않습니다.
+```
+
+```text
+$ node scripts/usage.mjs report --by project
+기간: 처음 ~ 끝 · 기준: project · 추정 대상 턴 출력 절감률 47.0%
+구분                  턴  적용  상향  양보  생략  출력 토큰    추정 절감  미추정 적용  shadow 잠재 절감
+~/work/saluscare-ops   3     3     1     0     0      4,510    923 (1턴)          2턴           0 (0턴)
+~/work/vitaport-icp    6     3     0     1     1     11,650  2,433 (2턴)          1턴       1,038 (1턴)
+합계                   9     6     1     1     1     16,160  3,356 (3턴)          3턴       1,038 (1턴)
+추정 절감은 평가에서 측정한 모델·effort 조합(xhigh→medium, xhigh→high)만 계산합니다. 미추정 적용 턴과 상향 턴은 절감에 넣지 않습니다.
+```
+
+```text
+$ node scripts/usage.mjs report --by pair
+기간: 처음 ~ 끝 · 기준: pair · 추정 대상 턴 출력 절감률 47.0%
+구분          턴  적용  상향  양보  생략  출력 토큰    추정 절감  미추정 적용  shadow 잠재 절감
+medium>low     1     1     0     0     0        420      0 (0턴)          1턴           0 (0턴)
+medium>xhigh   1     1     1     0     0      3,100      0 (0턴)          1턴           0 (0턴)
+xhigh>high     1     1     0     0     0      1,720  1,426 (1턴)          0턴           0 (0턴)
+xhigh>keep     2     0     0     0     1      4,400      0 (0턴)          0턴           0 (0턴)
+xhigh>medium   4     3     0     1     0      6,520  1,931 (2턴)          1턴       1,038 (1턴)
+합계           9     6     1     1     1     16,160  3,356 (3턴)          3턴       1,038 (1턴)
+추정 절감은 평가에서 측정한 모델·effort 조합(xhigh→medium, xhigh→high)만 계산합니다. 미추정 적용 턴과 상향 턴은 절감에 넣지 않습니다.
+```
+
+읽는 법:
+
+- `적용`: enforce가 effort를 바꾼 턴입니다. `상향`과 `양보`는 그중 올린 턴과 턴 도중 사용자 변경으로 적용을 멈춘 턴입니다.
+- `생략`: 분류하지 못해 적용하지 않은 턴입니다(위 예시에서는 스킬 명령).
+- `추정 절감 (N턴)`: 측정한 조합으로 적용된 N턴에서 줄었다고 추정한 출력 토큰입니다. 첫 줄의 `추정 대상 턴 출력 절감률`은 이 턴들에 대한 비율이며, 전체 사용량 대비 절감률이 아닙니다.
+- `미추정 적용`: 적용했지만 절감을 계산하지 않은 턴입니다. 측정하지 않은 조합(medium→low), 상향(medium→xhigh), 양보한 턴이 여기에 들어갑니다.
+- `shadow 잠재 절감`: shadow 턴에서 추천대로 적용했다면 줄었을 것으로 추정한 양입니다. 실제로 절감된 양이 아닙니다.
+- `--json`은 같은 집계를 필드별로 출력합니다. `estimatedBaselineOutput`(적용 안 했을 때의 추정 출력), `unestimatedAppliedOutput`(미추정 적용 턴의 실제 출력), 입력·캐시 토큰 합계가 추가로 들어 있습니다.
+
+**추정 절감의 범위.** 적용하지 않았을 때의 토큰은 관측할 수 없으므로 추정합니다. [Claude 하향 비교](evaluations/downshift-claude-2026-09-28/README.md)에서 측정한 조합(Opus 5.5의 xhigh→medium 출력 비율 0.517, xhigh→high 0.547)만 `실제 출력 ÷ 비율 − 실제 출력`으로 계산합니다. 측정하지 않은 조합, 상향 적용, 턴 도중 사용자 변경으로 양보한 턴은 `미추정`으로 따로 세며 절감에 넣지 않습니다. shadow 턴은 원래 effort로 실행됐으므로 `실제 출력 × (1 − 비율)`을 잠재 절감으로만 표시합니다. 합성 과제 4개에서 얻은 비율이라 실제 작업의 절감률을 보장하지 않습니다. 금액은 표시하지 않습니다.
+
+## 8. 로컬·공개 marketplace 설치
 
 폴더 직접 로드가 아닌 설치 방식이 필요할 때만 사용합니다. 다음은 Claude 세션 안에서 실행하는 명령이며 사용자 설정·설치 상태를 변경합니다.
 
@@ -201,7 +266,7 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 설치 범위를 확인하고, 로드가 보류되면 화면의 안내를 따릅니다. GitHub marketplace 추가 및 설치 형식의 근거는 [공식 설치 문서](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace)입니다. 원격 새 clone의 테스트·manifest 검증은 통과했지만 이 두 marketplace 설치 절차는 jet-router에서 실제 실행하지 않았습니다.
 
-## 8. 중지와 문제 해결
+## 9. 중지와 문제 해결
 
 | 상황 | 확인할 내용 |
 | --- | --- |
@@ -220,7 +285,7 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 실제 설치 후에는 [테스트 체크리스트](test-checklist.md)를 순서대로 진행하고 결과를 기록합니다.
 
-## 9. 개발 검증
+## 10. 개발 검증
 
 플러그인 폴더에서 실행합니다. Node 22+가 필요하며 의존성 설치는 필요하지 않습니다.
 
