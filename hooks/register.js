@@ -26,8 +26,9 @@ export function registerRouter(on, classify, options = {}) {
   let project = null;
   const turns = new Map();
   const submissions = new Set();
-  // Subagent turn id -> effort inherited from the main turn that was running at
-  // its first step, or null when it must pass through unchanged.
+  // Subagent turn id -> binding to the main turn running at its first step: the
+  // inherited effort (undefined when it passes through unchanged) and a copy of
+  // that main turn's decision for the usage log (none without a main turn).
   const subagents = new Map();
 
   // shadow and enforce share classification; only enforce rewrites effort.
@@ -133,8 +134,17 @@ export function registerRouter(on, classify, options = {}) {
   });
 
   on('turn.complete', async ($, e, next) => {
-    if (e.agentId !== undefined) subagents.delete(e.turnId);
-    const turn = e.agentId === undefined ? turns.get(e.turnId) : undefined;
+    if (e.agentId !== undefined) {
+      const bound = subagents.get(e.turnId);
+      subagents.delete(e.turnId);
+      const result = await next(e);
+      if (routing() && bound?.record && options.usageLog === true) {
+        await recordUsage($, usageRecord({ project, model: baseModel(bound.stepModel), kind: 'subagent', record: bound.record,
+          outcome: e.reason, durationMs: e.durationMs, usage: e.usage }));
+      }
+      return result;
+    }
+    const turn = turns.get(e.turnId);
     if (!turn || turn.completing) return next(e);
     turn.completing = true;
     turn.valid = false;
@@ -161,14 +171,21 @@ export function registerRouter(on, classify, options = {}) {
   function subagentEffort(e) {
     if (!subagents.has(e.turnId)) {
       const main = [...turns.values()].find(turn => turn.started && !turn.completing);
-      subagents.set(e.turnId, mode === 'enforce' && main?.applied && main.record?.applied &&
-        e.effort === main.requested && (e.model ?? null) === main.model
-        ? { effort: main.applied, requested: main.requested, model: main.model } : null);
+      const inherit = mode === 'enforce' && main?.applied && main.record?.applied &&
+        e.effort === main.requested && (e.model ?? null) === main.model;
+      // A held-out main turn keeps its subagents unchanged too: they are its control arm.
+      subagents.set(e.turnId, { effort: inherit ? main.applied : undefined, requested: main?.requested, model: main?.model,
+        stepModel: e.model ?? null, record: main?.record && { ...main.record, applied: inherit ? main.applied : undefined,
+          yielded: false, latencyMs: null } });
     }
     const bound = subagents.get(e.turnId);
+    if (bound.record) bound.record.forwarded = safeEffort(e.effort);
     // The user changed effort or model: their choice wins for this subagent.
-    if (bound && (e.effort !== bound.requested || (e.model ?? null) !== bound.model)) subagents.set(e.turnId, null);
-    return subagents.get(e.turnId)?.effort;
+    if (bound.effort && (e.effort !== bound.requested || (e.model ?? null) !== bound.model)) {
+      bound.effort = undefined;
+      bound.record.yielded = true;
+    }
+    return bound.effort;
   }
 
   on('turn.step', async function* ($, e, next) {
@@ -300,7 +317,7 @@ function startMode(options) {
   return options.defaultMode === 'shadow' ? 'shadow' : 'off';
 }
 
-const REPORT_GROUPS = ['day', 'week', 'month', 'project', 'model', 'mode', 'pair', 'all'];
+const REPORT_GROUPS = ['day', 'week', 'month', 'project', 'model', 'mode', 'kind', 'pair', 'all'];
 const REPORT_HTML = '~/.claude/jet-router/usage-report.html';
 const REPORT_USAGE = `절감 리포트: /jet-router report [${REPORT_GROUPS.join('|')}] [html]`;
 

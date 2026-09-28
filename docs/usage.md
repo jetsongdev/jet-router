@@ -28,7 +28,7 @@ enforce는 **기본 설정을 바꾸지 않고 한 프롬프트의 턴에만 적
 
 다음 경우에는 적용하지 않고 요청 effort를 그대로 넘깁니다: `keep`·현재 값과 같은 추천, 분류 생략(시간 초과·오류·전송 미동의 등), `max` 요청, 잠금, 사용자가 입력하지 않은 턴. 적용 경로와 서버 반영은 [경로 확인 기록](evaluations/enforce-path-2026-09-28.md)에서 확인했습니다.
 
-subagent는 따로 분류하지 않고, 자신을 띄운 메인 턴에 적용된 effort를 그대로 이어받습니다(상향 포함). 백그라운드로 도는 subagent도 메인 턴이 끝난 뒤까지 같은 값을 씁니다. 메인 턴이 적용하지 않았거나(keep·대조군·사용자 변경으로 중단) subagent에 들어온 effort를 사용자가 바꾼 경우, 그리고 메인 턴 없이 시작하는 `/subtask`는 그대로 넘깁니다. subagent 토큰은 아직 사용량 기록에 포함되지 않습니다([subagent 경로 확인](evaluations/subagent-step-2026-09-28.md)).
+subagent는 따로 분류하지 않고, 자신을 띄운 메인 턴에 적용된 effort를 그대로 이어받습니다(상향 포함). 백그라운드로 도는 subagent도 메인 턴이 끝난 뒤까지 같은 값을 씁니다. 메인 턴이 적용하지 않았거나(keep·대조군·사용자 변경으로 중단) subagent에 들어온 effort를 사용자가 바꾼 경우, 그리고 메인 턴 없이 시작하는 `/subtask`는 그대로 넘깁니다. subagent 토큰은 `kind: "subagent"`로 따로 기록합니다([7절](#7-사용량-기록과-절감-리포트), [subagent 경로 확인](evaluations/subagent-step-2026-09-28.md)).
 
 shadow에서는 위 표의 적용을 하지 않고 요청 effort를 그대로 유지합니다.
 
@@ -188,10 +188,11 @@ enforce의 표시 예시입니다. `적용`은 해당 턴의 요청 effort를 �
 
 ## 7. 사용량 기록과 절감 리포트
 
-shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용).
+shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용). 그 턴이 띄운 subagent도 subagent 턴이 끝날 때 `kind: "subagent"`로 따로 한 줄 기록합니다(0.11.0~, 이전 기록은 `main`).
 
-- 기록 항목: 시각, 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
-- 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, subagent·알림 턴.
+- 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
+- subagent 줄의 effort·대조군 여부는 자신을 띄운 메인 턴의 결정을 이어받고, 토큰은 subagent 턴 합계입니다(메인 턴 합계에는 subagent 토큰이 들어가지 않습니다). 메인 턴이 대조군이면 그 subagent도 대조군입니다.
+- 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, 알림 턴, 메인 턴 없이 시작한 subagent(`/subtask` 등).
 - 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.
 
 리포트는 네트워크 호출 없이 로컬 파일만 읽습니다. 세션 안에서는 `/jet-router report`(`project`·`week` 등 기준, `html` 옵션)로, 터미널에서는 아래 스크립트로 봅니다. 설치본 경로는 [README](../README.md#절감-현황-보기)를 참고합니다.
@@ -203,12 +204,12 @@ node scripts/usage.mjs report --by project,pair
 node scripts/usage.mjs report --by month --json
 ```
 
-`--by`는 `day|week|month|project|model|mode|pair|all`을 쉼표로 조합합니다. 날짜는 로컬 시간 기준입니다.
+`--by`는 `day|week|month|project|model|mode|kind|pair|all`을 쉼표로 조합합니다. `kind`는 메인 턴과 subagent를 나눕니다. 날짜는 로컬 시간 기준입니다.
 
 **HTML 대시보드.** `node scripts/usage.mjs report --html [파일]`은 브라우저로 여는 파일 하나를 만듭니다(기본 `jet-router-usage.html`, `--from`/`--to`로 포함 기간 제한). 외부 스크립트·네트워크 요청 없이 로컬에서만 동작합니다.
 
 - 구성: 요약 카드, 기간별 실제 출력·추정 절감 차트(일·주·월), 조합별 측정 비율과 95% 구간 차트(평가 비율은 마름모로 표시), 프로젝트별·조합별 표.
-- 필터: 기간, 프로젝트, 모드. 페이지 안에서 CLI와 같은 집계 코드를 다시 실행하므로 결과가 CLI와 같습니다. 측정 비율은 프로젝트·모드 필터와 관계없이 선택 기간 전체 기록으로 계산합니다.
+- 필터: 기간, 프로젝트, 모드, 구분(메인 턴·subagent). 페이지 안에서 CLI와 같은 집계 코드를 다시 실행하므로 결과가 CLI와 같습니다. 측정 비율은 프로젝트·모드·구분 필터와 관계없이 선택 기간 전체 기록으로 계산하며, 메인 턴과 subagent를 따로 계산합니다(subagent에는 평가 비율을 쓰지 않습니다).
 - 화면 폭 1100px 이상에서는 카드 한 줄과 차트·표 2단으로, 좁은 화면에서는 1단으로 배치합니다. 기본은 라이트 모드이며 오른쪽 위 버튼으로 다크 모드로 바꿉니다.
 - 파일에는 선택 기간의 기록(프로젝트 경로 포함, 홈 경로는 `~`로 표시)이 들어 있습니다. 공유할 때 유의합니다.
 
@@ -250,7 +251,7 @@ claude-opus-5-5 · medium>xhigh        1          0      3,100            -     
 claude-opus-5-5 · xhigh>high          1          0      1,720            -      -            -  표본 부족
 claude-opus-5-5 · xhigh>medium        2          2      1,035        1,970  0.525            -  표본 부족
 
-추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다.
+추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다. subagent 턴(kind=subagent)은 subagent끼리 측정한 비율만 씁니다.
 ```
 
 ```text
@@ -271,7 +272,7 @@ claude-opus-5-5 · medium>xhigh        1          0      3,100            -     
 claude-opus-5-5 · xhigh>high          1          0      1,720            -      -            -  표본 부족
 claude-opus-5-5 · xhigh>medium        2          2      1,035        1,970  0.525            -  표본 부족
 
-추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다.
+추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다. subagent 턴(kind=subagent)은 subagent끼리 측정한 비율만 씁니다.
 ```
 
 읽는 법:

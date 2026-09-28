@@ -184,6 +184,34 @@ test('subagent inheritance yields to user changes, holdout, shadow, off and comp
   assert.equal(changed.seen, changed.e);
 });
 
+test('subagent usage is logged as its own kind with the inherited decision or control arm', async () => {
+  for (const [options, applied, holdout] of [[{}, 'low', false], [{ holdoutRate: '0.5', random: () => 0 }, null, true]]) {
+    const runs = [];
+    const run = async (argv, init) => { runs.push(JSON.parse(init.stdin)); return { exitCode: 0, stdout: '', stderr: '' }; };
+    const w = world(undefined, undefined, { usageLog: true, ...options }, run);
+    await w.event('session.start', { cwd: '/work/icp' }); await w.command('enforce'); await w.submit(); await forward(w);
+    await forward(w, { turnId: 's1', agentId: 'a1' });
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer', usage: { output_tokens: 40 } });
+    await forward(w, { turnId: 's1', agentId: 'a1', index: 1 });
+    await w.event('turn.complete', { turnId: 's1', agentId: 'a1', reason: 'answer', durationMs: 700, usage: { output_tokens: 90 } });
+    assert.deepEqual(runs.map(r => [r.kind, r.original, r.recommendation, r.applied, r.holdout, r.usage.output]),
+      [['main', 'high', 'low', applied, holdout, 40], ['subagent', 'high', 'low', applied, holdout, 90]]);
+    assert.equal(runs[1].classifyMs, null);
+  }
+  // A subagent with no main turn (such as /subtask) is not logged; a user change marks it yielded.
+  const runs = [];
+  const run = async (argv, init) => { runs.push(JSON.parse(init.stdin)); return { exitCode: 0, stdout: '', stderr: '' }; };
+  const w = world(undefined, undefined, { usageLog: true }, run);
+  await w.start(); await w.command('enforce');
+  await forward(w, { turnId: 's0', agentId: 'a0' });
+  await w.event('turn.complete', { turnId: 's0', agentId: 'a0', reason: 'answer' });
+  assert.equal(runs.length, 0);
+  await w.submit(); await forward(w);
+  await forward(w, { turnId: 's1', agentId: 'a1' }); await forward(w, { turnId: 's1', agentId: 'a1', index: 1, effort: 'xhigh' });
+  await w.event('turn.complete', { turnId: 's1', agentId: 'a1', reason: 'answer' });
+  assert.deepEqual([runs[0].kind, runs[0].applied, runs[0].yielded, runs[0].forwarded], ['subagent', 'low', true, 'xhigh']);
+});
+
 test('switching off mid-turn stops applying the enforced effort', async () => {
   const w = world(); await w.start(); await w.command('enforce'); await w.submit();
   assert.equal((await forward(w)).seen.effort, 'low');
