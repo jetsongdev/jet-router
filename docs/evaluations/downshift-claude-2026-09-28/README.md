@@ -27,6 +27,14 @@
 
 과제 단위 단측 sign-flip p=0.0625다. 과제가 넷뿐이라 이 값보다 작아질 수 없다. 통계적으로 확정된 효과라고 표현하지 않는다.
 
+## 그래프
+
+![토큰·품질·지연 비교](comparison.png)
+
+![CLI 보고 비용 비교](costs.png)
+
+[토큰 SVG](comparison.svg) · [비용 SVG](costs.svg). 생성: `uv run --no-project --with matplotlib python scripts/plot-downshift-claude.py docs/evaluations/downshift-claude-2026-09-28` (네트워크 호출 없음, matplotlib 필요).
+
 ## 방법
 
 [사전 등록 프로토콜](protocol.md)을 결과 전에 커밋했다(`51c33e0`).
@@ -46,4 +54,4 @@
 
 ## 파일
 
-[고정된 추천](routes.json) · [생성 코드와 측정 원본](routes-runs.json) · [요약 JSON](summary.json) · 실행 `node scripts/compare-downshift-claude.mjs run <routes.json>` · 재검증 `node scripts/summarize-downshift-claude.mjs <runs.json> <summary.json>`
+[고정된 추천](routes.json) · 그래프 `scripts/plot-downshift-claude.py` · [생성 코드와 측정 원본](routes-runs.json) · [요약 JSON](summary.json) · 실행 `node scripts/compare-downshift-claude.mjs run <routes.json>` · 재검증 `node scripts/summarize-downshift-claude.mjs <runs.json> <summary.json>`
