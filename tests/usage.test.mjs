@@ -104,3 +104,27 @@ test('measured control ratios replace evaluation ratios once both arms have enou
   const text = formatReport(report(records, { by: ['pair'] }));
   assert.match(text, /측정 비율/); assert.match(text, /0\.500–0\.500\s+사용/); assert.match(text, /표본 부족/);
 });
+
+test('subagent turns are a separate kind with their own ratios and no evaluation fallback', () => {
+  const at = i => `2026-10-${String(1 + i).padStart(2, '0')}T02:00:00Z`;
+  const sub = (record, output) => make(at(0), record, output, { kind: 'subagent' });
+  const records = [];
+  for (let i = 0; i < 10; i++) {
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', applied: 'medium' }, 500));
+    records.push(make(at(i), { mode: 'enforce', original: 'xhigh', recommendation: 'medium', holdout: true }, 1000));
+    records.push(sub({ mode: 'enforce', original: 'xhigh', recommendation: 'medium', applied: 'medium' }, 300));
+    records.push(sub({ mode: 'enforce', original: 'xhigh', recommendation: 'medium', holdout: true }, 1200));
+  }
+  // Older lines without kind read back as main turns.
+  assert.equal(parseLine(JSON.stringify({ ...records[0], kind: undefined })).kind, 'main');
+  assert.equal(parseLine(JSON.stringify({ ...records[0], kind: 'CANARY' })).kind, 'main');
+  const byKind = Object.fromEntries(measuredFactors(records).map(f => [f.kind, f]));
+  assert.deepEqual([byKind.main.outputRatio, byKind.subagent.outputRatio], [0.5, 0.25]);
+  const rows = Object.fromEntries(report(records, { by: ['kind'] }).rows.map(r => [r.key, r]));
+  assert.deepEqual([rows.main.turns, rows.subagent.turns, rows.main.estimatedSaved, rows.subagent.estimatedSaved], [20, 20, 5000, 9000]);
+  // With too few subagent samples, the main-turn evaluation ratio is not borrowed.
+  const few = [sub({ mode: 'enforce', original: 'xhigh', recommendation: 'medium', applied: 'medium' }, 300)];
+  const { total } = report(few, { by: ['all'] });
+  assert.deepEqual([total.estimatedTurns, total.unestimatedAppliedTurns], [0, 1]);
+  assert.match(formatReport(report(records, { by: ['kind'] })), /claude-opus-5-5 · subagent · xhigh>medium/);
+});

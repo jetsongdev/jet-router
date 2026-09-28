@@ -5,9 +5,12 @@ export const USAGE_VERSION = 1;
 const MODES = ['shadow', 'enforce'];
 const PROVIDERS = ['fake', 'jev'];
 const OUTCOMES = ['answer', 'aborted', 'error', 'refusal'];
+// main: a typed turn; subagent: a subagent turn spawned by one (no kind = main).
+const KINDS = ['main', 'subagent'];
 
 // Output-token ratio (recommended / original) measured on the same tasks.
 // Only measured pairs are estimated; everything else is reported as unestimated.
+// Measured on main turns only, so subagent turns rely on their own control group.
 export const SAVINGS_FACTORS = Object.freeze({
   'claude-opus-5-5': Object.freeze({
     'xhigh>medium': Object.freeze({ outputRatio: 9467 / 18298, runs: 9, source: 'docs/evaluations/downshift-claude-2026-09-28' }),
@@ -21,9 +24,10 @@ const text = (value, max) => (typeof value === 'string' && value.length <= max ?
 
 // Builds the stored record from a router record and host usage. Unknown values
 // become null instead of being copied, so no free text can reach the log.
-export function usageRecord({ project, model, record, outcome, durationMs, usage }) {
+export function usageRecord({ project, model, kind, record, outcome, durationMs, usage }) {
   return {
     v: USAGE_VERSION,
+    kind: KINDS.includes(kind) ? kind : 'main',
     project: text(project, 1024),
     model: text(model, 128),
     mode: MODES.includes(record.mode) ? record.mode : null,
@@ -52,7 +56,7 @@ export function parseLine(line) {
   try { value = JSON.parse(line); } catch { return null; }
   if (!value || value.v !== USAGE_VERSION || typeof value.ts !== 'string' || Number.isNaN(Date.parse(value.ts))) return null;
   const rebuilt = usageRecord({
-    project: value.project, model: value.model, outcome: value.outcome, durationMs: value.durationMs,
+    project: value.project, model: value.model, kind: value.kind, outcome: value.outcome, durationMs: value.durationMs,
     record: { ...value, latencyMs: value.classifyMs },
     usage: { input_tokens: value.usage?.input, output_tokens: value.usage?.output,
       cache_read_input_tokens: value.usage?.cacheRead, cache_creation_input_tokens: value.usage?.cacheCreation },
@@ -82,6 +86,7 @@ export const GROUPS = Object.freeze({
   project: r => r.project ?? '(unknown)',
   model: r => r.model ?? '(unknown)',
   mode: r => r.mode ?? '(unknown)',
+  kind: r => r.kind,
   pair: r => `${r.original ?? '?'}>${r.applied ?? r.recommendation ?? '?'}`,
   all: () => 'all',
 });
@@ -103,8 +108,9 @@ function bootstrapRatio(treatment, control, rounds = 1000) {
   return ratios.length ? [ratios[Math.floor(ratios.length * 0.025)], ratios[Math.ceil(ratios.length * 0.975) - 1]] : [null, null];
 }
 
-// Measured ratio per model and pair: applied turns versus randomly held-out
-// turns of the same pair. Turns whose effort the user changed mid-turn are
+// Measured ratio per model, kind and pair: applied turns versus randomly
+// held-out turns of the same pair. Subagent turns inherit the main turn's arm,
+// and their task sizes differ, so they are never mixed with main turns. Turns whose effort the user changed mid-turn are
 // excluded from both arms.
 export function measuredFactors(records) {
   const arms = new Map();
@@ -112,26 +118,26 @@ export function measuredFactors(records) {
     if (r.mode !== 'enforce' || r.usage.output === null || !r.model) continue;
     const target = r.applied ?? (r.holdout ? r.recommendation : null);
     if (!target) continue;
-    const key = `${r.model}|${r.original}>${target}`;
+    const key = `${r.model}|${r.kind}|${r.original}>${target}`;
     if (!arms.has(key)) arms.set(key, { treatment: [], control: [] });
     if (r.applied && !r.yielded && !r.holdout) arms.get(key).treatment.push(r.usage.output);
     if (r.holdout && r.forwarded === r.original) arms.get(key).control.push(r.usage.output);
   }
   return [...arms.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, { treatment, control }]) => {
-    const [model, pair] = key.split('|');
+    const [model, kind, pair] = key.split('|');
     const usable = treatment.length >= MIN_SAMPLES && control.length >= MIN_SAMPLES && mean(control) > 0;
     const ratio = treatment.length && control.length && mean(control) > 0 ? mean(treatment) / mean(control) : null;
     const [low, high] = usable ? bootstrapRatio(treatment, control) : [null, null];
-    return { model, pair, treatmentTurns: treatment.length, controlTurns: control.length,
+    return { model, kind, pair, treatmentTurns: treatment.length, controlTurns: control.length,
       treatmentMeanOutput: treatment.length ? mean(treatment) : null, controlMeanOutput: control.length ? mean(control) : null,
       outputRatio: ratio, ci95: [low, high], usable };
   });
 }
 
 function factorFor(r, target, measured) {
-  const own = measured.find(f => f.usable && f.model === r.model && f.pair === `${r.original}>${target}`);
+  const own = measured.find(f => f.usable && f.model === r.model && f.kind === r.kind && f.pair === `${r.original}>${target}`);
   if (own) return { outputRatio: own.outputRatio, source: 'measured' };
-  const evaluated = SAVINGS_FACTORS[r.model]?.[`${r.original}>${target}`];
+  const evaluated = r.kind === 'main' ? SAVINGS_FACTORS[r.model]?.[`${r.original}>${target}`] : undefined;
   return evaluated ? { outputRatio: evaluated.outputRatio, source: 'evaluation' } : null;
 }
 

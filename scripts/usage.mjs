@@ -46,7 +46,7 @@ export function formatReport(result) {
   const ratio = value => (value === null ? '-' : value.toFixed(3));
   const factors = result.factors.length ? ['', `측정 비율 (적용 ÷ 대조군 평균 출력, 양쪽 ${MIN_SAMPLES}턴 이상일 때 사용)`, ...table([
     ['모델 · 조합', '적용 턴', '대조군 턴', '적용 평균', '대조군 평균', '비율', '95% 구간', '상태'],
-    ...result.factors.map(f => [`${f.model} · ${f.pair}`, n(f.treatmentTurns), n(f.controlTurns),
+    ...result.factors.map(f => [`${f.model} · ${f.kind === 'subagent' ? 'subagent · ' : ''}${f.pair}`, n(f.treatmentTurns), n(f.controlTurns),
       f.treatmentMeanOutput === null ? '-' : n(Math.round(f.treatmentMeanOutput)),
       f.controlMeanOutput === null ? '-' : n(Math.round(f.controlMeanOutput)), ratio(f.outputRatio),
       f.usable ? `${ratio(f.ci95[0])}–${ratio(f.ci95[1])}` : '-', f.usable ? '사용' : '표본 부족']),
@@ -56,7 +56,7 @@ export function formatReport(result) {
     ...table(rows),
     ...factors,
     '',
-    '추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다.',
+    '추정 절감은 측정 비율(표본 충분)을 우선 쓰고, 없으면 평가 비율(Opus 5.5 xhigh→medium·high)을 씁니다. 둘 다 없는 조합과 양보한 턴은 미추정으로 절감에 넣지 않습니다. 대조군 턴은 절감이 없습니다. subagent 턴(kind=subagent)은 subagent끼리 측정한 비율만 씁니다.',
   ].join('\n');
 }
 
@@ -102,7 +102,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
         console.log(args.json ? JSON.stringify(result, null, 2) : formatReport(result));
       }
     } catch (error) {
-      console.error(`사용법: node scripts/usage.mjs report [--by day|week|month|project|model|mode|pair|all[,...]] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--dir 경로] [--json | --html [파일]]\n${error.message}`);
+      console.error(`사용법: node scripts/usage.mjs report [--by day|week|month|project|model|mode|kind|pair|all[,...]] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--dir 경로] [--json | --html [파일]]\n${error.message}`);
       process.exitCode = 1;
     }
   } else {

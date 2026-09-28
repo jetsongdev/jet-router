@@ -298,7 +298,8 @@ MCP 취소 신호를 helper까지 전달하고 4초 정리 제한을 추가했�
 | 0.9.0 | #18 | Jev도 `defaultMode=shadow`로 시작 |
 | 0.9.1 | #20 | 1M 컨텍스트 모델 이름(`[1m]`)을 기본 모델 이름으로 분류·기록 |
 | – | #19 | [subagent 경로 확인](evaluations/subagent-step-2026-09-28.md) |
-| 0.10.0 | – | subagent가 자신을 띄운 메인 턴의 적용값을 이어받음(상향 포함, `/subtask` 제외) |
+| 0.10.0 | #21 | subagent가 자신을 띄운 메인 턴의 적용값을 이어받음(상향 포함, `/subtask` 제외) |
+| 0.11.0 | – | subagent 사용량 구분 기록(`kind`), 리포트 `kind` 기준·대시보드 구분 필터, subagent끼리 실측 비율 |
 
 확인한 host 계약(Claude Code 2.1.283): `turn.step` effort 재작성은 해당 요청과 서버 동작에 반영되고 설정에 남지 않는다. `/effort`는 실행 중인 턴의 다음 요청부터 반영된다. `turn.complete`의 usage는 턴 전체 합계다. `session.start`는 `cwd`를 주지만 세션 ID는 주지 않는다. subagent는 별도 turnId·`turn.complete`를 받고 부모 턴 필드·`turn.start`가 없다. 훅 모듈의 `on()` 이벤트 이름은 문자열 리터럴이어야 한다.
 

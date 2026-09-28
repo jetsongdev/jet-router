@@ -83,6 +83,7 @@ footer { font-size: 12px; color: var(--muted); }
     <label>종료일<input type="date" id="to"></label>
     <label>프로젝트<select id="project"></select></label>
     <label>모드<select id="mode"><option value="">전체</option><option value="enforce">enforce</option><option value="shadow">shadow</option></select></label>
+    <label>구분<select id="kind"><option value="">전체</option><option value="main">메인 턴</option><option value="subagent">subagent</option></select></label>
     <label>차트 단위<select id="bucket"><option value="day">일</option><option value="week">주</option><option value="month">월</option></select></label>
   </div>
   <div class="cards" id="cards"></div>
@@ -189,11 +190,14 @@ ${aggregatorSource()}
     return chart;
   }
 
+  // Evaluation ratios were measured on main turns only.
+  const evaluatedFor = f => (f.kind === 'main' ? SAVINGS_FACTORS[f.model]?.[f.pair] : undefined);
+
   function ratios(factors) {
     const rows = factors;
     if (!rows.length) return el('div', { class: 'empty' }, '대조군과 비교할 enforce 기록이 아직 없습니다.');
     const W = 720, rowH = 34, L = 210, R = 24, T = 20, H = T + rows.length * rowH + 24;
-    const values = rows.flatMap(f => [f.outputRatio, f.ci95[0], f.ci95[1], SAVINGS_FACTORS[f.model]?.[f.pair]?.outputRatio]).filter(v => typeof v === 'number');
+    const values = rows.flatMap(f => [f.outputRatio, f.ci95[0], f.ci95[1], evaluatedFor(f)?.outputRatio]).filter(v => typeof v === 'number');
     const max = Math.max(1.2, ...values) * 1.05;
     const x = v => L + (W - L - R) * v / max;
     const chart = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart', role: 'img', 'aria-label': '조합별 측정 비율' });
@@ -202,7 +206,7 @@ ${aggregatorSource()}
     rows.forEach((f, i) => {
       const cy = T + rowH * i + rowH / 2;
       const color = f.usable ? 'var(--measured)' : 'var(--weak)';
-      chart.append(svg('text', { x: L - 10, y: cy + 4, 'text-anchor': 'end' }, f.model.replace('claude-', '') + ' · ' + f.pair + '  (' + f.treatmentTurns + '/' + f.controlTurns + ')'));
+      chart.append(svg('text', { x: L - 10, y: cy + 4, 'text-anchor': 'end' }, f.model.replace('claude-', '') + ' · ' + (f.kind === 'subagent' ? 'sub · ' : '') + f.pair + '  (' + f.treatmentTurns + '/' + f.controlTurns + ')'));
       if (f.usable && f.ci95[0] !== null) {
         // Caps keep a narrow interval visible behind the dot.
         chart.append(svg('line', { x1: x(f.ci95[0]), x2: x(f.ci95[1]), y1: cy, y2: cy, stroke: color, 'stroke-width': 3 }));
@@ -213,10 +217,10 @@ ${aggregatorSource()}
         dot.append(svg('title', {}, f.pair + ' 비율 ' + f.outputRatio.toFixed(3) + (f.usable ? ' (' + f.ci95[0].toFixed(3) + '–' + f.ci95[1].toFixed(3) + ')' : ' 표본 부족')));
         chart.append(dot, svg('text', { x: x(Math.max(f.outputRatio, f.ci95[1] ?? 0)) + 10, y: cy + 4 },
           f.outputRatio.toFixed(3) + (f.usable ? ' (' + f.ci95[0].toFixed(3) + '–' + f.ci95[1].toFixed(3) + ')' : ' 표본 부족')));
-      } else if (!SAVINGS_FACTORS[f.model]?.[f.pair]) {
+      } else if (!evaluatedFor(f)) {
         chart.append(svg('text', { x: L + 4, y: cy + 4 }, f.controlTurns ? '적용 턴 없음' : '대조군 없음'));
       }
-      const evaluated = SAVINGS_FACTORS[f.model]?.[f.pair];
+      const evaluated = evaluatedFor(f);
       if (evaluated) {
         const mark = svg('rect', { x: x(evaluated.outputRatio) - 4, y: cy - 4, width: 8, height: 8, fill: 'var(--saved)', transform: 'rotate(45 ' + x(evaluated.outputRatio) + ' ' + cy + ')' });
         mark.append(svg('title', {}, '평가 비율 ' + evaluated.outputRatio.toFixed(3)));
@@ -228,8 +232,9 @@ ${aggregatorSource()}
   }
 
   function render() {
-    const project = $('project').value, mode = $('mode').value;
-    const records = data.records.filter(r => (!project || (r.project ?? '(unknown)') === project) && (!mode || r.mode === mode));
+    const project = $('project').value, mode = $('mode').value, kind = $('kind').value;
+    const records = data.records.filter(r => (!project || (r.project ?? '(unknown)') === project) && (!mode || r.mode === mode) &&
+      (!kind || r.kind === kind));
     const range = { from: $('from').value || undefined, to: $('to').value || undefined, factorRecords: data.records };
     const bucket = report(records, { by: [$('bucket').value], ...range });
     const t = bucket.total;
@@ -248,7 +253,7 @@ ${aggregatorSource()}
     $('projects').replaceChildren(table([...byProject.rows].sort((a, b) => b.estimatedSaved - a.estimatedSaved), HEAD));
     $('pairs').replaceChildren(table(report(records, { by: ['pair'], ...range }).rows, HEAD));
   }
-  for (const id of ['from', 'to', 'project', 'mode', 'bucket']) $(id).addEventListener('change', render);
+  for (const id of ['from', 'to', 'project', 'mode', 'kind', 'bucket']) $(id).addEventListener('change', render);
   render();
 })();
 </script>

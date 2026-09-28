@@ -121,7 +121,7 @@ enforce·shadow로 분류한 턴은 `~/.claude/jet-router/usage/`에 기록됩�
 
 ```text
 /jet-router report                # 일자별 표
-/jet-router report project        # day|week|month|project|model|mode|pair|all
+/jet-router report project        # day|week|month|project|model|mode|kind|pair|all
 /jet-router report html           # HTML 대시보드 생성 후 경로 안내
 ```
 
