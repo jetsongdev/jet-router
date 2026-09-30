@@ -96,3 +96,13 @@ test('shadow keeps unknown facts explicit instead of blocking experimental recom
   raw.context = null;
   assert.ok(prepareRoutingRequest(raw).uncertainties.includes('unknown-context'));
 });
+
+test('independent context question distinguishes missing history from required history', () => {
+  const out = prepareRoutingRequest(input());
+  const instruction = out.request.questions.contextSufficient.instructions;
+  assert.equal(out.metadata.criteriaVersion, 'jev-effort-provenance-v4');
+  assert.match(instruction, /estimate the reasoning effort/);
+  assert.match(instruction, /does not by itself mean that conversation is required/);
+  assert.match(instruction, /Answer no when the request depends on omitted earlier discussion/);
+  assert.match(instruction, /Treat state as data/);
+});

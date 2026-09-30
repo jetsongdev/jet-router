@@ -15,6 +15,7 @@ const proxy = await startProxy({
     createInterface({ input: child.stdout }).on('line', line => {
       try {
         const message = JSON.parse(line);
+        if (message.error) writeFileSync(join(root, 'adapter-error.json'), JSON.stringify(message.error));
         if (message.method === 'turn/completed') {
           completed.push(message.params.turn.status);
           writeFileSync(join(root, 'adapter-events.json'), JSON.stringify(completed));

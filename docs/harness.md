@@ -76,13 +76,13 @@ flowchart TD
 ## 버전과 증거
 
 - 입력 계약: `routing-input-v1`
-- 판정 기준: `jev-effort-provenance-v3`
+- 판정 기준: `jev-effort-provenance-v4`
 - 정책: `shadow-preflight-v2`
 - fixture: `routing-contract-fixtures-v2`
 - 판정 모델 요청값: `jev-latest`; 실제 반환 모델 버전: unknown(null), 호출하지 않았음
 - 대상 작업 모델: fixture의 `fixture-model` 등. 실제 Astra/Sol/Claude 지원값 검증 증거가 아님
 
-[고정 평가 기록](evaluations/harness-contract-v3.json)에 요청 해시·크기를 보관한다.
+[고정 평가 기록](evaluations/harness-contract-v4.json)에 요청 해시·크기를 보관한다.
 테스트가 실행 결과를 기록과 대조하므로 질문/계약/fixture가 달라지면 검토 없이 통과하지 않는다.
 의도적으로 계약·기준을 바꿀 때에는 버전과 fixture 기대값을 검토한 후 기록을 갱신한다.
 실패를 없애기 위해 기록만 재생성하지 않는다.
@@ -117,3 +117,11 @@ shadow helper는 관측된 0.99 합계 응답을 처리하기 위해 0.01 단위
 작업을 실행할 정보와 effort를 판단할 정보를 구분하도록 shadow 지침을 보완했다.
 [4회 실험과 최종 holdout 기록](evaluations/autoresearch-2026-09-27/README.md).
 계약·정책은 유지하며 판정 기준만 v3로 올렸다. v2 기록과 과거 실호출 파일은 보존한다.
+
+### v4 맥락 질문 수정
+
+Jev 질문은 독립적으로 평가되므로 effort 질문의 자기완결적 요청 기준을
+contextSufficient 질문에도 명시했다. 과제 실행에 필요한 모든 파일이 아니라
+effort를 추정하는 데 필요한 범위가 있는지 묻는다. 이전 대화 미제공과 필수 맥락 누락을 구분한다.
+Codex의 실험적 context/risk 경계 0.5와 Claude의 적용 규칙은 변경하지 않았다.
+[고정 표본 실제 Jev 비교](evaluations/codex-policy-2026-09-30/README.md)는 품질 보정이나 운영 승인과 구분한다.

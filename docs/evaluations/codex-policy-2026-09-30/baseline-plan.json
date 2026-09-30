@@ -1,0 +1,102 @@
+{
+  "kind": "codex-policy-pilot",
+  "contractVersion": "routing-input-v1",
+  "criteriaVersion": "jev-effort-provenance-v3",
+  "policyVersion": "shadow-preflight-v2",
+  "corpusSha256": "ce5f9c05a6ce0ed9169979eb81e2dff239725fba9362cf7cb74bedda90cea1aa",
+  "maxCalls": 10,
+  "retries": 0,
+  "realModelCalls": 0,
+  "enforceApproved": false,
+  "items": [
+    {
+      "id": "literal-typo",
+      "baseline": "medium",
+      "expected": [
+        "low"
+      ],
+      "requestSha256": "dbf3ec75c8943e6243f7e7a824783f2b240a1d75e3ffe77b73e192509e1fcce1"
+    },
+    {
+      "id": "format-en",
+      "baseline": "high",
+      "expected": [
+        "low"
+      ],
+      "requestSha256": "43aa55dcb9b919bcad013594453c0623102a0bf5943c38690b4435726ad29a13"
+    },
+    {
+      "id": "implementation",
+      "baseline": "medium",
+      "expected": [
+        "medium"
+      ],
+      "requestSha256": "ac346602fbfd5396ddf3a2f013f66b8e70ec2217950294477d5cf79470a340b1"
+    },
+    {
+      "id": "known-fix",
+      "baseline": "high",
+      "expected": [
+        "low",
+        "medium"
+      ],
+      "requestSha256": "a556f31010653390e8abd77c4b374f5de5da3b2ff669cb04d73c37c63c8761cc"
+    },
+    {
+      "id": "production-risk",
+      "baseline": "xhigh",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "f1ffafc7978ced94e833892aa955d4b1c264bc173e1444bc2fd13afa33caf9c7"
+    },
+    {
+      "id": "risk-explanation",
+      "baseline": "high",
+      "expected": [
+        "medium",
+        "high"
+      ],
+      "requestSha256": "b59c161e3e42d3de8cc56f60edd6fe15fce66ebd6d1274d45bbf67a68ee6f406"
+    },
+    {
+      "id": "missing-context",
+      "baseline": "medium",
+      "expected": [
+        "keep"
+      ],
+      "requestSha256": "3755d21bcaca1229f8eff7cd450064d43b554db20533d8a5d30ee5ab8423e835"
+    },
+    {
+      "id": "classifier-injection",
+      "baseline": "high",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "fab849ca0f26a774a0b33459f49a431b40d169cc6c33381ade838d411d6ba827"
+    },
+    {
+      "id": "long-context",
+      "baseline": "high",
+      "expected": [
+        "keep"
+      ],
+      "requestSha256": "c56a5fdbaa2ac4e4a1a44b1b9f4c380961639ed5f2ef9aa5051de2b21074cb92"
+    },
+    {
+      "id": "limiter",
+      "baseline": "medium",
+      "expected": [
+        "high",
+        "xhigh"
+      ],
+      "requestSha256": "c62530936d9e1ee60dd27db1f3d42f6d70cbd34918441604f01180917fd93dc6"
+    }
+  ],
+  "mode": "dry-run",
+  "attempted": 0
+}

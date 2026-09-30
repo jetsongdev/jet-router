@@ -83,8 +83,9 @@ npm test
 - 실제 CLI + 실제 Codex App Server + 로컬 가짜 Responses 서버: 첫 요청 low, 다음 medium,
   수동 high 변경 후 low 적용과 다음 high 보존. 5턴 모두 완료.
 - 통합 검사에서는 Jev 함수를 고정 응답으로 주입한다. runtime 환경변수로 fake 추천을 활성화하는 기능은 없다.
-- 실제 Jev 1회 연결은 확인했지만 contextScore 검사로 low 추천이 보류되어 첫 요청은 medium이었다.
-  [실호출 기록](evaluations/codex-live-jev-2026-09-30/README.md). 실제 모델 호출·품질·비용은 미검증이다.
+- 초기 실제 Jev 호출은 맥락 점수로 보류됐다. v4 맥락 질문 개선 후 실제 Jev + 가짜 모델 서버에서
+  첫 요청 low와 기본값 medium 복귀를 확인했다. [정책 평가/적용 기록](evaluations/codex-policy-2026-09-30/README.md).
+  실제 모델 호출·품질·비용은 미검증이다.
   취소·복귀 실패·경쟁 상태는 단위 검사이며 실제 네트워크 장애 검증으로 확대하지 않는다.
 - 실제 CLI의 `/model` 메뉴, 프로세스 크래시, 중복 resume, subagent 전파는 추가 검증이 필요하다.
   Claude 실호출은 토큰 한도로 계속 스킵한다.

@@ -56,7 +56,8 @@
   취소/수동 변경/복귀 경쟁은 단위 검사, 정상 경로는 실제 CLI+가짜 provider로 검증했다.
   2026-09-30 실제 Jev 1회 연결에서 low 추천/contextScore 0.42를 받았지만 실험 경계 0.5로 보류됐다.
   첫 요청과 기본값은 medium이었다. [실호출 기록](docs/evaluations/codex-live-jev-2026-09-30/README.md).
-  다음은 context/risk 적용 정책의 표본 평가·호스트 간 차이 정리, 이후 실제 추천 적용/모델 호출과 장애 복구 검증이다.
+  후속 고정 표본 10개 평가로 v4 맥락 질문을 개선했고, 실제 Jev + 가짜 모델에서 첫 요청 low/기본값 medium 복귀를 확인했다.
+  [평가 결과](docs/evaluations/codex-policy-2026-09-30/README.md). 다음은 실제 모델 호출과 장애 복구 검증이다.
   [격리 재현 결과](docs/evaluations/codex-turn-effort-2026-09-28/README.md),
   [이전 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 기존 MCP는 shadow를 유지하고, 별도 프록시만 실험적 enforce를 제공한다.
 
@@ -75,8 +76,11 @@
   [실행/제한](docs/codex-proxy.md), [검증 기록](docs/evaluations/codex-adapter-2026-09-28/README.md).
   아래 실제 모델·전체 생명주기 완료 기준과 구분한다.
 
-- [ ] 자기완결적 요청/맥락 누락 표본으로 Codex context/risk 경계와 Claude 적용 정책 차이를 평가한다.
-  단일 실호출 결과에 맞춰 경계를 낮추지 않는다. 정책 확정 후 실제 Jev 추천의 첫 요청 적용을 재검증한다.
+- [x] 고정 표본으로 Codex/Claude 적용 정책 차이를 비교하고, 맥락 질문만 개선해 첫 요청 적용을 재검증한다.
+  [파일럿 10개 결과](docs/evaluations/codex-policy-2026-09-30/README.md): 적용 기대 6/10 → 9/10, 경계값 유지.
+- [ ] Codex 0.159.2 TUI 초기화의 간헐 backend-request-failed를 조사한다. 프로토콜 4턴은 통과했고 TUI 재시도는 성공했으나 원인은 미확정이다.
+- [ ] 새 표본·반복 관측으로 context/risk 경계를 보정한다. limiter의 medium 추천(기대 high/xhigh)을 조사한다.
+  합성 파일럿을 일반 품질 보장이나 두 호스트 정책의 동등성으로 해석하지 않는다.
 - [ ] 최초 enforce 대상 모델을 GPT-6 Astra / GPT-6 Sol로 제한하는 허용 정책을 확정한다.
   모델 alias·snapshot 식별 방법도 명시하며, 확인되지 않은 모델은 기존 effort를 유지한다.
 - [ ] 활성 모델과 실제 effort를 실행 host에서 읽는 경로를 구현한다.
