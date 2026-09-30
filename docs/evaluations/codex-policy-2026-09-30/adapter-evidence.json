@@ -1,0 +1,25 @@
+{
+  "stage": "live Jev + local fake model",
+  "jev": {
+    "decision": {
+      "provider": "jev",
+      "choice": "low",
+      "confidence": 0.98,
+      "contextScore": 0.89,
+      "riskScore": 0.02,
+      "selectedProbability": 0.99
+    }
+  },
+  "wire": [
+    {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    }
+  ],
+  "baselineAfter": "medium",
+  "criteriaVersion": "jev-effort-provenance-v4",
+  "jevCalls": 1,
+  "realModelCalls": 0,
+  "realCliRemote": false,
+  "applicationResult": "first-request-low-baseline-medium"
+}

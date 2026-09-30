@@ -1,0 +1,180 @@
+[
+  {
+    "method": "initialize",
+    "sentAt": 1790777168915,
+    "latencyMs": 78,
+    "errorCode": null
+  },
+  {
+    "method": "model/list",
+    "sentAt": 1790777168994,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/start",
+    "sentAt": 1790777168994,
+    "latencyMs": 8483,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177478,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "turn/start",
+    "sentAt": 1790777177480,
+    "latencyMs": 2,
+    "errorCode": null
+  },
+  {
+    "method": "thread/settings/update",
+    "sentAt": 1790777177482,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177493,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177494,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "turn/start",
+    "sentAt": 1790777177494,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177505,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "thread/settings/update",
+    "sentAt": 1790777177506,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177506,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "turn/start",
+    "sentAt": 1790777177507,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "thread/settings/update",
+    "sentAt": 1790777177508,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177518,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177518,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "turn/start",
+    "sentAt": 1790777177519,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "thread/read",
+    "sentAt": 1790777177529,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "initialize",
+    "sentAt": 1790777178846,
+    "latencyMs": 40,
+    "errorCode": null
+  },
+  {
+    "method": "model/list",
+    "sentAt": 1790777178886,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "account/read",
+    "sentAt": 1790777178887,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "config/read",
+    "sentAt": 1790777178889,
+    "latencyMs": 2,
+    "errorCode": null
+  },
+  {
+    "method": "account/read",
+    "sentAt": 1790777178891,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "hooks/list",
+    "sentAt": 1790777178892,
+    "latencyMs": 2,
+    "errorCode": null
+  },
+  {
+    "method": "model/list",
+    "sentAt": 1790777178894,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "configRequirements/read",
+    "sentAt": 1790777178895,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "collaborationMode/list",
+    "sentAt": 1790777178895,
+    "latencyMs": 0,
+    "errorCode": null
+  },
+  {
+    "method": "config/read",
+    "sentAt": 1790777178896,
+    "latencyMs": 1,
+    "errorCode": null
+  },
+  {
+    "method": "thread/start",
+    "sentAt": 1790777178898
+  },
+  {
+    "method": "thread/loaded/list",
+    "sentAt": 1790777193900,
+    "latencyMs": 1,
+    "errorCode": null
+  }
+]

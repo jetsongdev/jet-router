@@ -1,0 +1,266 @@
+{
+  "kind": "codex-policy-pilot",
+  "contractVersion": "routing-input-v1",
+  "criteriaVersion": "jev-effort-provenance-v4",
+  "policyVersion": "shadow-preflight-v2",
+  "corpusSha256": "ce5f9c05a6ce0ed9169979eb81e2dff239725fba9362cf7cb74bedda90cea1aa",
+  "maxCalls": 10,
+  "retries": 0,
+  "realModelCalls": 0,
+  "enforceApproved": false,
+  "items": [
+    {
+      "id": "literal-typo",
+      "baseline": "medium",
+      "expected": [
+        "low"
+      ],
+      "requestSha256": "2085d73ce1cb12848e6237e5978d1baae154d2caf392bd5728ea3a3771b1ba73"
+    },
+    {
+      "id": "format-en",
+      "baseline": "high",
+      "expected": [
+        "low"
+      ],
+      "requestSha256": "4d4d6a33c46af39604e9a6f374364d3d3170828eeeb8190d661fc1339b657486"
+    },
+    {
+      "id": "implementation",
+      "baseline": "medium",
+      "expected": [
+        "medium"
+      ],
+      "requestSha256": "7821f1cfbf08d3da07a9bce42cbb42e3cbd463f2d9af08f5a5b0903af9151c38"
+    },
+    {
+      "id": "known-fix",
+      "baseline": "high",
+      "expected": [
+        "low",
+        "medium"
+      ],
+      "requestSha256": "3d5675efcd213b6cb510bbfc0b4cf07e5c415965a75f0a112fb158b2abebe3fb"
+    },
+    {
+      "id": "production-risk",
+      "baseline": "xhigh",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "e39bd6ec3af3f10f7a24352469678d9519387ba9b4e79bb3246a48ebbac9a997"
+    },
+    {
+      "id": "risk-explanation",
+      "baseline": "high",
+      "expected": [
+        "medium",
+        "high"
+      ],
+      "requestSha256": "c871c0456c2c9c2be93b7f0daeff4ba95613422c6c9d7c275f53563684e0a130"
+    },
+    {
+      "id": "missing-context",
+      "baseline": "medium",
+      "expected": [
+        "keep"
+      ],
+      "requestSha256": "5bd11e275d3721767564ebaccc99ece5664815ad2ebdb089550cfe3a3960cb04"
+    },
+    {
+      "id": "classifier-injection",
+      "baseline": "high",
+      "expected": [
+        "high",
+        "xhigh",
+        "keep"
+      ],
+      "requestSha256": "0b7955f3b36d20fcf154f44004cdd5361107a156ac4bfd5c9967b261edd0fc41"
+    },
+    {
+      "id": "long-context",
+      "baseline": "high",
+      "expected": [
+        "keep"
+      ],
+      "requestSha256": "c114f5646a6b6197f40c58f207f7a455a7f6c6e8546cbd293673977ef525bbe8"
+    },
+    {
+      "id": "limiter",
+      "baseline": "medium",
+      "expected": [
+        "high",
+        "xhigh"
+      ],
+      "requestSha256": "3294e37252034a02d8b6a5f4464875e277329a8d701478d4d2e576075e11753f"
+    }
+  ],
+  "mode": "live",
+  "startedAt": "2026-09-30T13:55:02.650Z",
+  "attempted": 10,
+  "results": [
+    {
+      "id": "literal-typo",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.88,
+        "riskScore": 0.02,
+        "selectedProbability": 0.99
+      },
+      "codexCandidate": "low",
+      "choiceOnlyCandidate": "low",
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "format-en",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.98,
+        "contextScore": 0.8,
+        "riskScore": 0.02,
+        "selectedProbability": 0.99
+      },
+      "codexCandidate": "low",
+      "choiceOnlyCandidate": "low",
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "implementation",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.91,
+        "contextScore": 0.9,
+        "riskScore": 0.03,
+        "selectedProbability": 0.93
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "known-fix",
+      "decision": {
+        "provider": "jev",
+        "choice": "low",
+        "confidence": 0.37,
+        "contextScore": 0.84,
+        "riskScore": 0.04,
+        "selectedProbability": 0.5
+      },
+      "codexCandidate": "low",
+      "choiceOnlyCandidate": "low",
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "production-risk",
+      "decision": {
+        "provider": "jev",
+        "choice": "xhigh",
+        "confidence": 0.54,
+        "contextScore": 0.58,
+        "riskScore": 0.96,
+        "selectedProbability": 0.64
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "risk-explanation",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.29,
+        "contextScore": 0.77,
+        "riskScore": 0.08,
+        "selectedProbability": 0.43
+      },
+      "codexCandidate": "medium",
+      "choiceOnlyCandidate": "medium",
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "missing-context",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.09,
+        "riskScore": 0.08,
+        "selectedProbability": 1
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "classifier-injection",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 0.67,
+        "contextScore": 0.25,
+        "riskScore": 0.18,
+        "selectedProbability": 0.74
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "long-context",
+      "decision": {
+        "provider": "jev",
+        "choice": "keep",
+        "confidence": 1,
+        "contextScore": 0.12,
+        "riskScore": 0.09,
+        "selectedProbability": 1
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": true,
+      "codexExpected": true,
+      "choiceOnlyExpected": true
+    },
+    {
+      "id": "limiter",
+      "decision": {
+        "provider": "jev",
+        "choice": "medium",
+        "confidence": 0.32,
+        "contextScore": 0.87,
+        "riskScore": 0.04,
+        "selectedProbability": 0.46
+      },
+      "codexCandidate": null,
+      "choiceOnlyCandidate": null,
+      "recommendationExpected": false,
+      "codexExpected": false,
+      "choiceOnlyExpected": false
+    }
+  ],
+  "completed": true
+}

@@ -1,0 +1,25 @@
+{
+  "stage": "live Jev + local fake model",
+  "jev": {
+    "decision": {
+      "provider": "jev",
+      "choice": "low",
+      "confidence": 0.98,
+      "contextScore": 0.42,
+      "riskScore": 0.02,
+      "selectedProbability": 0.99
+    }
+  },
+  "wire": [
+    {
+      "model": "gpt-6-astra",
+      "effort": "medium"
+    }
+  ],
+  "baselineAfter": "medium",
+  "sourceCommit": "de912fe4b9b3479cda2f06df06f674516a279221",
+  "jevCalls": 1,
+  "realModelCalls": 0,
+  "applicationResult": "withheld-context",
+  "contextThreshold": 0.5
+}
