@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createRouter } from '../router.mjs';
 const config = { mode: 'enforce', consent: true, apiKey: 'fixture-only' };
 const input = () => ({ params: { threadId: 'thread1', input: [{ type: 'text', text: 'literal edit' }] },
@@ -23,4 +24,13 @@ test('bad response, high risk downshift, missing context and provider error keep
 });
 test('deadline terminates wait even if provider ignores abort', async () => {
   assert.equal(await createRouter({ ...config, timeoutMs: 5 }, () => new Promise(() => {}))(input()), null);
+});
+
+test('recorded live Jev recommendation is withheld by the experimental context guard', async () => {
+  const evidence = JSON.parse(readFileSync(new URL('../../docs/evaluations/codex-live-jev-2026-09-30/evidence.json', import.meta.url), 'utf8'));
+  let calls = 0;
+  const route = createRouter(config, async () => { calls++; return evidence.jev; });
+  assert.equal(evidence.jev.decision.choice, 'low');
+  assert.equal(await route(input()), null);
+  assert.equal(calls, 1);
 });
