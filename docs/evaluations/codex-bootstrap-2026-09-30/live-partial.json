@@ -1,0 +1,48 @@
+{
+  "model": "gpt-6-astra",
+  "baseline": "medium",
+  "maxJevCalls": 1,
+  "maxModelTurns": 2,
+  "retriesByProbe": 0,
+  "independentSessions": false,
+  "costComparison": false,
+  "wireObserved": false,
+  "startedAt": "2026-09-30T14:12:51.041Z",
+  "jevCalls": 1,
+  "submitted": [
+    {
+      "effort": "low",
+      "explicitOverride": true
+    }
+  ],
+  "turns": [
+    {
+      "mode": "enforce",
+      "status": "completed",
+      "baselineAfter": "medium",
+      "latencyMs": 3908,
+      "usage": {
+        "totalTokens": 10358,
+        "inputTokens": 10340,
+        "cachedInputTokens": 0,
+        "cacheWriteInputTokens": 0,
+        "outputTokens": 18,
+        "reasoningOutputTokens": 0
+      },
+      "outputMatches": true,
+      "usedTools": true
+    }
+  ],
+  "complete": false,
+  "jev": {
+    "decision": {
+      "provider": "jev",
+      "choice": "low",
+      "confidence": 0.98,
+      "contextScore": 0.86,
+      "riskScore": 0.02,
+      "selectedProbability": 0.99
+    }
+  },
+  "failureStage": "turn-1"
+}

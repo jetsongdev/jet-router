@@ -2,7 +2,7 @@
 
 기존 Codex CLI를 `--remote`로 연결해 **turn/start 전에** Jev 추천을 넣는 별도 실행기다.
 MCP shadow 설치를 자동 전환하지 않으며 Claude 플러그인과도 별도다.
-현재 검증 버전은 Codex 0.158.0, Node 22 이상이다. 기본 모드는 off다.
+현재 CLI 가짜 provider 검증 버전은 Codex 0.158.0/0.159.2, Node 22 이상이다. 기본 모드는 off다.
 
 ## 실행
 
@@ -45,6 +45,7 @@ node --env-file=.env codex/proxy.mjs
 - Jev는 공통 요청/응답 검증기를 사용한다. 4초 기한·오류·잘못된 후보·keep이면 원래 요청을 보낸다.
 - 실험적 구조 검사로 contextScore 0.5 미만은 유지, riskScore 0.5 이상에서는 하향을 막는다.
   이 경계값이 품질을 보장하거나 모델별로 보정됐다는 뜻은 아니다.
+- backend RPC는 15초 제한이며, 초기화가 오래 걸리는 thread/start만 60초를 허용한다.
 - 추천을 turn/start와 명시된 collaborationMode에 함께 넣고 응답은 즉시 CLI에 전달한다.
   이어 후속 턴 설정을 사용자 기준값으로 복귀시킨다. 복귀 전의 설정 변경/다음 턴은 직렬 처리한다.
 - 분류 중 취소·수동 설정 변경은 추천을 폐기하고 해당 제출을 취소한다. CLI에 취소 오류를 반환하므로
@@ -85,7 +86,9 @@ npm test
 - 통합 검사에서는 Jev 함수를 고정 응답으로 주입한다. runtime 환경변수로 fake 추천을 활성화하는 기능은 없다.
 - 초기 실제 Jev 호출은 맥락 점수로 보류됐다. v4 맥락 질문 개선 후 실제 Jev + 가짜 모델 서버에서
   첫 요청 low와 기본값 medium 복귀를 확인했다. [정책 평가/적용 기록](evaluations/codex-policy-2026-09-30/README.md).
-  실제 모델 호출·품질·비용은 미검증이다.
+  실제 Astra 1턴에서 low 명시 제출·완료·기준 medium 조회·사용량을 확인했다.
+  [실제 모델 기록](evaluations/codex-bootstrap-2026-09-30/README.md). 검증기 문제로 2턴 smoke는 미완료이며
+  실제 HTTP wire·도구 미사용·다음 턴 요청·품질/비용 비교는 미검증이다.
   취소·복귀 실패·경쟁 상태는 단위 검사이며 실제 네트워크 장애 검증으로 확대하지 않는다.
 - 실제 CLI의 `/model` 메뉴, 프로세스 크래시, 중복 resume, subagent 전파는 추가 검증이 필요하다.
   Claude 실호출은 토큰 한도로 계속 스킵한다.

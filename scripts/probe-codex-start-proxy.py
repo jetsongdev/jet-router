@@ -301,7 +301,7 @@ try:
                            env=env, stdin=slave, stdout=slave, stderr=slave, start_new_session=True)
     os.close(slave)
     terminal = bytearray()
-    deadline = time.monotonic() + 35
+    deadline = time.monotonic() + 75
     while time.monotonic() < deadline and len(completions) < 5:
         if adapter and (root / 'adapter-events.json').exists():
             completions[:] = json.loads((root / 'adapter-events.json').read_text())

@@ -30,7 +30,10 @@ export async function startProxy({ config, classify, launch = () => spawn('codex
     const rpc = (method, params) => new Promise((resolve, reject) => {
       if (ended) return reject(new Error('backend unavailable'));
       const id = `jet-router-${++sequence}`;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error('backend timeout')); }, 15000);
+      // Session bootstrap can exceed 15s before any model request (Codex 0.159.2).
+      // Keep mutation/restoration deadlines short; only lifecycle startup gets 60s.
+      const timeoutMs = method === 'thread/start' ? 60000 : 15000;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error('backend timeout')); }, timeoutMs);
       pending.set(id, { resolve, reject, timer });
       write({ id, method, params });
     });

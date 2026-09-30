@@ -78,7 +78,10 @@
 
 - [x] 고정 표본으로 Codex/Claude 적용 정책 차이를 비교하고, 맥락 질문만 개선해 첫 요청 적용을 재검증한다.
   [파일럿 10개 결과](docs/evaluations/codex-policy-2026-09-30/README.md): 적용 기대 6/10 → 9/10, 경계값 유지.
-- [ ] Codex 0.159.2 TUI 초기화의 간헐 backend-request-failed를 조사한다. 프로토콜 4턴은 통과했고 TUI 재시도는 성공했으나 원인은 미확정이다.
+- [x] Codex 0.159.2 TUI 초기화 실패를 재현했다. 공통 15초 제한이 원인이며 thread/start만 60초로 늘려 24.7초 응답과 5턴 통과를 확인했다.
+  [초기화/실제 모델 기록](docs/evaluations/codex-bootstrap-2026-09-30/README.md).
+- [ ] 수정된 검증기로 실제 2턴 smoke를 완료한다. 실제 첫 턴은 low 제출/완료/기준 medium 조회와 사용량을 확인했지만,
+  userMessage를 도구로 센 검증기 결함으로 다음 턴은 미실행이다. 도구 사용 여부는 기존 기록으로 소급 확정하지 않는다.
 - [ ] 새 표본·반복 관측으로 context/risk 경계를 보정한다. limiter의 medium 추천(기대 high/xhigh)을 조사한다.
   합성 파일럿을 일반 품질 보장이나 두 호스트 정책의 동등성으로 해석하지 않는다.
 - [ ] 최초 enforce 대상 모델을 GPT-6 Astra / GPT-6 Sol로 제한하는 허용 정책을 확정한다.
