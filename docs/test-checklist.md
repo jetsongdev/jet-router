@@ -49,6 +49,7 @@
 - [ ] 새 세션 시작 시 off와 최근 완료 없음으로 초기화되고, `jet-router: 세션 시작 · 꺼짐(off)` 알림이 한 번 나온다.
 - [ ] fake에서 `defaultMode=shadow`로 reload·재시작하면 새 세션이 `세션 시작 · 관찰(shadow)`로 시작한다.
 - [ ] Jev에서 `defaultMode=shadow`면 새 세션·`/reload-plugins` 후 `관찰(shadow) · Jev · 적용: /jet-router enforce`로 시작하고, `/jet-router enforce`로 적용이 켜진다.
+- [ ] Jev에서 `defaultMode=enforce`면 새 세션·`/reload-plugins` 후 `적용(enforce) · Jev`로 시작하고 첫 턴부터 추천 effort가 적용된다.
 - [ ] 기존 대화를 재개했을 때도 초기 상태를 확인한다. 재개 방법·결과는 별도 기록한다.
 - [ ] `/jet-router enforce` 후 status가 `적용(enforce)`와 `effort 자동 변경: 켜짐`을 표시한다.
 - [ ] enforce에서 하향 추천 턴은 `… → … 적용`으로 표시되고, statusline·settings의 effort는 바뀌지 않는다.

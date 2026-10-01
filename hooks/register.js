@@ -310,11 +310,10 @@ function invalidateTurn(turn) {
   turn.cancel?.();
 }
 
-// shadow only when explicitly chosen; with Jev that sends every session's
-// prompts (after cloud consent), so the default stays off. enforce is never a
-// start mode and always needs /jet-router enforce.
+// shadow or enforce only when explicitly chosen; with Jev both send every
+// session's prompts (after cloud consent), so the default stays off.
 function startMode(options) {
-  return options.defaultMode === 'shadow' ? 'shadow' : 'off';
+  return ['shadow', 'enforce'].includes(options.defaultMode) ? options.defaultMode : 'off';
 }
 
 const REPORT_GROUPS = ['day', 'week', 'month', 'project', 'model', 'mode', 'kind', 'pair', 'all'];
