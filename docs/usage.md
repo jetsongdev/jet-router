@@ -95,9 +95,10 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 
 ## 5. 추천 테스트값 바꾸기
 
-`defaultMode` 옵션은 세션을 시작·재개할 때의 모드를 정합니다. `off`(기본값) 또는 `shadow`를 받습니다. `shadow`를 고르면 fake·Jev 모두 shadow로 시작합니다. Jev에서는 전송 동의(`cloudConsent`) 후 **모든 세션의 분류 대상 프롬프트가 Jev로 전송**되므로 명시적으로 고른 경우에만 적용되며, 기본값은 off입니다. enforce는 시작 모드로 둘 수 없고 세션마다 `/jet-router enforce`로 켭니다. `/reload-plugins`로 새 버전을 불러오면 새 모듈이 세션 시작 처리를 다시 하므로 이 시작 모드로 돌아가며, enforce는 다시 켜야 합니다. 시작 시 표시 예시입니다.
+`defaultMode` 옵션은 세션을 시작·재개할 때의 모드를 정합니다. `off`(기본값), `shadow`, `enforce`를 받습니다. 고른 모드로 fake·Jev 모두 시작합니다. Jev에서는 전송 동의(`cloudConsent`) 후 **모든 세션의 분류 대상 프롬프트가 Jev로 전송**되고, `enforce`면 모든 세션에서 추천 effort가 그 턴(과 그 턴의 subagent)에 자동 적용되므로 명시적으로 고른 경우에만 적용되며, 기본값은 off입니다(`enforce` 시작은 0.12.0~). `/reload-plugins`로 새 버전을 불러오면 새 모듈이 세션 시작 처리를 다시 하므로 이 시작 모드로 돌아갑니다. 세션 안에서 `/jet-router shadow`·`off`로 언제든 바꿀 수 있습니다. 시작 시 표시 예시입니다.
 
 ```text
+jet-router: 세션 시작 · 적용(enforce) · Jev · 관찰만: /jet-router shadow · 끄기: /jet-router off
 jet-router: 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce
 jet-router: 세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)
 ```

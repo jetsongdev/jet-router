@@ -267,5 +267,6 @@ Jev에 제공하는 후보와 사용자에게 표시하는 유효 추천은 활�
 - [ ] 실제 작업에서 주요 조합(예: medium→low, xhigh→medium)의 대조군 표본 각 10턴 이상 확보
 - [ ] 실측 비율이 평가 비율과 크게 다르거나 상향 조합의 순증가가 크면 적용 정책(상향 허용 범위 등) 재검토
 - [ ] 충분히 측정된 뒤 `holdoutRate`를 낮추거나 0으로 끄는 기준 정리
-- 범위 밖: Codex enforce, 세션 시작 기본값으로 enforce 두기, 금액 환산
+- [x] 세션 시작 기본값으로 enforce 선택 가능(`defaultMode=enforce`, 0.12.0)
+- 범위 밖: Codex enforce, 금액 환산
 

@@ -51,6 +51,7 @@ export function summary(record, outcome) {
 export function sessionNotice(mode, provider) {
   const classifier = provider === 'jev' ? 'Jev' : 'fake(외부 전송 없음)';
   if (mode === 'shadow') return `세션 시작 · 관찰(shadow) · ${classifier} · 적용: /jet-router enforce`;
+  if (mode === 'enforce') return `세션 시작 · 적용(enforce) · ${classifier} · 관찰만: /jet-router shadow · 끄기: /jet-router off`;
   return `세션 시작 · 꺼짐(off) · ${classifier} · 켜기: /jet-router shadow(관찰) · enforce(적용)`;
 }
 

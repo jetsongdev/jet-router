@@ -2,7 +2,7 @@
 
 기존 Claude Code 모델·대화·입력창을 유지하면서 프롬프트마다 필요한 effort를 선택하는 실험적 플러그인입니다.
 
-**현재는 Claude Code에서 off/shadow 관찰과 enforce(추천 effort를 해당 턴에만 적용)를 지원합니다.** 기본 `fake`는 고정 테스트 결과만 반환하고, Jev는 명시적 설정·전송 동의·키가 있을 때만 호출합니다. 세션은 off(또는 설정한 경우 shadow)로 시작하며 enforce는 `/jet-router enforce`로 켤 때만 동작합니다. 적용한 턴이 띄운 subagent도 같은 effort를 이어받습니다. 분류한 턴의 effort 결정과 토큰은 로컬에 기록되고, 적용 대상의 10%를 대조군으로 남겨 실제 작업의 절감을 측정합니다([사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트)). 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md). Codex MCP는 shadow만 지원하고, 로컬 모델 연결은 미지원입니다.
+**현재는 Claude Code에서 off/shadow 관찰과 enforce(추천 effort를 해당 턴에만 적용)를 지원합니다.** 기본 `fake`는 고정 테스트 결과만 반환하고, Jev는 명시적 설정·전송 동의·키가 있을 때만 호출합니다. 세션은 off(또는 설정한 경우 shadow·enforce)로 시작하며, 그 밖에는 `/jet-router enforce`로 켤 때만 적용합니다. 적용한 턴이 띄운 subagent도 같은 effort를 이어받습니다. 분류한 턴의 effort 결정과 토큰은 로컬에 기록되고, 적용 대상의 10%를 대조군으로 남겨 실제 작업의 절감을 측정합니다([사용량 기록과 절감 리포트](docs/usage.md#7-사용량-기록과-절감-리포트)). 근거: [적용 경로 확인](docs/evaluations/enforce-path-2026-09-28.md), [Claude 하향 비교](docs/evaluations/downshift-claude-2026-09-28/README.md). Codex MCP는 shadow만 지원하고, 로컬 모델 연결은 미지원입니다.
 
 ## Codex MCP shadow — 별도 실험
 
@@ -78,7 +78,7 @@ Jev helper가 실행되는 머신에 Node 22+가 필요합니다. 플러그인�
 
 키는 채팅·명령 인자·Git 파일에 넣지 마세요. 키 입력 UI와 secure storage 재로드는 아직 수동 검증하지 않았습니다. Configure options의 세부 위치는 Claude 버전에 따라 달라질 수 있습니다. 저장 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. [공식 플러그인 설정 안내](https://code.claude.com/docs/en/plugins-reference#user-configuration)
 
-세션은 기본적으로 off로 시작합니다. Configure의 `Mode at session start`를 `shadow`로 고르면 새 세션과 `/reload-plugins` 후 모두 shadow로 시작합니다(Jev는 전송 동의 후 모든 세션의 분류 대상 프롬프트를 전송). enforce는 세션마다 `/jet-router enforce`로 켭니다. 세션을 시작할 때 `jet-router: 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce`처럼 현재 모드와 켜는 명령이 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰 또는 적용을 켭니다.
+세션은 기본적으로 off로 시작합니다. Configure의 `Mode at session start`를 `shadow`나 `enforce`로 고르면 새 세션과 `/reload-plugins` 후 모두 그 모드로 시작합니다(Jev는 전송 동의 후 모든 세션의 분류 대상 프롬프트를 전송, `enforce`는 추천 effort 자동 적용). 그 밖에는 세션마다 `/jet-router enforce`로 켭니다. 세션을 시작할 때 `jet-router: 세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce`처럼 현재 모드와 켜는 명령이 한 줄 표시됩니다. 다음 명령으로 상태를 확인하고 관찰 또는 적용을 켭니다.
 
 ```text
 /jet-router status

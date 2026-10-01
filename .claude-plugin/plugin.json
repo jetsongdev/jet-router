@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -21,8 +21,8 @@
     "defaultMode": {
       "type": "string",
       "title": "Mode at session start",
-      "description": "off (default) or shadow. With Jev, shadow sends each session's prompts after cloud consent. enforce always needs /jet-router enforce.",
-      "options": ["off", "shadow"],
+      "description": "off (default), shadow or enforce. With Jev, shadow and enforce send each session's prompts after cloud consent; enforce also changes effort for the turn and its subagents.",
+      "options": ["off", "shadow", "enforce"],
       "default": "off"
     },
     "usageLog": {

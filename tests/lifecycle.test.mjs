@@ -519,7 +519,7 @@ test('model change during Jev classification cancels the stale result without ch
   assert.deepEqual(w.sent.map(e => e.model).sort(), ['changed-model', 'unchanged']);
 });
 
-test('session start announces the mode and an explicit shadow default applies to both classifiers', async () => {
+test('session start announces the mode and an explicit shadow or enforce default applies to both classifiers', async () => {
   const plain = world(); await plain.start();
   assert.deepEqual(plain.notices, ['세션 시작 · 꺼짐(off) · fake(외부 전송 없음) · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
   await plain.submit(); await plain.step();
@@ -535,11 +535,16 @@ test('session start announces the mode and an explicit shadow default applies to
   await jev.start();
   assert.deepEqual(jev.notices, ['세션 시작 · 관찰(shadow) · Jev · 적용: /jet-router enforce']);
   assert.match(jev.command('status').text, /관찰\(shadow\)/);
-  // A shadow start never applies effort; enforce still needs the command.
+  // A shadow start never applies effort; an enforce start applies from the first turn.
+  const enforced = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY', defaultMode: 'enforce' });
+  await enforced.start();
+  assert.deepEqual(enforced.notices, ['세션 시작 · 적용(enforce) · Jev · 관찰만: /jet-router shadow · 끄기: /jet-router off']);
+  const fakeEnforce = world(undefined, undefined, { defaultMode: 'enforce' }); await fakeEnforce.start(); await fakeEnforce.submit();
+  assert.equal((await forward(fakeEnforce)).seen.effort, 'low');
   const jevOff = world(undefined, undefined, { provider: 'jev', cloudConsent: true, jevApiKey: 'KEY_CANARY' });
   await jevOff.start();
   assert.deepEqual(jevOff.notices, ['세션 시작 · 꺼짐(off) · Jev · 켜기: /jet-router shadow(관찰) · enforce(적용)']);
-  for (const value of ['enforce', 'ENFORCE', 'on']) {
+  for (const value of ['ENFORCE', 'on', 'max']) {
     const x = world(undefined, undefined, { defaultMode: value }); await x.start();
     assert.match(x.command('status').text, /꺼짐\(off\)/);
   }
