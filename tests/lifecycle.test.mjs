@@ -461,6 +461,17 @@ test('a context-variant model name like claude-opus-5-5[1m] classifies and logs 
   assert.deepEqual([seen.model, seen.effort], ['claude-opus-5-5[1m]', 'low']); // The host request keeps its own model.
 });
 
+test('enforce leaves Jev candidates below the apply probability unchanged', async () => {
+  for (const [selectedProbability, effort, label] of [[0.48, 'high', /high → low 확률 미달 미적용/], [0.7, 'low', /high → low 적용/], [undefined, 'low', /high → low 적용/]]) {
+    const decision = { ...JSON.parse(jevResult.stdout).decision, ...(selectedProbability === undefined ? {} : { selectedProbability }) };
+    const w = world(undefined, undefined, jevOptions, async () => ({ ...jevResult, stdout: JSON.stringify({ ok: true, decision }) }));
+    await w.start(); await w.command('enforce'); await w.submit();
+    assert.equal((await forward(w)).seen.effort, effort);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.match(w.logs[0], label);
+  }
+});
+
 test('Jev failure has no fallback and timeout keeps only one outstanding helper', async () => {
   const pending = deferred(), began = deferred(); let processes = 0;
   const w = world(undefined, undefined, jevOptions, () => { processes++; began.resolve(); return pending.promise; });

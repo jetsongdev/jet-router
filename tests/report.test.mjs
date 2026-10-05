@@ -45,3 +45,9 @@ test('Jev status distinguishes consent from activity and marks recommendations u
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'correlation', latencyMs: null }, 'aborted'), 'Jev 생략: 요청 연결 불확실 · shadow · 중단');
   assert.equal(summary({ ...record, provider: 'jev', reasonCode: 'command', latencyMs: null }), 'Jev 생략: 스킬·명령 입력 · shadow');
 });
+
+test('enforce summary marks a candidate held back by the probability gate', () => {
+  const gated = { ...record, mode: 'enforce', provider: 'jev', reasonCode: 'unevaluated', probability: 0.48 };
+  assert.equal(summary(gated, 'answer'), 'Jev.enforce(): high → low 확률 미달 미적용 (48%) · 12ms');
+  assert.equal(summary({ ...gated, mode: 'shadow' }, 'answer'), 'Jev.shadow(): high → low (48%) · 12ms');
+});
