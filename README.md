@@ -75,6 +75,7 @@ Jev helper가 실행되는 머신에 Node 22+가 필요합니다. 플러그인�
 | `provider` | `jev` 선택. 기본값 `fake`는 외부 호출 없는 고정 테스트 결과 |
 | `cloudConsent` | TypeSafe로 현재 입력을 전송하는 데 동의하면 `true`. 기본값 `false` |
 | `jevApiKey` | TypeSafe API 키 입력. sensitive 옵션으로 Claude secure storage에 저장하도록 선언됨 |
+| `sendTaskContext` | 직전 턴(프롬프트 앞부분·답변 끝부분, 2,000자 이내)도 Jev에 보내려면 `true`. 기본값 `false`(0.13.0~) |
 
 키는 채팅·명령 인자·Git 파일에 넣지 마세요. 키 입력 UI와 secure storage 재로드는 아직 수동 검증하지 않았습니다. Configure options의 세부 위치는 Claude 버전에 따라 달라질 수 있습니다. 저장 후 Claude가 안내하는 reload/재시작 절차를 따릅니다. [공식 플러그인 설정 안내](https://code.claude.com/docs/en/plugins-reference#user-configuration)
 

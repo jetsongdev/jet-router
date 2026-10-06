@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -42,6 +42,12 @@
       "type": "boolean",
       "title": "Allow Jev cloud requests",
       "description": "Send each eligible current prompt and effort to api.typesafe.ai in shadow. No files/history. Charges may apply; off cannot undo an already sent request. Review TypeSafe data policy before enabling.",
+      "default": false
+    },
+    "sendTaskContext": {
+      "type": "boolean",
+      "title": "Send previous turn to Jev",
+      "description": "With Jev cloud consent, also send the previous main turn as taskContext: the prompt's start and the assistant answer's end, 2,000 characters at most. The answer may contain code, paths or values from your session. Off sends the current prompt only.",
       "default": false
     },
     "jevApiKey": {

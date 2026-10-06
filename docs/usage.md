@@ -119,10 +119,13 @@ Node 22+ 실행 파일이 Claude 프로세스의 PATH에 있어야 합니다. `/
 | `provider` | 기본 `fake`. Jev를 쓰려면 `jev` 선택 |
 | `cloudConsent` | 기본 false. 현재 프롬프트와 effort의 TypeSafe 외부 전송에 동의할 때만 true |
 | `jevApiKey` | TypeSafe API 키. sensitive 옵션으로 Claude의 secure storage 사용. 채팅·명령 인자·저장소에 적지 않음 |
+| `sendTaskContext` | 기본 false. true면 직전 메인 턴을 `taskContext`로 함께 전송(0.13.0~, 아래 참고) |
 
 동의 전 TypeSafe의 데이터 처리·보관 정책을 확인하세요. 이 구현은 해당 정책이나 계정 요금·한도를 검증하지 않았습니다. 설정만으로 전송하지는 않으며, 새 세션은 off입니다. `/jet-router status` 확인 후 `/jet-router shadow`에서 분류 대상 입력이 전송됩니다. API 키가 없거나 잘못된 형식이면 전송을 생략합니다.
 
-전송 대상은 `https://api.typesafe.ai/v1/systemone`으로 고정되어 있습니다. 현재 프롬프트(최대 6,000자)·현재 effort·고정 분류 질문만 보내며 파일, 전체 대화, 시스템 지침은 수집하지 않습니다. `taskContext`는 null입니다. 이 제한이 프롬프트 자체에 포함된 비밀을 제거해 주지는 않으므로 민감한 입력 전에는 off/lock을 사용하세요.
+전송 대상은 `https://api.typesafe.ai/v1/systemone`으로 고정되어 있습니다. 현재 프롬프트(최대 6,000자)·현재 effort·고정 분류 질문만 보내며 파일, 전체 대화, 시스템 지침은 수집하지 않습니다. 기본 `taskContext`는 null입니다. 이 제한이 프롬프트 자체에 포함된 비밀을 제거해 주지는 않으므로 민감한 입력 전에는 off/lock을 사용하세요.
+
+**직전 턴 맥락(`sendTaskContext`, 0.13.0~).** 프롬프트만 보내면 "이거 고쳐줘"·"ㅇㅋ"처럼 직전 답변을 가리키는 입력의 범위를 Jev가 알기 어렵습니다(2026-09-28~10-06 enforce 판정의 98%가 `keep`). 이 옵션을 켜면 직전에 정상 종료한 메인 턴의 프롬프트 앞부분(최대 600자)과 Claude 최종 답변의 끝부분을 합쳐 2,000자 이내로 `taskContext`에 넣습니다(`contextSource: model-summary`, 답변이 비면 `user-provided`). 직전 1턴만 메모리에 두고 디스크에 쓰지 않으며, off·lock·모드 전환·세션 시작·중단된 턴에서 비웁니다. 사용자가 입력하지 않은 subagent 보고·작업 알림 턴은 맥락으로 쓰지 않고, 그 앞 턴이 오래된 맥락으로 전송되지 않도록 보관 중인 맥락도 비웁니다. **답변에 들어 있는 코드·경로·설정 값도 그대로 전송되므로** 민감한 작업 전에는 끄거나 lock을 사용하세요. usage 기록의 `contextSent`로 맥락을 실제 전송한 턴을 구분합니다.
 
 모든 redirect를 거부하고 재시도·자동 fallback을 하지 않습니다. helper 입력·응답은 각각 64 KiB 한도이며 응답 한도는 다운로드 중 적용됩니다. hook의 대기 한도는 1.5초, helper의 HTTPS 전체 요청 한도는 3초, 호스트 process 한도는 4초입니다. Node 시작 시간 등은 별도이므로 이 값은 실제 완료 시간 보장이 아닙니다. 느린 호출은 추천을 표시하지 않을 수 있습니다.
 
@@ -190,7 +193,7 @@ jet-router: Jev 생략: 시간 초과 · enforce
 
 shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용). 그 턴이 띄운 subagent도 subagent 턴이 끝날 때 `kind: "subagent"`로 따로 한 줄 기록합니다(0.11.0~, 이전 기록은 `main`).
 
-- 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, Jev 맥락·위험 점수(`contextScore`·`riskScore`, 0.12.2~, 기록만 하고 판정에는 쓰지 않음), 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
+- 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, Jev 맥락·위험 점수(`contextScore`·`riskScore`, 0.12.2~, 기록만 하고 판정에는 쓰지 않음), 직전 턴 맥락 전송 여부(`contextSent`, 0.13.0~), 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
 - subagent 줄의 effort·대조군 여부는 자신을 띄운 메인 턴의 결정을 이어받고, 토큰은 subagent 턴 합계입니다(메인 턴 합계에는 subagent 토큰이 들어가지 않습니다). 메인 턴이 대조군이면 그 subagent도 대조군입니다.
 - 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, 알림 턴, 메인 턴 없이 시작한 subagent(`/subtask` 등).
 - 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.

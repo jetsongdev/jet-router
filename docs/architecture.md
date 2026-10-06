@@ -16,7 +16,7 @@ Jev가 코딩 작업을 수행하거나 Claude/Codex 설정을 직접 바꾸는 
 | 분류 시작 | 연결된 메인 턴의 첫 `turn.step` | `UserPromptSubmit`에서 MCP 도구 호출 |
 | 실제 effort 읽기 | `turn.step`의 `e.effort` | 현재 hook 입력에는 제공되지 않음 |
 | Jev에 전달하는 effort | 요청에서 읽은 실제 effort | 사용자가 설정한 참고 effort |
-| Jev 전송 내용 | 현재 텍스트, effort, taskContext=null | 현재 텍스트, 참고 effort, taskContext=null |
+| Jev 전송 내용 | 현재 텍스트, effort, taskContext=null(`sendTaskContext`면 직전 턴 2,000자 이내) | 현재 텍스트, 참고 effort, taskContext=null |
 | 안내 시점 | `turn.complete` 처리 후 | 입력 hook 처리 시점, 정상 작업 진행 전 |
 | 안내 방식 | 별도 `$.ui.log` 한 줄 | hook `systemMessage`, UI 경고/이벤트 |
 | 실제 effort 변경 | 없음, 원본 요청 객체 그대로 전달 | 없음, effort 제어 API를 호출하지 않음 |

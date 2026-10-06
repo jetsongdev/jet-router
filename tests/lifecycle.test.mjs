@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { registerRouter } from '../hooks/register.js';
+import { registerRouter, contextText } from '../hooks/register.js';
 
 const choice = { choice: 'low', contextSufficient: true, risky: false };
 const deferred = () => { let resolve, reject; const promise = new Promise((r, j) => { resolve = r; reject = j; }); return { promise, resolve, reject }; };
@@ -648,4 +648,88 @@ test('report runs the loaded plugin version of the usage script with fixed argum
   reply = { exitCode: 1, stdout: '', stderr: 'boom' };
   assert.match((await w.command('report')).text, /리포트 생성 실패/);
   assert.match(w.command('status').text, /모드/);
+});
+
+test('task context keeps the previous prompt head and answer tail within the Jev budget', () => {
+  assert.equal(contextText(undefined), null);
+  assert.equal(contextText({ prompt: ' ', answer: '' }), null);
+  const text = contextText({ prompt: 'P'.repeat(900) + 'PROMPT_END', answer: 'ANSWER_START' + 'A'.repeat(3000) + '진행할까요?' });
+  assert.ok(text.length <= 2000);
+  assert.ok(!text.includes('PROMPT_END') && !text.includes('ANSWER_START'));
+  assert.ok(text.endsWith('진행할까요?'));
+  assert.equal(contextText({ prompt: null, answer: 'only' }), 'Previous assistant answer (end):\nonly');
+});
+
+test('sendTaskContext sends the previous answered turn and logs it; off keeps prompt-only', async () => {
+  for (const sendTaskContext of [true, false]) {
+    const runs = [];
+    const run = async (argv, init) => {
+      runs.push({ argv, stdin: init.stdin });
+      return argv[1].endsWith('/scripts/jev-request.mjs') ? jevResult : { exitCode: 0, stdout: '', stderr: '' };
+    };
+    const w = world(undefined, undefined, { ...jevOptions, usageLog: true, sendTaskContext }, run);
+    await w.start(); await w.command('shadow');
+    await w.submit('t1', 'FIRST_PROMPT'); await forward(w);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer', answer: 'FIRST_ANSWER 진행할까요?' });
+    await w.submit('t2', 'ㅇㅋ'); await forward(w, { turnId: 't2' });
+    await w.event('turn.complete', { turnId: 't2', reason: 'answer', answer: 'done' });
+    const jev = runs.filter(r => r.argv[1].endsWith('/scripts/jev-request.mjs')).map(r => JSON.parse(r.stdin).routingInput.context);
+    const usage = runs.filter(r => r.argv[1].endsWith('/scripts/usage.mjs')).map(r => JSON.parse(r.stdin).contextSent);
+    assert.deepEqual(jev[0], { source: 'prompt-only', missingRequired: null });
+    if (sendTaskContext) {
+      assert.equal(jev[1].source, 'model-summary');
+      assert.match(jev[1].text, /FIRST_PROMPT[\s\S]*FIRST_ANSWER 진행할까요\?$/);
+      assert.deepEqual(usage, [false, true]);
+      assert.match((await w.command('status')).text, /직전 턴/);
+    } else {
+      assert.deepEqual(jev[1], { source: 'prompt-only', missingRequired: null });
+      assert.deepEqual(usage, [false, false]);
+      assert.match((await w.command('status')).text, /현재 프롬프트·effort만 전송/);
+    }
+  }
+});
+
+test('task context is dropped after an aborted turn and on mode changes', async () => {
+  const runs = [];
+  const run = async (argv, init) => { runs.push(JSON.parse(init.stdin).routingInput?.context); return jevResult; };
+  const w = world(undefined, undefined, { ...jevOptions, sendTaskContext: true }, run);
+  await w.start(); await w.command('shadow');
+  await w.submit('t1', 'one'); await forward(w);
+  await w.event('turn.complete', { turnId: 't1', reason: 'aborted', answer: 'partial' });
+  await w.submit('t2', 'two'); await forward(w, { turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer', answer: 'answer two' });
+  await w.command('enforce');
+  await w.submit('t3', 'three'); await forward(w, { turnId: 't3' });
+  assert.deepEqual(runs.map(c => c.source), ['prompt-only', 'prompt-only', 'prompt-only']);
+});
+
+test('task context: notification turns clear it, blank answers send the prompt as user-provided', async () => {
+  const runs = [];
+  const run = async (argv, init) => { runs.push(JSON.parse(init.stdin).routingInput?.context); return jevResult; };
+  const w = world(undefined, undefined, { ...jevOptions, sendTaskContext: true }, run);
+  await w.start(); await w.command('shadow');
+  await w.submit('t1', 'one'); await forward(w);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer', answer: '   ' });
+  await w.submit('t2', 'two'); await forward(w, { turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer', answer: 'answer two' });
+  // A task notification opens a turn nobody typed.
+  await w.event('prompt.submit', { text: 'task done', origin: { kind: 'task-notification' }, wait: false },
+    async e => { await w.event('turn.start', { turnId: 'n1', text: e.text }); return { text: e.text }; });
+  await w.event('turn.complete', { turnId: 'n1', reason: 'answer', answer: 'notification answer' });
+  await w.submit('t3', 'three'); await forward(w, { turnId: 't3' });
+  assert.deepEqual(runs.map(c => c.source), ['prompt-only', 'user-provided', 'prompt-only']);
+  assert.equal(runs[1].text, 'Previous user request:\none');
+});
+
+test('an overlapped turn that still finishes keeps its prompt as context', async () => {
+  const runs = [];
+  const run = async (argv, init) => { runs.push(JSON.parse(init.stdin).routingInput?.context); return jevResult; };
+  const w = world(undefined, undefined, { ...jevOptions, sendTaskContext: true }, run);
+  await w.start(); await w.command('shadow');
+  await w.submit('t1', 'FIRST'); await forward(w);
+  // Typed mid-turn: the submission joins the running turn and invalidates it.
+  await w.event('prompt.submit', { text: 'typed mid-turn', origin: { kind: 'composer' }, wait: false, turnId: 't1' }, async e => ({ text: e.text }));
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer', answer: 'ANSWER' });
+  await w.submit('t2', 'next'); await forward(w, { turnId: 't2' });
+  assert.match(runs.at(-1).text, /FIRST[\s\S]*ANSWER$/);
 });
