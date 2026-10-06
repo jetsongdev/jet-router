@@ -72,6 +72,19 @@ test('savings are estimated only for measured pairs and exclude yielded and upsh
   assert.match(formatReport(report(records, { by: ['day'] })), /추정 대상 턴 출력 절감률/);
 });
 
+test('gated counts only different enforce candidates below the apply probability', () => {
+  const records = [
+    make('2026-10-06T01:00:00Z', { mode: 'enforce', original: 'medium', recommendation: 'high', probability: 0.43 }, 100),
+    make('2026-10-06T02:00:00Z', { mode: 'enforce', original: 'medium', recommendation: 'medium', probability: 0.44 }, 100),
+    make('2026-10-06T03:00:00Z', { mode: 'enforce', original: 'medium', recommendation: 'high', applied: 'high', probability: 0.48 }, 100),
+    make('2026-10-06T04:00:00Z', { mode: 'enforce', original: 'medium', recommendation: 'keep', probability: 0.3 }, 100),
+    make('2026-10-06T05:00:00Z', { mode: 'shadow', original: 'medium', recommendation: 'high', probability: 0.43 }, 100),
+    make('2026-10-06T06:00:00Z', { mode: 'enforce', original: 'medium', recommendation: 'high', probability: 0.43 }, 100, { kind: 'subagent' }),
+  ];
+  assert.equal(report(records).total.gated, 1);
+  assert.match(formatReport(report(records)), /확률 미달/);
+});
+
 test('measured control ratios replace evaluation ratios once both arms have enough turns', () => {
   const at = i => `2026-10-${String(1 + (i % 20)).padStart(2, '0')}T02:00:00Z`;
   const records = [];

@@ -1,4 +1,4 @@
-import { belowApplyProbability } from './policy.js';
+import { belowApplyProbability, MIN_APPLY_PROBABILITY } from './policy.js';
 
 // Only normalized router records reach these formatters, never provider text.
 // Same shape as the Codex MCP shadow messages (mcp/shadow.mjs) minus the
@@ -34,10 +34,13 @@ export function summary(record, outcome) {
     parts.push(`${provider} 생략: ${skipped}`, mode);
   } else {
     const original = record.original === 'unsupported' ? '미확인' : record.original;
-    const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
+    // A recommendation equal to the current effort changes nothing, so it reads as keep.
+    const unchanged = record.recommendation === 'keep' || record.recommendation === record.original;
+    const gated = record.mode === 'enforce' && !unchanged && belowApplyProbability(record.probability);
+    const percentage = record.probability === undefined ? ''
+      : ` (${Math.round(record.probability * 100)}%${gated ? ` < ${Math.round(MIN_APPLY_PROBABILITY * 100)}%` : ''})`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
-    const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
-    const gated = record.mode === 'enforce' && record.recommendation !== 'keep' && belowApplyProbability(record.probability);
+    const target = unchanged ? `${original} 유지` : `${original} → ${record.recommendation}`;
     const applied = record.applied ? ' 적용' : record.holdout ? ' 대조군 미적용' : gated ? ' 확률 미달 미적용' : '';
     parts.push(`${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);

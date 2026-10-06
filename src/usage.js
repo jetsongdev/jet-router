@@ -1,4 +1,4 @@
-import { EFFORTS } from './policy.js';
+import { EFFORTS, MIN_APPLY_PROBABILITY } from './policy.js';
 
 // Local usage log: one line per routed main turn. Never prompt or answer text.
 export const USAGE_VERSION = 1;
@@ -145,7 +145,7 @@ function factorFor(r, target, measured) {
 }
 
 function emptyTotals() {
-  return { turns: 0, enforceTurns: 0, applied: 0, upshifts: 0, yielded: 0, holdout: 0, skipped: 0,
+  return { turns: 0, enforceTurns: 0, applied: 0, upshifts: 0, yielded: 0, holdout: 0, gated: 0, skipped: 0,
     output: 0, input: 0, cacheRead: 0, cacheCreation: 0,
     estimatedSaved: 0, estimatedBaselineOutput: 0, estimatedTurns: 0, measuredTurns: 0, unestimatedAppliedTurns: 0, unestimatedAppliedOutput: 0,
     shadowPotentialSaved: 0, shadowEstimatedTurns: 0, shadowUnestimatedTurns: 0 };
@@ -167,6 +167,10 @@ export function accumulate(totals, r, measured = []) {
   if (r.mode === 'enforce') {
     t.enforceTurns++;
     if (r.holdout) t.holdout++;
+    // Main-turn candidates the 0.7 probability gate left unchanged (0.12.1~);
+    // subagent lines only inherit that decision.
+    if (r.kind === 'main' && !r.applied && !r.holdout && EFFORTS.includes(r.recommendation) && r.recommendation !== r.original &&
+        r.probability !== null && r.probability < MIN_APPLY_PROBABILITY) t.gated++;
     if (r.applied) {
       t.applied++;
       if (EFFORTS.indexOf(r.applied) > EFFORTS.indexOf(r.original)) t.upshifts++;

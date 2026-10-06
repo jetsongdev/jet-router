@@ -48,6 +48,11 @@ test('Jev status distinguishes consent from activity and marks recommendations u
 
 test('enforce summary marks a candidate held back by the probability gate', () => {
   const gated = { ...record, mode: 'enforce', provider: 'jev', reasonCode: 'unevaluated', probability: 0.48 };
-  assert.equal(summary(gated, 'answer'), 'Jev.enforce(): high → low 확률 미달 미적용 (48%) · 12ms');
+  assert.equal(summary(gated, 'answer'), 'Jev.enforce(): high → low 확률 미달 미적용 (48% < 70%) · 12ms');
   assert.equal(summary({ ...gated, mode: 'shadow' }, 'answer'), 'Jev.shadow(): high → low (48%) · 12ms');
+});
+
+test('a recommendation equal to the current effort reads as keep, never as gated', () => {
+  const same = { ...record, mode: 'enforce', provider: 'jev', reasonCode: 'unevaluated', recommendation: 'high', probability: 0.44 };
+  assert.equal(summary(same, 'answer'), 'Jev.enforce(): high 유지 (44%) · 12ms');
 });
