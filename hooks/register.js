@@ -7,6 +7,9 @@ import { usageRecord } from '../src/usage.js';
 
 // Jev p90 reached ~630ms with timeouts at the old 1000ms wait (2026-10-05).
 export const CLASSIFY_WAIT_MS = 1500;
+// Jev taskContext budget (src/harness.js rejects more than 2000 characters).
+const CONTEXT_PROMPT_CHARS = 600;
+const CONTEXT_TOTAL_CHARS = 2000;
 
 export function register(on, options) {
   registerRouter(on, fakeProvider(options.fakeChoice), options);
@@ -33,6 +36,10 @@ export function registerRouter(on, classify, options = {}) {
   // inherited effort (undefined when it passes through unchanged) and a copy of
   // that main turn's decision for the usage log (none without a main turn).
   const subagents = new Map();
+  // The last answered main turn, kept only with sendTaskContext: a prompt-only
+  // request lacks what a short follow-up such as "fix it" refers to.
+  const sendContext = provider === 'jev' && options.sendTaskContext === true;
+  let previous;
 
   // shadow and enforce share classification; only enforce rewrites effort.
   function routing() {
@@ -45,6 +52,7 @@ export function registerRouter(on, classify, options = {}) {
 
   function invalidate() {
     pending = undefined;
+    previous = undefined;
     queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
@@ -77,7 +85,7 @@ export function registerRouter(on, classify, options = {}) {
       return { text: `사용법: /jet-router status|shadow|enforce|off|lock|unlock\n${REPORT_USAGE}` };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
-    return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true) };
+    return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true, sendContext) };
   });
 
   on('prompt.submit', async ($, e, next) => {
@@ -131,7 +139,8 @@ export function registerRouter(on, classify, options = {}) {
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
     if (routing()) {
-      turns.set(e.turnId, { valid: Boolean(valid), silent, reason, text: valid ? e.text : '', started: false });
+      turns.set(e.turnId, { valid: Boolean(valid), silent, reason, text: valid ? e.text : '', started: false,
+        prompt: sendContext && valid ? e.text : null });
     }
     return next(e);
   });
@@ -154,6 +163,11 @@ export function registerRouter(on, classify, options = {}) {
     turn.cancel?.();
     try {
       const result = await next(e);
+      // A notification turn the user did not type breaks the chain: sending the
+      // turn before it would label stale text as the previous turn.
+      if (sendContext && turns.get(e.turnId) === turn) {
+        previous = routing() && !turn.silent && e.reason === 'answer' ? { prompt: turn.prompt, answer: e.answer } : undefined;
+      }
       if (routing() && turns.get(e.turnId) === turn && turn.record) {
         lastSummary = summary(turn.record, e.reason);
         publish($, lastSummary);
@@ -215,6 +229,7 @@ export function registerRouter(on, classify, options = {}) {
     const record = { provider, mode, original: effort,
       recommendation: 'keep', forwarded: effort, reasonCode: turn.valid ? 'correlation' : turn.reason, latencyMs: null };
     if (turn.valid && e.index === 0 && effort !== 'max' && effort !== 'unsupported') {
+      const taskContext = sendContext ? contextText(previous) : null;
       const timer = new AbortController();
       const began = await $.clock.now();
       if (!isActiveTurn(e.turnId, turn)) return yield* next(e);
@@ -231,7 +246,8 @@ export function registerRouter(on, classify, options = {}) {
                 target: { model: baseModel(e.model ?? null), source: e.model ? 'host' : 'unknown', supportedEfforts: null },
                 effort: { value: e.effort, source: 'host' },
                 event: { sessionId: null, turnId: e.turnId, correlated: true },
-                context: { source: 'prompt-only', missingRequired: null },
+                context: taskContext ? { source: previous.answer?.trim() ? 'model-summary' : 'user-provided', text: taskContext, missingRequired: null }
+                  : { source: 'prompt-only', missingRequired: null },
               };
               return classifyJev($, routingInput, options, flight, () => isActiveTurn(e.turnId, turn));
             }
@@ -248,7 +264,9 @@ export function registerRouter(on, classify, options = {}) {
       if (!isActiveTurn(e.turnId, turn)) return yield* next(e);
       Object.assign(record, classificationResult(provider, outcome));
       record.latencyMs = Math.max(0, (await $.clock.now()) - began);
+      // These reasons mean no request left the machine.
       if (['no-consent', 'missing-key', 'busy', 'invalid-input'].includes(record.reasonCode)) record.latencyMs = null;
+      else if (taskContext) record.contextSent = true;
       if (!turn.valid) return yield* next(e);
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (effort === 'unsupported') record.reasonCode = 'unsupported';
@@ -291,6 +309,19 @@ function applicable(record) {
     !belowApplyProbability(record.probability) &&
     EFFORTS.includes(record.recommendation) && record.recommendation !== 'max' &&
     EFFORTS.includes(record.original) && record.original !== 'max' && record.recommendation !== record.original;
+}
+
+// Previous prompt head and answer tail: a follow-up usually answers the
+// answer's closing question or proposal.
+export function contextText(previous) {
+  const prompt = typeof previous?.prompt === 'string' ? previous.prompt.trim() : '';
+  const answer = typeof previous?.answer === 'string' ? previous.answer.trim() : '';
+  if (!prompt && !answer) return null;
+  const head = prompt ? `Previous user request:\n${prompt.slice(0, CONTEXT_PROMPT_CHARS)}` : '';
+  const label = 'Previous assistant answer (end):\n';
+  const room = CONTEXT_TOTAL_CHARS - head.length - (head ? 2 : 0) - label.length;
+  const tail = answer && room > 0 ? `${label}${answer.slice(-room)}` : '';
+  return [head, tail].filter(Boolean).join('\n\n') || null;
 }
 
 function holdoutShare(value) {

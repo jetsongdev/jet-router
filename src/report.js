@@ -61,13 +61,13 @@ export function sessionNotice(mode, provider) {
   return `세션 시작 · 꺼짐(off) · ${classifier} · 켜기: /jet-router shadow(관찰) · enforce(적용)`;
 }
 
-export function status(mode, locked, lastSummary, provider = 'fake', cloudConsent = false) {
+export function status(mode, locked, lastSummary, provider = 'fake', cloudConsent = false, sendContext = false) {
   return [
     `모드: ${{ off: '꺼짐(off)', shadow: '관찰(shadow) — 추천만 표시', enforce: '적용(enforce) — 추천 effort를 해당 턴에만 적용' }[mode]}`,
     provider === 'jev'
       ? `분류기: Jev · 외부 전송: ${cloudConsent ? (mode !== 'off' && !locked ? '허용(분류 대상 입력)' : '중지(동의됨)') : '차단(미동의)'}`
       : '분류기: fake(고정 테스트 결과) · 외부 전송: 없음',
-    ...(provider === 'jev' ? ['전송 대상: api.typesafe.ai · 현재 프롬프트·effort만 전송',
+    ...(provider === 'jev' ? [`전송 대상: api.typesafe.ai · ${sendContext ? '현재 프롬프트·effort·직전 턴(프롬프트 앞부분·답변 끝부분, 2,000자 이내)' : '현재 프롬프트·effort만 전송'}`,
       '취소 한계: 대기 종료 후에도 이미 시작한 요청·비용이 남을 수 있음'] : []),
     `수동 잠금: ${locked ? '켜짐 — 분류 일시 정지' : '꺼짐'}`,
     `effort 자동 변경: ${mode === 'enforce' ? (locked ? '잠금으로 정지' : '켜짐 — 해당 턴과 그 턴의 subagent만, max 제외, 턴 도중 /effort 변경 시 양보') : '꺼짐 — 켜기: /jet-router enforce'}`,
