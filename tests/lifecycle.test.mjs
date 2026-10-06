@@ -458,7 +458,24 @@ test('a context-variant model name like claude-opus-5-5[1m] classifies and logs 
   assert.equal(JSON.parse(jev.stdin).routingInput.target.model, 'claude-opus-5-5');
   assert.match(w.logs[0], /^Jev\.enforce\(\): high → low 적용/);
   assert.equal(JSON.parse(usage.stdin).model, 'claude-opus-5-5');
+  assert.deepEqual([JSON.parse(usage.stdin).contextScore, JSON.parse(usage.stdin).riskScore], [0.95, 0.01]);
   assert.deepEqual([seen.model, seen.effort], ['claude-opus-5-5[1m]', 'low']); // The host request keeps its own model.
+});
+
+test('Jev failures log null context and risk scores', async () => {
+  const runs = [];
+  const run = async (argv, init) => {
+    runs.push({ stdin: init.stdin });
+    return argv[1].endsWith('/scripts/jev-request.mjs')
+      ? { exitCode: 0, stdout: JSON.stringify({ ok: false, reason: 'http-error' }), stderr: '' }
+      : { exitCode: 0, stdout: '', stderr: '' };
+  };
+  const w = world(undefined, undefined, { ...jevOptions, usageLog: true }, run);
+  await w.start(); await w.command('enforce'); await w.submit();
+  await forward(w);
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  const usage = JSON.parse(runs[1].stdin);
+  assert.deepEqual([usage.reasonCode, usage.contextScore, usage.riskScore], ['http-error', null, null]);
 });
 
 test('enforce leaves Jev candidates below the apply probability unchanged', async () => {
