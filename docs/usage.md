@@ -190,7 +190,7 @@ jet-router: Jev 생략: 시간 초과 · enforce
 
 shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용). 그 턴이 띄운 subagent도 subagent 턴이 끝날 때 `kind: "subagent"`로 따로 한 줄 기록합니다(0.11.0~, 이전 기록은 `main`).
 
-- 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
+- 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, Jev 맥락·위험 점수(`contextScore`·`riskScore`, 0.12.2~, 기록만 하고 판정에는 쓰지 않음), 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
 - subagent 줄의 effort·대조군 여부는 자신을 띄운 메인 턴의 결정을 이어받고, 토큰은 subagent 턴 합계입니다(메인 턴 합계에는 subagent 토큰이 들어가지 않습니다). 메인 턴이 대조군이면 그 subagent도 대조군입니다.
 - 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, 알림 턴, 메인 턴 없이 시작한 subagent(`/subtask` 등).
 - 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.

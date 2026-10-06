@@ -279,7 +279,9 @@ function classificationResult(provider, outcome) {
     else reasonCode = decision.contextSufficient ? 'shadow' : 'context';
   }
   const probability = provider === 'jev' ? decision?.selectedProbability : undefined;
-  return { recommendation: decision?.choice ?? 'keep', reasonCode, ...(probability !== undefined ? { probability } : {}) };
+  // Recorded only, not a gate: no calibrated threshold exists yet for these scores.
+  const scores = provider === 'jev' && decision ? { contextScore: decision.contextScore, riskScore: decision.riskScore } : {};
+  return { recommendation: decision?.choice ?? 'keep', reasonCode, ...(probability !== undefined ? { probability } : {}), ...scores };
 }
 
 // Only a validated, different effort is applied; keep, skips, max,

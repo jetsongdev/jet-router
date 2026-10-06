@@ -14,15 +14,16 @@ const make = (ts, record, output, extra = {}) => ({ ts, ...usageRecord({ project
 test('stored records keep only validated decision and token fields', () => {
   const stored = usageRecord({ project: '/work/icp', model: 'claude-opus-5-5', outcome: 'answer', durationMs: 5,
     record: { mode: 'enforce', provider: 'jev', original: 'xhigh', recommendation: 'medium', applied: 'medium',
-      reasonCode: 'unevaluated', probability: 0.7, latencyMs: 12.4, text: 'CANARY_SECRET', prompt: 'CANARY_SECRET' },
+      reasonCode: 'unevaluated', probability: 0.7, contextScore: 0.9, riskScore: 0.05, latencyMs: 12.4, text: 'CANARY_SECRET', prompt: 'CANARY_SECRET' },
     usage: { ...usage(50), answer: 'CANARY_SECRET' } });
   assert.ok(!JSON.stringify(stored).includes('CANARY'));
   assert.deepEqual(stored.usage, { input: 4, output: 50, cacheRead: 100, cacheCreation: 10 });
   assert.equal(stored.classifyMs, 12);
+  assert.deepEqual([stored.contextScore, stored.riskScore], [0.9, 0.05]);
   const odd = usageRecord({ project: 7, model: 'x'.repeat(200), outcome: 'odd', durationMs: -1,
-    record: { mode: 'x', provider: 'y', original: 'turbo', recommendation: 'max?', applied: 'zzz', probability: 3 }, usage: null });
-  assert.deepEqual([odd.project, odd.model, odd.mode, odd.provider, odd.original, odd.applied, odd.probability, odd.outcome, odd.durationMs, odd.usage.output],
-    [null, null, null, null, null, null, null, null, null, null]);
+    record: { mode: 'x', provider: 'y', original: 'turbo', recommendation: 'max?', applied: 'zzz', probability: 3, contextScore: '0.9', riskScore: -1 }, usage: null });
+  assert.deepEqual([odd.project, odd.model, odd.mode, odd.provider, odd.original, odd.applied, odd.probability, odd.contextScore, odd.riskScore, odd.outcome, odd.durationMs, odd.usage.output],
+    [null, null, null, null, null, null, null, null, null, null, null, null]);
 });
 
 test('record appends one private line per turn into a monthly file', () => {

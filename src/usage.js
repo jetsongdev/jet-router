@@ -20,6 +20,7 @@ export const SAVINGS_FACTORS = Object.freeze({
 
 const count = value => (Number.isSafeInteger(value) && value >= 0 ? value : null);
 const effort = value => (EFFORTS.includes(value) ? value : null);
+const score = value => (typeof value === 'number' && value >= 0 && value <= 1 ? value : null);
 const text = (value, max) => (typeof value === 'string' && value.length <= max ? value : null);
 
 // Builds the stored record from a router record and host usage. Unknown values
@@ -40,6 +41,8 @@ export function usageRecord({ project, model, kind, record, outcome, durationMs,
     forwarded: effort(record.forwarded),
     reasonCode: text(record.reasonCode, 32),
     probability: typeof record.probability === 'number' && record.probability >= 0 && record.probability <= 1 ? record.probability : null,
+    contextScore: score(record.contextScore),
+    riskScore: score(record.riskScore),
     classifyMs: count(record.latencyMs === null ? null : Math.round(record.latencyMs)),
     outcome: OUTCOMES.includes(outcome) ? outcome : null,
     durationMs: count(durationMs),
