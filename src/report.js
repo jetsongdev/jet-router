@@ -1,3 +1,5 @@
+import { belowApplyProbability } from './policy.js';
+
 // Only normalized router records reach these formatters, never provider text.
 // Same shape as the Codex MCP shadow messages (mcp/shadow.mjs) minus the
 // [jet-router] tag: Claude Code already prefixes plugin output with `jet-router:`.
@@ -35,7 +37,8 @@ export function summary(record, outcome) {
     const percentage = record.probability === undefined ? '' : ` (${Math.round(record.probability * 100)}%)`;
     const fixture = provider === 'fake' ? '(고정값)' : '';
     const target = record.recommendation === 'keep' ? `${original} 유지` : `${original} → ${record.recommendation}`;
-    const applied = record.applied ? ' 적용' : record.holdout ? ' 대조군 미적용' : '';
+    const gated = record.mode === 'enforce' && record.recommendation !== 'keep' && belowApplyProbability(record.probability);
+    const applied = record.applied ? ' 적용' : record.holdout ? ' 대조군 미적용' : gated ? ' 확률 미달 미적용' : '';
     parts.push(`${provider}.${mode}(): ${target}${applied}${fixture}${percentage}`);
     if (record.latencyMs !== null) parts.push(`${Math.round(record.latencyMs)}ms`);
     if (record.original !== record.forwarded) {

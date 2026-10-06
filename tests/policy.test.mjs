@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decide, parseDecision } from '../src/policy.js';
+import { decide, parseDecision, belowApplyProbability, MIN_APPLY_PROBABILITY } from '../src/policy.js';
 
 const verdict = { choice: 'low', contextSufficient: true, risky: false };
 const input = { original: 'high', supported: ['low', 'medium', 'high', 'xhigh', 'max'], decision: verdict };
@@ -35,4 +35,11 @@ test('unknown enum, missing or non-boolean evidence and invalid numbers fail clo
 test('unsupported recommendation is never applied; provider strings do not enter reports', () => {
   assert.equal(decide({ ...input, supported: ['high'] }).reasonCode, 'unsupported');
   assert.deepEqual(parseDecision({ ...verdict, reason: 'SECRET', confidence: 0.8 }), { ...verdict, confidence: 0.8 });
+});
+
+test('apply probability gate blocks only numeric probabilities below the threshold', () => {
+  assert.equal(MIN_APPLY_PROBABILITY, 0.7);
+  assert.equal(belowApplyProbability(0.48), true);
+  assert.equal(belowApplyProbability(0.7), false);
+  assert.equal(belowApplyProbability(undefined), false); // fake carries no probability.
 });

@@ -1,5 +1,12 @@
 export const EFFORTS = Object.freeze(['low', 'medium', 'high', 'xhigh', 'max']);
 export const CHOICES = Object.freeze(['low', 'medium', 'high', 'xhigh', 'keep']);
+// Enforce applies a Jev recommendation only at or above this selected-candidate
+// probability. Usage logs (2026-09-28~10-05) applied upshifts at 0.48~0.55.
+export const MIN_APPLY_PROBABILITY = 0.7;
+
+export function belowApplyProbability(probability) {
+  return typeof probability === 'number' && probability < MIN_APPLY_PROBABILITY;
+}
 
 export function unit(value) {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;

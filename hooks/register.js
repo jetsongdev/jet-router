@@ -1,9 +1,12 @@
 import { prepareRoutingRequest } from '../src/harness.js';
-import { parseDecision, EFFORTS } from '../src/policy.js';
+import { parseDecision, EFFORTS, belowApplyProbability } from '../src/policy.js';
 import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status, sessionNotice } from '../src/report.js';
 import { usageRecord } from '../src/usage.js';
+
+// Jev p90 reached ~630ms with timeouts at the old 1000ms wait (2026-10-05).
+export const CLASSIFY_WAIT_MS = 1500;
 
 export function register(on, options) {
   registerRouter(on, fakeProvider(options.fakeChoice), options);
@@ -234,7 +237,7 @@ export function registerRouter(on, classify, options = {}) {
             }
             return classify(state);
           }).then(value => ({ value }), () => ({ reason: 'provider-error' })),
-          $.clock.sleep(1000, { signal: timer.signal }).then(() => ({ reason: 'timeout' })),
+          $.clock.sleep(CLASSIFY_WAIT_MS, { signal: timer.signal }).then(() => ({ reason: 'timeout' })),
           cancelled,
         ]);
       } finally {
@@ -279,10 +282,11 @@ function classificationResult(provider, outcome) {
   return { recommendation: decision?.choice ?? 'keep', reasonCode, ...(probability !== undefined ? { probability } : {}) };
 }
 
-// Only a validated, different effort is applied; keep, skips, max and
-// unsupported efforts leave the request unchanged.
+// Only a validated, different effort is applied; keep, skips, max,
+// unsupported efforts and low-probability Jev candidates leave the request unchanged.
 function applicable(record) {
   return ['unevaluated', 'shadow'].includes(record.reasonCode) && record.recommendation !== 'keep' &&
+    !belowApplyProbability(record.probability) &&
     EFFORTS.includes(record.recommendation) && record.recommendation !== 'max' &&
     EFFORTS.includes(record.original) && record.original !== 'max' && record.recommendation !== record.original;
 }
