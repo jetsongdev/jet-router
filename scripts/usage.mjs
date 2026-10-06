@@ -32,8 +32,8 @@ const padTo = (cell, size, left) => (left ? cell + ' '.repeat(size - width(cell)
 const home = homedir();
 
 export function formatReport(result) {
-  const head = ['구분', '턴', '적용', '상향', '양보', '대조군', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
-  const line = (key, t) => [key.replaceAll(home, '~'), n(t.turns), n(t.applied), n(t.upshifts), n(t.yielded), n(t.holdout), n(t.skipped),
+  const head = ['구분', '턴', '적용', '상향', '양보', '대조군', '확률 미달', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
+  const line = (key, t) => [key.replaceAll(home, '~'), n(t.turns), n(t.applied), n(t.upshifts), n(t.yielded), n(t.holdout), n(t.gated), n(t.skipped),
     n(t.output), `${n(t.estimatedSaved)} (${n(t.estimatedTurns)}턴, 측정 ${n(t.measuredTurns)})`, `${n(t.unestimatedAppliedTurns)}턴`,
     `${n(t.shadowPotentialSaved)} (${n(t.shadowEstimatedTurns)}턴)`];
   const table = rows => {

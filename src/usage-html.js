@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { EFFORTS } from './policy.js';
+import { EFFORTS, MIN_APPLY_PROBABILITY } from './policy.js';
 import { MIN_SAMPLES } from './usage.js';
 
 // Self-contained usage dashboard: no network, no external scripts. The page
@@ -7,7 +7,7 @@ import { MIN_SAMPLES } from './usage.js';
 // browser filters and `usage.mjs report` can never disagree.
 export function aggregatorSource() {
   const source = readFileSync(new URL('./usage.js', import.meta.url), 'utf8');
-  return `const EFFORTS = Object.freeze(${JSON.stringify(EFFORTS)});\n${source
+  return `const EFFORTS = Object.freeze(${JSON.stringify(EFFORTS)});\nconst MIN_APPLY_PROBABILITY = ${MIN_APPLY_PROBABILITY};\n${source
     .replace(/^import .*$/gm, '')
     .replace(/^export /gm, '')}`;
 }
@@ -154,7 +154,7 @@ ${aggregatorSource()}
     const body = el('tbody');
     for (const r of rows) {
       const tr = el('tr');
-      for (const cell of [r.key, n(r.turns), n(r.applied), n(r.upshifts), n(r.yielded), n(r.holdout), n(r.skipped), n(r.output),
+      for (const cell of [r.key, n(r.turns), n(r.applied), n(r.upshifts), n(r.yielded), n(r.holdout), n(r.gated), n(r.skipped), n(r.output),
         n(r.estimatedSaved) + ' (' + n(r.estimatedTurns) + '턴, 측정 ' + n(r.measuredTurns) + ')', n(r.unestimatedAppliedTurns) + '턴', n(r.shadowPotentialSaved)]) {
         tr.append(el('td', {}, cell));
       }
@@ -163,7 +163,7 @@ ${aggregatorSource()}
     t.append(body);
     return t;
   }
-  const HEAD = ['구분', '턴', '적용', '상향', '양보', '대조군', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
+  const HEAD = ['구분', '턴', '적용', '상향', '양보', '대조군', '확률 미달', '생략', '출력 토큰', '추정 절감', '미추정 적용', 'shadow 잠재 절감'];
 
   function series(rows) {
     if (!rows.length) return el('div', { class: 'empty' }, '선택한 범위에 기록이 없습니다.');
@@ -242,7 +242,7 @@ ${aggregatorSource()}
     $('cards').replaceChildren(
       card('턴', n(t.turns), 'enforce ' + n(t.enforceTurns) + ' · shadow ' + n(t.turns - t.enforceTurns)),
       card('적용', n(t.applied), '상향 ' + n(t.upshifts) + ' · 양보 ' + n(t.yielded)),
-      card('대조군', n(t.holdout), '생략 ' + n(t.skipped)),
+      card('대조군', n(t.holdout), '확률 미달 ' + n(t.gated) + ' · 생략 ' + n(t.skipped)),
       card('출력 토큰', n(t.output)),
       card('추정 절감', n(t.estimatedSaved), n(t.estimatedTurns) + '턴 · 측정 ' + n(t.measuredTurns)),
       card('추정 대상 절감률', rate, '미추정 적용 ' + n(t.unestimatedAppliedTurns) + '턴'),
