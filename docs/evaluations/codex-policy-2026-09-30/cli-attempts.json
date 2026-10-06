@@ -1,0 +1,31 @@
+{
+  "codexVersion": "0.159.2",
+  "realJevCalls": 0,
+  "realModelCalls": 0,
+  "attempts": [
+    {
+      "exitCode": 1,
+      "protocolTurnsPassed": 4,
+      "cliBootstrap": "backend-request-failed",
+      "wireEfforts": [
+        "low",
+        "medium",
+        "low",
+        "high"
+      ]
+    },
+    {
+      "exitCode": 0,
+      "protocolTurnsPassed": 4,
+      "cliBootstrap": "completed",
+      "wireEfforts": [
+        "low",
+        "medium",
+        "low",
+        "high",
+        "low"
+      ]
+    }
+  ],
+  "cause": "unresolved; second attempt with fixture error capture did not reproduce"
+}

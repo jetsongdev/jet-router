@@ -1,0 +1,16 @@
+{
+  "model": "gpt-6-astra",
+  "baseline": "medium",
+  "maxJevCalls": 1,
+  "maxModelTurns": 2,
+  "retriesByProbe": 0,
+  "independentSessions": false,
+  "costComparison": false,
+  "wireObserved": false,
+  "startedAt": "2026-09-30T14:10:33.515Z",
+  "jevCalls": 0,
+  "submitted": [],
+  "turns": [],
+  "complete": false,
+  "failureStage": "startup"
+}

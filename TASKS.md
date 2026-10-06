@@ -8,7 +8,8 @@
   대조군·HTML 리포트, subagent 전파·별도 사용량 기록 구현 완료.
   제품 구현과 프로브의 적용 경로 증거는 구분한다. wire 요청 본문 직접 관측은 미완료다.
 - **Codex:** shadow 입력창·연속 턴·취소 복구, 모델 지원 목록 조회와 합성 과제 비교 완료.
-  실제 effort 조회·자동 변경·대화 연속성은 CODEX-001의 후속 범위다.
+  별도 CLI 프록시에 Jev 계약·첫 요청 적용·기본값 복귀를 연결하고 로컬 통합 검사했다.
+  실제 모델 검증·크래시 복구·대화 연속성 확대는 CODEX-001의 후속 범위다.
 - **남은 품질 검증:** 실제 저장소 과제, 더 넓은 모델/기본 effort 조합, 주요 조합별 대조군·subagent 표본,
   Jev 비용과 실패 후 수정 비용을 포함한 순절감. 합성 파일럿의 통과를 일반 품질 보장으로 확대하지 않는다.
 
@@ -35,7 +36,7 @@
 
 ## CODEX-001 — 모델별 추천 범위·enforce 제한과 대화 연속성 검증
 
-- 상태: 진행 중 — shadow 모델 입력·선택적 지원 목록 조회·후보 검사 구현, enforce 미착수
+- 상태: 진행 중 — shadow 구현 완료, 별도 CLI enforce 실험 어댑터 구현·로컬 통합 검증. 실호출/장애 복구는 후속
 - 출처: 사용자 요청 (2026-09-27)
 - 범위: Codex의 모델별 shadow 추천 후보 구성과 향후 enforce 어댑터.
 - 선행 조건: shadow 추천 범위는 HARNESS-001의 공통 입력·판정 계약에 연결 완료했다.
@@ -51,9 +52,14 @@
   **hook 이후 변경으로 첫 요청까지 적용하는 요구는 충족하지 못했다.**
   후속 격리 프록시에서 기존 CLI `--remote` 연결·첫 요청 low·다음 턴 medium·수동 high 보존을 확인했다.
   [프록시 검증 결과](docs/evaluations/codex-start-proxy-2026-09-28/README.md).
-  다음은 Jev 연결과 복귀 실패·취소·동시 설정 변경을 처리하는 최소 제품 어댑터다.
+  [실험적 CLI 어댑터](docs/codex-proxy.md)에 Jev 계약 연결과 기본값 복귀·실패 차단을 구현했다.
+  취소/수동 변경/복귀 경쟁은 단위 검사, 정상 경로는 실제 CLI+가짜 provider로 검증했다.
+  2026-09-30 실제 Jev 1회 연결에서 low 추천/contextScore 0.42를 받았지만 실험 경계 0.5로 보류됐다.
+  첫 요청과 기본값은 medium이었다. [실호출 기록](docs/evaluations/codex-live-jev-2026-09-30/README.md).
+  후속 고정 표본 10개 평가로 v4 맥락 질문을 개선했고, 실제 Jev + 가짜 모델에서 첫 요청 low/기본값 medium 복귀를 확인했다.
+  [평가 결과](docs/evaluations/codex-policy-2026-09-30/README.md). 다음은 실제 모델 호출과 장애 복구 검증이다.
   [격리 재현 결과](docs/evaluations/codex-turn-effort-2026-09-28/README.md),
-  [이전 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 현재 제품 enforce는 미구현이다.
+  [이전 조사](docs/evaluations/codex-enforce-path-2026-09-28.md). 기존 MCP는 shadow를 유지하고, 별도 프록시만 실험적 enforce를 제공한다.
 
 - MCP shadow는 hook 모델명과 선택적 model/list 조회 결과로 후보를 검사한다.
   실제 effort는 미확인이고 사용자 지정 참고값으로 추천하며, effort를 변경하지 않는다. [검증 기록](docs/evaluations/shadow-closeout-2026-09-27.md).
@@ -66,6 +72,18 @@
 
 ### 작업 체크리스트
 
+- [x] 별도 CLI 실험 어댑터의 정상 경로와 단위 실패 처리를 구현하고 검증한다.
+  [실행/제한](docs/codex-proxy.md), [검증 기록](docs/evaluations/codex-adapter-2026-09-28/README.md).
+  아래 실제 모델·전체 생명주기 완료 기준과 구분한다.
+
+- [x] 고정 표본으로 Codex/Claude 적용 정책 차이를 비교하고, 맥락 질문만 개선해 첫 요청 적용을 재검증한다.
+  [파일럿 10개 결과](docs/evaluations/codex-policy-2026-09-30/README.md): 적용 기대 6/10 → 9/10, 경계값 유지.
+- [x] Codex 0.159.2 TUI 초기화 실패를 재현했다. 공통 15초 제한이 원인이며 thread/start만 60초로 늘려 24.7초 응답과 5턴 통과를 확인했다.
+  [초기화/실제 모델 기록](docs/evaluations/codex-bootstrap-2026-09-30/README.md).
+- [ ] 수정된 검증기로 실제 2턴 smoke를 완료한다. 실제 첫 턴은 low 제출/완료/기준 medium 조회와 사용량을 확인했지만,
+  userMessage를 도구로 센 검증기 결함으로 다음 턴은 미실행이다. 도구 사용 여부는 기존 기록으로 소급 확정하지 않는다.
+- [ ] 새 표본·반복 관측으로 context/risk 경계를 보정한다. limiter의 medium 추천(기대 high/xhigh)을 조사한다.
+  합성 파일럿을 일반 품질 보장이나 두 호스트 정책의 동등성으로 해석하지 않는다.
 - [ ] 최초 enforce 대상 모델을 GPT-6 Astra / GPT-6 Sol로 제한하는 허용 정책을 확정한다.
   모델 alias·snapshot 식별 방법도 명시하며, 확인되지 않은 모델은 기존 effort를 유지한다.
 - [ ] 활성 모델과 실제 effort를 실행 host에서 읽는 경로를 구현한다.

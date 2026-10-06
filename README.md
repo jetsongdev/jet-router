@@ -12,6 +12,13 @@ Codex용 로컬 MCP 서버와 `UserPromptSubmit` hook 설정 예시를 추가했
 **[설치·Jev 설정·중지·테스트 방법](docs/codex-mcp.md)**을 참고하세요.
 Claude 플러그인 설정과 키를 자동 공유하지 않습니다.
 
+## Codex CLI enforce — 실험적 프록시
+
+기존 CLI를 `--remote`로 연결하는 별도 실행기로 Jev 추천을 첫 요청부터 적용할 수 있습니다.
+기본 off이며 MCP shadow를 자동 전환하지 않습니다. 로컬 가짜 모델 통합 검증을 마쳤고,
+실제 Jev/모델 품질과 프로세스 장애 복구는 추가 검증이 필요합니다.
+**[실행·설정·복귀 실패 대응](docs/codex-proxy.md)**을 확인하세요.
+
 ## 동작 원리
 
 **[Claude Code·Codex 작동 다이어그램](docs/architecture.md)**: 호출 시점, Jev 판정 경로, 메시지 표시와 effort 유지 방식.
