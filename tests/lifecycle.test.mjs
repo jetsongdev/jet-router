@@ -278,11 +278,39 @@ test('turns nobody typed stay silent while queued user input still reports the s
   await w.event('turn.start', { turnId: 't1', text: 'notification' }); await w.step();
   await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(w.logs.length, 0);
+  // A user submission whose own turn never starts: the next turn (here a
+  // notification with other text) does not take its ticket.
   await w.event('prompt.submit', { text: 'queued', wait: false, origin: { kind: 'composer' } });
-  await w.event('turn.start', { turnId: 't2', text: 'queued' }); await w.step({ turnId: 't2' });
+  await w.event('turn.start', { turnId: 't2', text: 'other' }); await w.step({ turnId: 't2' });
   await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
   assert.equal(w.calls.length, 0);
   assert.deepEqual(w.logs, ['fake 생략: 대기 중 입력 · shadow']);
+});
+
+test('a turn.start delivered after prompt.submit resolved still classifies its own prompt', async () => {
+  // Another plugin's async turn.start hook ahead of this one delays our
+  // turn.start past next() (ask-board, 2026-10-12: every turn was 'queued').
+  const w = world(); await w.start(); await w.command('enforce');
+  await w.event('prompt.submit', { text: 'late', wait: false, origin: { kind: 'composer' } });
+  await w.event('turn.start', { turnId: 't1', text: 'late' });
+  assert.equal((await forward(w)).seen.effort, 'low');
+  await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  assert.equal(w.calls.length, 1);
+  assert.match(w.logs[0], /^fake\.enforce\(\): high → low 적용/);
+});
+
+test('late tickets are not kept for dropped, ambiguous or slash-command submissions', async () => {
+  for (const [extra, next, text] of [
+    [{}, async () => ({ drop: 'blocked' }), 'p'],
+    [{ attachments: [{ type: 'image' }] }, async e => e, 'p'],
+    [{}, async e => e, '/skill run'],
+  ]) {
+    const w = world(); await w.start(); await w.command('enforce');
+    await w.event('prompt.submit', { text, wait: false, origin: { kind: 'composer' }, ...extra }, next);
+    await w.event('turn.start', { turnId: 't1', text }); await forward(w);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.equal(w.calls.length, 0);
+  }
 });
 
 test('skipped turns name the specific reason instead of a generic correlation miss', async () => {

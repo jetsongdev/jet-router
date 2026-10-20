@@ -99,14 +99,22 @@ export function registerRouter(on, classify, options = {}) {
       command: e.text.trimStart().startsWith('/') };
     submissions.add(ticket);
     pending = ticket;
+    let dropped = false;
     try {
-      return await next(e);
+      const result = await next(e);
+      dropped = result?.drop !== undefined;
+      return result;
     } finally {
-      // A turn must have consumed this exact submission synchronously through
-      // next. Queued/blocked submissions cannot become a later turn's decision.
+      // next resolves once the turn started on the engine side, but another
+      // plugin's async turn.start hook ahead of this one can deliver our
+      // turn.start later (2026-10: every turn became 'queued'). A clean
+      // submission therefore stays pending for its own late turn.start;
+      // ambiguous, dropped and slash-command ones (which may never open a
+      // turn) cannot become a later turn's decision.
       if (pending === ticket) {
-        pending = undefined;
-        if (user) queuedUser = true;
+        if (ambiguous || dropped || ticket.command) pending = undefined;
+        else ticket.late = true;
+        if (user && !dropped) queuedUser = true;
       }
       submissions.delete(ticket);
     }
@@ -124,7 +132,9 @@ export function registerRouter(on, classify, options = {}) {
   }
 
   on('turn.start', ($, e, next) => {
-    const ticket = pending;
+    // A late ticket belongs only to the turn that carries its text: a
+    // notification turn or a skill expansion starting instead leaves it unused.
+    const ticket = pending?.late && pending.text !== e.text ? undefined : pending;
     pending = undefined;
     const valid = routing() && turns.size === 0 &&
       ticket && !ticket.ambiguous && ticket.text === e.text;

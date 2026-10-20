@@ -303,7 +303,7 @@ MCP 취소 신호를 helper까지 전달하고 4초 정리 제한을 추가했�
 | 0.11.1 | #23 | Claude Code 출력의 `jet-router` 이름 중복 제거 |
 | 0.12.0 | – | `defaultMode=enforce`로 세션을 enforce로 시작 |
 
-확인한 host 계약(Claude Code 2.1.283): `turn.step` effort 재작성은 해당 요청과 서버 동작에 반영되고 설정에 남지 않는다. `/effort`는 실행 중인 턴의 다음 요청부터 반영된다. `turn.complete`의 usage는 턴 전체 합계다. `session.start`는 `cwd`를 주지만 세션 ID는 주지 않는다. subagent는 별도 turnId·`turn.complete`를 받고 부모 턴 필드·`turn.start`가 없다. 훅 모듈의 `on()` 이벤트 이름은 문자열 리터럴이어야 한다.
+확인한 host 계약(Claude Code 2.1.283): `turn.step` effort 재작성은 해당 요청과 서버 동작에 반영되고 설정에 남지 않는다. `/effort`는 실행 중인 턴의 다음 요청부터 반영된다. `turn.complete`의 usage는 턴 전체 합계다. `session.start`는 `cwd`를 주지만 세션 ID는 주지 않는다. subagent는 별도 turnId·`turn.complete`를 받고 부모 턴 필드·`turn.start`가 없다. 훅 모듈의 `on()` 이벤트 이름은 문자열 리터럴이어야 한다. `prompt.submit`의 `next()`는 엔진 쪽에서 턴이 시작되면 끝나며, 앞선 플러그인의 비동기 `turn.start` 훅이 있으면 이 플러그인의 `turn.start`는 그 뒤에 온다(2.1.304 실측, 0.13.1부터 대응).
 
 남은 한계: 절감 추정은 평가 비율(합성 과제) 또는 대조군 표본이 쌓인 조합만 가능하다. wire 요청 본문은 직접 관측하지 않았다. Codex enforce는 미착수다.
 
