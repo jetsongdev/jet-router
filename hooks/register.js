@@ -40,6 +40,9 @@ export function registerRouter(on, classify, options = {}) {
   // request lacks what a short follow-up such as "fix it" refers to.
   const sendContext = provider === 'jev' && options.sendTaskContext === true;
   let previous;
+  let previousRecordId = null;
+  let chainGeneration = 0;
+  const sessionSalt = randomHex();
 
   // shadow and enforce share classification; only enforce rewrites effort.
   function routing() {
@@ -51,6 +54,8 @@ export function registerRouter(on, classify, options = {}) {
   }
 
   function invalidate() {
+    previousRecordId = null;
+    chainGeneration++;
     pending = undefined;
     previous = undefined;
     queuedUser = false;
@@ -182,8 +187,14 @@ export function registerRouter(on, classify, options = {}) {
         lastSummary = summary(turn.record, e.reason);
         publish($, lastSummary);
         if (options.usageLog === true) {
-          await recordUsage($, usageRecord({ project, model: baseModel(turn.model), record: turn.record,
-            outcome: e.reason, durationMs: e.durationMs, usage: e.usage }));
+          const recordId = `r_${randomHex()}`;
+          const generation = chainGeneration;
+          const record = usageRecord({ project, model: baseModel(turn.model), record: { ...turn.record, recordId, previousRecordId },
+            outcome: e.reason, durationMs: e.durationMs, usage: e.usage });
+          let sessionId;
+          try { sessionId = await $.session.id(); } catch { /* Session identity is optional. */ }
+          const identity = typeof sessionId === 'string' ? { sessionId, sessionSalt } : {};
+          if (await recordUsage($, { ...record, ...identity }) && generation === chainGeneration) previousRecordId = recordId;
         }
       }
       return result;
@@ -297,6 +308,10 @@ export function registerRouter(on, classify, options = {}) {
   });
 }
 
+function randomHex() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 function classificationResult(provider, outcome) {
   const decision = provider === 'jev' ? outcome.value?.decision : parseDecision(outcome.value);
   let reasonCode = outcome.reason;
@@ -384,10 +399,11 @@ async function runReport($, tokens) {
 // Local token log for savings reports; a failure never affects the session.
 async function recordUsage($, record) {
   try {
-    await $.process.run(['node', `${$.plugin.root}/scripts/usage.mjs`, 'record'], {
+    const result = await $.process.run(['node', `${$.plugin.root}/scripts/usage.mjs`, 'record'], {
       cwd: $.plugin.root, stdin: JSON.stringify(record), timeoutMs: 3000, env: { ...PROCESS_ENV },
     });
-  } catch { /* Logging is optional. */ }
+    return result.exitCode === 0;
+  } catch { return false; }
 }
 
 function publish($, text) {

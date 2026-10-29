@@ -22,6 +22,14 @@ const count = value => (Number.isSafeInteger(value) && value >= 0 ? value : null
 const effort = value => (EFFORTS.includes(value) ? value : null);
 const score = value => (typeof value === 'number' && value >= 0 && value <= 1 ? value : null);
 const text = (value, max) => (typeof value === 'string' && value.length <= max ? value : null);
+const pattern = (value, regex) => (typeof value === 'string' && regex.test(value) ? value : null);
+const oneOf = (value, values) => (values.includes(value) ? value : null);
+const candidate = value => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  if ((value.effort !== null && !EFFORTS.includes(value.effort)) || !Array.isArray(value.reasons) ||
+      value.reasons.some(reason => !['ceiling', 'floor', 'no-up', 'max-cap', 'model'].includes(reason))) return null;
+  return { effort: value.effort, reasons: [...new Set(value.reasons)].slice(0, 5) };
+};
 
 // Builds the stored record from a router record and host usage. Unknown values
 // become null instead of being copied, so no free text can reach the log.
@@ -29,6 +37,16 @@ export function usageRecord({ project, model, kind, record, outcome, durationMs,
   return {
     v: USAGE_VERSION,
     kind: KINDS.includes(kind) ? kind : 'main',
+    recordId: pattern(record.recordId, /^r_[0-9a-f]{16,32}$/),
+    previousRecordId: pattern(record.previousRecordId, /^r_[0-9a-f]{16,32}$/),
+    sessionHash: pattern(record.sessionHash, /^h_[0-9a-f]{16,32}$/),
+    policyVersion: pattern(record.policyVersion, /^[a-z0-9._-]{1,32}$/),
+    policyArm: oneOf(record.policyArm, ['treated', 'control', 'none']),
+    policyCandidate: candidate(record.policyCandidate),
+    rework: oneOf(record.rework, ['yes', 'no', 'unknown']),
+    betweenTurnEffort: oneOf(record.betweenTurnEffort, ['up', 'down', 'same', 'unknown']),
+    midTurnEffort: oneOf(record.midTurnEffort, ['up', 'down', 'same', 'unknown']),
+    previousFlagged: typeof record.previousFlagged === 'boolean' ? record.previousFlagged : null,
     project: text(project, 1024),
     model: text(model, 128),
     mode: MODES.includes(record.mode) ? record.mode : null,
