@@ -1,6 +1,11 @@
 import { createHmac, randomBytes } from 'node:crypto';
 
-export function createShadowRaise() {
+export function bashNonzeroHint(content) {
+  const texts = typeof content === 'string' ? [content] : Array.isArray(content) ? content.filter(block => block.type === 'text').map(block => block.text) : [];
+  return texts.some(text => typeof text === 'string' && /\bexit(?:ed with)? code\s*[:=]?\s*[1-9]\d*\b/i.test(text));
+}
+
+export function createShadowRaise({ rule = 'v0' } = {}) {
   const key = randomBytes(32), steps = new Set(), calls = new Map(), edits = new Map();
   let toolStreak = 0, testStreak = 0;
   let observedSteps = null, maxConsecutiveToolFailures = null, maxConsecutiveTestFailures = null, maxSameFileEdits = null;
@@ -37,11 +42,11 @@ export function createShadowRaise() {
           calls.delete(block.tool_use_id);
           toolStreak = block.is_error ? toolStreak + 1 : 0;
           maxConsecutiveToolFailures = Math.max(maxConsecutiveToolFailures ?? 0, toolStreak);
-          if (call.isTest) { testStreak = block.is_error ? testStreak + 1 : 0; maxConsecutiveTestFailures = Math.max(maxConsecutiveTestFailures ?? 0, testStreak); }
+          if (call.isTest) { testStreak = (block.is_error || (rule === 'v0b' && bashNonzeroHint(block.content))) ? testStreak + 1 : 0; maxConsecutiveTestFailures = Math.max(maxConsecutiveTestFailures ?? 0, testStreak); }
           check();
         }
       }
     },
-    result() { return { status: atStep === null ? 'not_triggered' : 'triggered', atStep, reasons: [...reasons], observedSteps, maxConsecutiveToolFailures, maxConsecutiveTestFailures, maxSameFileEdits, applyAt: 'next_input', rule: 'v0' }; }
+    result() { return { status: atStep === null ? 'not_triggered' : 'triggered', atStep, reasons: [...reasons], observedSteps, maxConsecutiveToolFailures, maxConsecutiveTestFailures, maxSameFileEdits, applyAt: 'next_input', rule }; }
   };
 }

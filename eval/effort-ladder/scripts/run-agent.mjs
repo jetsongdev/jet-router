@@ -7,7 +7,7 @@ import { EFFORTS, runId, sha256 } from '../lib/ids.mjs';
 import { openLedger } from '../lib/ledger.mjs';
 import { loadKeys } from '../lib/keys.mjs';
 import { createIsolation } from '../lib/agent-isolation.mjs';
-import { createShadowRaise } from '../lib/shadow-raise.mjs';
+import { bashNonzeroHint, createShadowRaise } from '../lib/shadow-raise.mjs';
 
 const base = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const segments = ['pilot', 'batch', 'agent', 'boost', 'turn2'];
@@ -22,6 +22,17 @@ function safeInit(message) {
   }
   return result;
 }
+function budgetFor(effort) { return effort === 'max' ? 3 : effort === 'xhigh' ? 1.5 : 1; }
+function classifyError(error) {
+  const status = error?.status ?? error?.statusCode;
+  const detail = `${error?.name ?? ''} ${error?.code ?? ''} ${error?.message ?? ''}`;
+  if (status === 402 || /billing|credit.balance|payment|insufficient.quota/i.test(detail)) return 'billing';
+  if (status === 401 || status === 403 || /authenticat|unauthori[sz]ed|forbidden|invalid.api.key|credential/i.test(detail)) return 'auth';
+  if (status === 429 || /rate.?limit/i.test(detail)) return 'rate_limit';
+  if (/network|fetch.failed|econn|enotfound|etimedout|socket|dns/i.test(detail)) return 'network';
+  return 'other';
+}
+function executionStop(reason, exitCode = 1) { const error = Error(reason); error.exitCode = exitCode; return error; }
 const targets = new Set(['site-route-repair', 'link-lint-scope', 'batch-rollback-debug']);
 export const FOLLOWUP = 'Some requirements in the original task are still not met. Re-read the task statement carefully, find what is missing or wrong, fix it, and run the public tests again.';
 
@@ -58,7 +69,7 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, fo
   await mkdir(outputDir, { recursive: true });
   if (!injectedLedger) await mkdir(dirname(ledgerPath), { recursive: true });
   const ledger = injectedLedger ?? openLedger(ledgerPath);
-  const rows = [];
+  const rows = []; let consecutiveErrors = 0;
   try {
     const matrix = [];
     for (const task of tasks) for (const effort of efforts) for (let rep = 1; rep <= reps; rep++) matrix.push({ task, effort, rep });
@@ -70,18 +81,25 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, fo
       const snapshotRoot = await mkdtemp(join(tmpdir(), 'effort-parent-'));
       let isolated;
       try {
-        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: item.effort === 'max' ? 1.5 : 1, apiKey });
+        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: budgetFor(item.effort), apiKey });
         const execute = async ({ effort, turn = 1, arm, parent }) => {
           const id = runId({ wave, suite: 'ag', slug, effort: item.effort, rep: item.rep, ...(turn === 2 ? { turn, arm } : {}) });
-          const budget = effort === 'max' ? 1.5 : 1;
+          const budget = budgetFor(effort);
           const reservation = await ledger.reserve(segment ?? (turn === 1 ? 'agent' : 'turn2'), budget, id);
-          const shadow = createShadowRaise(), startedAt = new Date().toISOString(), start = Date.now();
+          const shadow = createShadowRaise(), shadowV0b = createShadowRaise({ rule: 'v0b' }), startedAt = new Date().toISOString(), start = Date.now();
           let result, sessionId, effortEvidence = null, hookEffort = null, error;
-          const bashIds = new Set(), errorIds = new Set(); let bashCalls = 0, toolErrors = 0;
+          const bashIds = new Set(), errorIds = new Set(), stepIds = new Set(); const steps = []; let bashCalls = 0, toolErrors = 0, bashNonzeroHints = 0, bashNonzeroFlagged = 0;
           try {
             const options = { ...isolated.options, effort, maxBudgetUsd: budget, hooks: { PreToolUse: [{ hooks: [async input => { if (typeof input.effort?.level === 'string') hookEffort = input.effort.level; return {}; }] }] }, ...(parent ? { resume: parent.sessionId, forkSession: true } : {}) };
             for await (const message of query({ prompt: turn === 1 ? prompt : FOLLOWUP, options })) {
-              shadow.observe(message);
+              shadow.observe(message); shadowV0b.observe(message);
+              if (message.type === 'assistant' && message.parent_tool_use_id == null && message.message?.id && !stepIds.has(message.message.id)) {
+                stepIds.add(message.message.id);
+                const usage = message.message.usage ?? {};
+                const step = { id: message.message.id, input_tokens: usage.input_tokens ?? null, cache_read_input_tokens: usage.cache_read_input_tokens ?? null, cache_creation_input_tokens: usage.cache_creation_input_tokens ?? null };
+                if (usage.cache_creation) step.cache_creation = Object.fromEntries(['ephemeral_5m_input_tokens', 'ephemeral_1h_input_tokens'].filter(key => usage.cache_creation[key] != null).map(key => [key, usage.cache_creation[key]]));
+                steps.push(step);
+              }
               if (message.session_id) sessionId = message.session_id;
               if (message.type === 'system' && message.subtype === 'init') {
                 effortEvidence = typeof message.effort === 'string' ? message.effort : null;
@@ -91,7 +109,10 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, fo
               const content = message.message?.content;
               if (Array.isArray(content) && (message.type === 'assistant' || message.type === 'user')) for (const block of content) {
                 if (message.type === 'assistant' && block.type === 'tool_use' && block.name === 'Bash') { bashCalls++; bashIds.add(block.id); }
-                if (message.type === 'user' && block.type === 'tool_result' && block.is_error === true) { toolErrors++; errorIds.add(block.tool_use_id); }
+                if (message.type === 'user' && block.type === 'tool_result') {
+                  if (block.is_error === true) { toolErrors++; errorIds.add(block.tool_use_id); }
+                  if (bashIds.has(block.tool_use_id) && bashNonzeroHint(block.content)) { bashNonzeroHints++; if (block.is_error === true) bashNonzeroFlagged++; }
+                }
               }
               if (message.type === 'result') result = message;
             }
@@ -106,13 +127,15 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, fo
           const ws = join(outputDir, 'ws', id); await mkdir(dirname(ws), { recursive: true }); await cp(isolated.cwd, ws, { recursive: true, force: false, errorOnExist: true });
           const scored = await grade(slug, ws);
           const failedResult = !result || result.subtype !== 'success' || result.is_error;
-          const row = { v: 1, runId: id, taskId: item.task, kind: 'agent', effort, rep: item.rep, wave, turn, arm: arm ?? null, parentRunId: parent?.id ?? null, model: 'claude-opus-5-5', promptSha256: sha256(turn === 1 ? prompt : FOLLOWUP), fixtureSha256, startedAt, durationMs: Date.now() - start, endReason: result?.subtype ?? 'error_during_execution', truncated: ['error_max_turns', 'error_max_budget_usd'].includes(result?.subtype), usage: result ? { usage: result.usage, modelUsage: result.modelUsage } : null, costUsd, costSource, passed: !failedResult && scored.passed, passedChecks: scored.passedChecks, totalChecks: scored.totalChecks, publicTestsUnmodified: scored.publicTestsUnmodified, shadowRaise: turn === 2 ? parent.shadow : shadow.result(), effortEvidence, bashCalls, bashErrors, toolErrors, ...(turn === 2 && forkAlways ? { forced: true } : {}), ...(turn === 2 ? { effortTurn2: effort } : {}) };
+          const row = { v: 1, runId: id, taskId: item.task, kind: 'agent', effort, rep: item.rep, wave, turn, arm: arm ?? null, parentRunId: parent?.id ?? null, model: 'claude-opus-5-5', promptSha256: sha256(turn === 1 ? prompt : FOLLOWUP), fixtureSha256, startedAt, durationMs: Date.now() - start, endReason: result?.subtype ?? 'error_during_execution', truncated: ['error_max_turns', 'error_max_budget_usd'].includes(result?.subtype), usage: result ? { usage: result.usage, modelUsage: result.modelUsage } : null, costUsd, costSource, passed: !failedResult && scored.passed, passedChecks: scored.passedChecks, totalChecks: scored.totalChecks, publicTestsUnmodified: scored.publicTestsUnmodified, shadowRaise: turn === 2 ? parent.shadow : shadow.result(), shadowRaiseV0b: turn === 2 ? parent.shadowV0b : shadowV0b.result(), effortEvidence, bashCalls, bashErrors, toolErrors, bashNonzeroHints, bashNonzeroFlagged, steps, cacheReadTotal: steps.reduce((sum, step) => sum + (step.cache_read_input_tokens ?? 0), 0), cacheCreationTotal: steps.reduce((sum, step) => sum + (step.cache_creation_input_tokens ?? 0), 0), firstStepCacheCreation: steps[0]?.cache_creation_input_tokens ?? null, ...(!result ? { errorClass: classifyError(error) } : {}), ...(turn === 2 && forkAlways ? { forced: true } : {}), ...(turn === 2 ? { effortTurn2: effort } : {}) };
           await appendFile(join(outputDir, 'agent.jsonl'), JSON.stringify(row) + '\n'); rows.push(row);
-          if (error) throw Error('agent-execution-failed');
-          return { id, sessionId, cost: cumulative, shadow: shadow.result(), row };
+          consecutiveErrors = result ? 0 : consecutiveErrors + 1;
+          if (!result && ['auth', 'billing'].includes(row.errorClass)) throw executionStop('agent-execution-' + row.errorClass, 5);
+          if (consecutiveErrors >= 3) throw executionStop('agent-execution-consecutive-errors');
+          return { id, sessionId, cost: cumulative, shadow: shadow.result(), shadowV0b: shadowV0b.result(), row };
         };
         const parent = await execute({ effort: item.effort });
-        if (twoTurn && targets.has(slug) && (forkAlways || !parent.row.passed)) {
+        if (parent.row.endReason !== 'error_during_execution' && twoTurn && targets.has(slug) && (forkAlways || !parent.row.passed)) {
           if (!parent.sessionId) throw Error('run has no session ID for fork');
           const snapshot = join(snapshotRoot, 'workspace'); await cp(isolated.cwd, snapshot, { recursive: true });
           for (const [arm, effort] of [['S', item.effort], ['U', EFFORTS[EFFORTS.indexOf(item.effort) + 1]]]) {
@@ -142,5 +165,5 @@ function parseArgs(args) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try { await runAgent(parseArgs(process.argv.slice(2))); }
-  catch (error) { console.error(error.message); process.exitCode = error.message === 'paid call blocked' ? 3 : 1; }
+  catch (error) { console.error(error.message); process.exitCode = error.exitCode ?? (error.message === 'paid call blocked' ? 3 : 1); }
 }

@@ -25,3 +25,9 @@ test('tool-only threshold and successful non-test reset', () => {
  for (const n of [2, 3, 4]) { const s = createShadowRaise(); for (let i = 0; i < n; i++) { s.observe(assistant(String(i), [tool(String(i), 'Read', {file_path:'x'})])); s.observe(result(String(i), true)); } const r=s.result(); assert.equal(r.maxConsecutiveToolFailures,n); assert.equal(r.maxConsecutiveTestFailures,null); assert.equal(r.status,n >= 3 ? 'triggered' : 'not_triggered'); }
  const s=createShadowRaise(); for (const [i, err] of [true,true,false,true].entries()) {s.observe(assistant(String(i),[tool(String(i),'Read',{file_path:'x'})]));s.observe(result(String(i),err));} assert.equal(s.result().maxConsecutiveToolFailures,2);
 });
+
+test('v0b counts nonzero hints for test failures while v0 stays unchanged', () => {
+ const v0=createShadowRaise(), v0b=createShadowRaise({rule:'v0b'});
+ for (let i=0;i<2;i++) { const events=[assistant(String(i),[tool(String(i),'Bash',{command:'npm test'})]),{type:'user',message:{content:[{type:'tool_result',tool_use_id:String(i),is_error:false,content:'Process exited with code 2'}]}}]; for (const event of events) {v0.observe(event);v0b.observe(event);} }
+ assert.equal(v0.result().maxConsecutiveTestFailures,0); assert.equal(v0b.result().maxConsecutiveTestFailures,2); assert.equal(v0b.result().maxConsecutiveToolFailures,0); assert.deepEqual(v0b.result().reasons,['test_failures']); assert.equal(v0b.result().rule,'v0b');
+});
