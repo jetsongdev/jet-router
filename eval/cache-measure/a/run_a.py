@@ -18,6 +18,21 @@ PER = 'per-turn-control-2026-07-01'
 EFFORT = 'effort-2025-11-24'
 MODEL = 'claude-opus-5-5'
 CACHE = {'type': 'ephemeral'}
+KEY_FILE = Path.home() / '.config' / 'effort-router' / 'keys.env'
+
+
+def read_key():
+    # The key file is user-written outside the repository; the value is never printed or logged.
+    try:
+        for line in KEY_FILE.read_text(encoding='utf-8').splitlines():
+            name, sep, value = line.strip().removeprefix('export ').partition('=')
+            if sep and name.strip() == 'ANTHROPIC_API_KEY':
+                value = value.strip().strip('"').strip("'")
+                if value:
+                    return value
+    except OSError:
+        pass
+    return os.environ.get('ANTHROPIC_API_KEY')
 TASK = 'Sort these numbers and answer on one line: 9, 2, 5, 1.'
 
 def text_block(label, n):
@@ -113,9 +128,9 @@ def main():
         p.error('--cap-usd must be greater than 0 and at most 8')
     if args.a5_value is not None and not __import__('math').isfinite(args.a5_value):
         p.error('--a5-value must be finite')
-    key = os.environ.get('ANTHROPIC_API_KEY') if args.live else None
+    key = read_key() if args.live else None
     if args.live and (not key or '\n' in key or '\r' in key):
-        sys.exit('Live execution requires a valid ANTHROPIC_API_KEY.')
+        sys.exit(f'Live execution requires ANTHROPIC_API_KEY in {KEY_FILE} or the environment.')
     out = ROOT / 'out'
     out.mkdir(exist_ok=True)
     stamp = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
