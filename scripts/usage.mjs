@@ -2,6 +2,7 @@ import { appendFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } f
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { createHmac } from 'node:crypto';
 import { parseLine, report, GROUPS, MIN_SAMPLES } from '../src/usage.js';
 import { renderHtml } from '../src/usage-html.js';
 
@@ -11,7 +12,12 @@ const expandHome = path => (path.startsWith('~/') ? join(homedir(), path.slice(2
 export const usageDir = () => process.env.JET_ROUTER_USAGE_DIR || join(homedir(), '.claude/jet-router/usage');
 
 export function recordLine(input, dir = usageDir(), now = new Date()) {
-  const parsed = parseLine(JSON.stringify({ ...JSON.parse(input), ts: now.toISOString() }));
+  const value = JSON.parse(input);
+  const { sessionId, sessionSalt } = value;
+  if (typeof sessionId === 'string' && typeof sessionSalt === 'string' && /^[0-9a-f]{32}$/.test(sessionSalt)) {
+    value.sessionHash = 'h_' + createHmac('sha256', Buffer.from(sessionSalt, 'hex')).update(sessionId).digest('hex').slice(0, 32);
+  }
+  const parsed = parseLine(JSON.stringify({ ...value, ts: now.toISOString() }));
   if (!parsed) return false;
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   const file = join(dir, `${parsed.ts.slice(0, 7)}.jsonl`);
@@ -85,7 +91,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   const [command, ...rest] = process.argv.slice(2);
   if (command === 'record') {
     // Logging must never disturb the session: failures are silent.
-    try { recordLine(readFileSync(0, 'utf8')); } catch { /* ignore */ }
+    try { if (!recordLine(readFileSync(0, 'utf8'))) process.exitCode = 1; } catch { process.exitCode = 1; }
   } else if (command === 'report') {
     try {
       const args = parseArgs(rest);

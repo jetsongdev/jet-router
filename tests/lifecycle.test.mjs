@@ -32,7 +32,7 @@ function world(provider = async () => choice, now = async () => 10, options = {}
     assert.deepEqual(await stream.next(), { value: 'result', done: true });
     assert.ok(sent.includes(e)); // Concurrent steps may finish in a different order.
   };
-  return { event, command, start, submit, step, logs, notices, calls, sent, expire: () => expire() };
+  return { event, command, start, submit, step, logs, notices, calls, sent, host: $, expire: () => expire() };
 }
 
 test('off does not classify; shadow is explicit and delegates identical requests', async () => {
@@ -627,6 +627,83 @@ test('usage logging sends decisions and token counts, never prompt text, only wh
   await off.start(); await off.command('enforce'); await off.submit(); await forward(off);
   await off.event('turn.complete', { turnId: 't1', reason: 'answer' });
   assert.equal(runs.length, 1);
+});
+
+test('usage linkage advances only on success, resets on invalidation, and excludes subagents', async () => {
+  const lines = []; let result = 0;
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => {
+    lines.push(JSON.parse(init.stdin));
+    if (result === 'throw') throw new Error('failed');
+    return { exitCode: result };
+  });
+  w.host.session = { id: async () => 'SESSION_CANARY' };
+  await w.start(); await w.command('shadow');
+  const turn = async id => { await w.submit(id, 'PROMPT_CANARY'); await forward(w, { turnId: id });
+    await w.event('turn.complete', { turnId: id, reason: 'answer', answer: 'ANSWER_CANARY', command: 'COMMAND_CANARY', path: 'PATH_CANARY' }); };
+  await turn('one'); result = 1; await turn('two'); result = 'throw'; await turn('three'); result = 0; await turn('four');
+  for (const line of lines) assert.match(line.recordId, /^r_[0-9a-f]{32}$/);
+  assert.equal(new Set(lines.map(line => line.recordId)).size, 4);
+  assert.deepEqual(lines.map(line => line.previousRecordId), [null, lines[0].recordId, lines[0].recordId, lines[0].recordId]);
+  assert.equal(lines[0].sessionId, 'SESSION_CANARY');
+  assert.equal(lines[0].sessionSalt, lines[3].sessionSalt);
+  await w.command('lock'); await w.command('unlock');
+  w.host.session.id = async () => { throw new Error('identity'); };
+  await turn('five'); assert.equal(lines[4].previousRecordId, null); assert.equal(lines[4].sessionId, undefined);
+  w.host.session.id = async () => 42; await turn('six'); assert.equal(lines[5].sessionId, undefined);
+  await w.submit('seven', 'PROMPT_CANARY'); await forward(w, { turnId: 'seven' });
+  await forward(w, { turnId: 'child', agentId: 'child' });
+  await w.event('turn.complete', { turnId: 'child', agentId: 'child', reason: 'answer' });
+  assert.deepEqual([lines[6].recordId, lines[6].previousRecordId, lines[6].sessionHash], [null, null, null]);
+});
+
+test('in-flight recording cannot restore a chain after invalidation', async () => {
+  const pending = deferred(), began = deferred(), lines = [];
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => {
+    lines.push(JSON.parse(init.stdin));
+    if (lines.length === 1) { began.resolve(); return pending.promise; }
+    return { exitCode: 0 };
+  });
+  await w.start(); await w.command('shadow'); await w.submit(); await forward(w);
+  const completing = w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  await began.promise; await w.command('lock'); await w.command('unlock');
+  await w.submit('t2', 'next'); await forward(w, { turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  pending.resolve({ exitCode: 0 }); await completing;
+  await w.submit('t3', 'next'); await forward(w, { turnId: 't3' });
+  await w.event('turn.complete', { turnId: 't3', reason: 'answer' });
+  assert.deepEqual(lines.map(line => line.previousRecordId), [null, null, lines[1].recordId]);
+});
+
+test('overlapping recordings use the chain snapshot at creation and advance on completion', async () => {
+  const first = deferred(), began = deferred(), lines = [];
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => {
+    lines.push(JSON.parse(init.stdin));
+    if (lines.length === 1) { began.resolve(); return first.promise; }
+    return { exitCode: 0 };
+  });
+  await w.start(); await w.command('shadow'); await w.submit(); await forward(w);
+  const completing = w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+  await began.promise;
+  await w.submit('t2', 'next'); await forward(w, { turnId: 't2' });
+  await w.event('turn.complete', { turnId: 't2', reason: 'answer' });
+  first.resolve({ exitCode: 0 }); await completing;
+  await w.submit('t3', 'next'); await forward(w, { turnId: 't3' });
+  await w.event('turn.complete', { turnId: 't3', reason: 'answer' });
+  assert.deepEqual(lines.map(line => line.previousRecordId), [null, null, lines[0].recordId]);
+});
+
+test('enabling usage logging preserves shadow and enforce requests and decisions', async () => {
+  for (const mode of ['shadow', 'enforce']) {
+    const results = [];
+    for (const usageLog of [false, true]) {
+      const w = world(undefined, undefined, { usageLog }, async () => ({ exitCode: 0 }));
+      await w.start(); await w.command(mode); await w.submit();
+      const { e, seen } = await forward(w);
+      await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+      results.push({ seen, same: seen === e, logs: w.logs });
+    }
+    assert.deepEqual(results[0], results[1]);
+  }
 });
 
 test('holdout leaves a random share of applicable enforce turns unchanged and marks them', async () => {

@@ -26,6 +26,50 @@ test('stored records keep only validated decision and token fields', () => {
     [null, null, null, null, null, null, null, null, null, null, null, null]);
 });
 
+test('v1 linkage fields validate, round trip, and leave reports unchanged', () => {
+  const fields = ['recordId', 'previousRecordId', 'sessionHash', 'policyVersion', 'policyArm', 'policyCandidate',
+    'rework', 'betweenTurnEffort', 'midTurnEffort', 'previousFlagged'];
+  const old = make('2026-10-01T00:00:00Z', { mode: 'shadow', original: 'high', recommendation: 'low' }, 9);
+  const legacy = Object.fromEntries(Object.entries(old).filter(([key]) => !fields.includes(key)));
+  assert.deepEqual(fields.map(key => parseLine(JSON.stringify(legacy))[key]), fields.map(() => null));
+  const valid = { recordId: 'r_' + 'a'.repeat(16), previousRecordId: 'r_' + 'b'.repeat(32), sessionHash: 'h_' + 'c'.repeat(16),
+    policyVersion: 'v1.test-1', policyArm: 'control', policyCandidate: { effort: 'max', reasons: ['floor', 'floor', 'model'], extra: 'CANARY' },
+    rework: 'yes', betweenTurnEffort: 'up', midTurnEffort: 'same', previousFlagged: false };
+  const withFields = make(old.ts, { mode: 'shadow', original: 'high', recommendation: 'low', ...valid }, 9);
+  const dir = mkdtempSync(join(tmpdir(), 'jet-router-fields-'));
+  try {
+    assert.equal(recordLine(JSON.stringify(withFields), dir, new Date(old.ts)), true);
+    const stored = readRecords(dir)[0];
+    assert.deepEqual(fields.map(key => stored[key]), fields.map(key => key === 'policyCandidate' ? { effort: 'max', reasons: ['floor', 'model'] } : valid[key]));
+    assert.deepEqual(report([stored]), report([old]));
+    assert.equal(formatReport(report([stored])), formatReport(report([old])));
+    assert.ok(!readFileSync(join(dir, '2026-10.jsonl'), 'utf8').includes('CANARY'));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  const invalid = Object.fromEntries(fields.map(key => [key, 'INVALID_CANARY']));
+  const parsed = parseLine(JSON.stringify({ ...legacy, ...invalid }));
+  assert.deepEqual(fields.map(key => parsed[key]), fields.map(() => null));
+  for (const policyCandidate of [{ effort: 'turbo', reasons: [] }, { effort: null, reasons: ['CANARY'] }, { effort: null, reasons: 'floor' }, []]) {
+    assert.equal(parseLine(JSON.stringify({ ...legacy, policyCandidate })).policyCandidate, null);
+  }
+  assert.deepEqual(parseLine(JSON.stringify({ ...legacy, policyCandidate: { effort: null, reasons: [] } })).policyCandidate, { effort: null, reasons: [] });
+});
+
+test('session identity is keyed and never stored as raw input', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'jet-router-session-'));
+  try {
+    const base = make('2026-10-01T00:00:00Z', { mode: 'shadow' }, 1);
+    const write = (sessionId, sessionSalt) => recordLine(JSON.stringify({ ...base, sessionId, sessionSalt,
+      prompt: 'PROMPT_CANARY', answer: 'ANSWER_CANARY', path: 'PATH_CANARY', command: 'COMMAND_CANARY' }), dir, new Date(base.ts));
+    write('SESSION_CANARY', 'a'.repeat(32)); write('SESSION_CANARY', 'a'.repeat(32)); write('SESSION_CANARY', 'b'.repeat(32));
+    const records = readRecords(dir);
+    assert.match(records[0].sessionHash, /^h_[0-9a-f]{32}$/);
+    assert.equal(records[0].sessionHash, records[1].sessionHash);
+    assert.notEqual(records[0].sessionHash, records[2].sessionHash);
+    const text = readFileSync(join(dir, '2026-10.jsonl'), 'utf8');
+    for (const canary of ['SESSION_CANARY', 'a'.repeat(32), 'PROMPT_CANARY', 'ANSWER_CANARY', 'PATH_CANARY', 'COMMAND_CANARY']) assert.ok(!text.includes(canary));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('record appends one private line per turn into a monthly file', () => {
   const dir = mkdtempSync(join(tmpdir(), 'jet-router-usage-'));
   try {
