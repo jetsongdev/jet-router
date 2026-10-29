@@ -1,0 +1,173 @@
+[
+  {
+    "task_id": "tq/ranges",
+    "suite": "tq",
+    "slug": "ranges",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function parseRanges(text). text is a string containing comma-separated signed decimal safe integers or ascending inclusive ranges written a..b. Whitespace around tokens and range endpoints is allowed, but not inside a signed number. Empty or whitespace-only text returns []. Reject non-string with TypeError. Reject empty comma items, malformed syntax, descending ranges, non-safe integers, or any range with more than 1000 members using RangeError. Leading zeros and + signs are valid. Merge duplicates, sort ascending, do not mutate external state. No imports or external libraries.",
+    "prompt_sha256": "dd608266372773f0a30add0edf5f9ee4e474a53162ce43bb4b0f775aa502d901",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "tq/ttl-lru",
+    "suite": "tq",
+    "slug": "ttl-lru",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function createCache(capacity, now). capacity is a positive safe integer, otherwise throw RangeError. now is an injected function returning nondecreasing finite timestamps. Return {set(key,value,ttl),get(key),has(key),size getter}. Keys use Map identity including objects and NaN. ttl must be finite and >=0, otherwise RangeError with no changes. set returns undefined, expiration is now()+ttl and entries expire when time >= expiration. ttl=0 deletes any existing key. Purge expired entries before insertion/eviction and before reporting size. get returns undefined for missing/expired entries and promotes live entries to MRU even if value is undefined. has checks existence without changing recency. Updating a key resets expiry and promotes it. Evict LRU live entries when over capacity. No imports.",
+    "prompt_sha256": "ca4e111c0b3e4b1a62adedc3771e4dd5f45a215a51c9296d2973480f75f7595a",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "tq/async-memo",
+    "suite": "tq",
+    "slug": "async-memo",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function memoizeAsync(fn). Return {get(key),invalidate(key),clear()}. get always returns a Promise; fn(key) may return a value, throw synchronously, or reject. Concurrent gets for the same Map-identity key must return the exact same Promise and invoke fn once. Cache successful results including undefined. Rejection must be passed through with the original error identity and evict only that generation, so the next get retries. invalidate deletes a key and clear deletes all; they do not cancel callers' already-returned Promises. If invalidated while pending, the old resolution/rejection must never overwrite or delete a new generation. fn may reentrantly invalidate its own key before returning; that invalidation must take effect (a subsequent get must call fn again). No imports, sleeps, or external libraries.",
+    "prompt_sha256": "edc2bcc1a4a732b04dbe24067ad12156fe24ace79eedfd37787840e3b9937887",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "tq/ledger",
+    "suite": "tq",
+    "slug": "ledger",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function createLedger(initial). initial is an object of own enumerable string account keys to nonnegative safe integer balances, invalid balances throw RangeError. Return {apply(batch),snapshot()}. snapshot returns a fresh null-prototype object. apply takes an array of transfers {id,from,to,amount}: id is a nonempty string, from/to must be existing account names, amount is a positive safe integer; invalid fields throw RangeError. Process in order atomically: any error rolls back all balances AND remembered ids from that batch. A new transfer returns 'applied'; the same id with identical from/to/amount returns 'duplicate' without checking current available balance. Same id with different fields throws RangeError. Duplicate ids within a batch follow the same rule. Reject insufficient balance and destination safe-integer overflow with RangeError. Self-transfer requires sufficient balance but changes neither balance nor causes destination overflow. Return one status per input. Empty batch returns []. snapshot mutations and later mutations of initial/transfer objects cannot affect internal state. Support account names __proto__ and constructor as ordinary own keys. No imports.",
+    "prompt_sha256": "27f1b87aae0ce4dd170f11647b3b6dbabd7ed4426a272d4d78a217205c17121b",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "tq/keyed-queue",
+    "suite": "tq",
+    "slug": "keyed-queue",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function createKeyedQueue(). Return function enqueue(key,task) returning a Promise. Tasks for the same Map-identity key execute strictly in submission order with at most one active, while different keys may progress independently. Tasks may synchronously throw or return rejected promises; preserve original rejection reason and always run the next task. Task can enqueue another task for the same key without awaiting it; maintain submission order. When idle release internal key state without letting old cleanup erase a newly queued generation. No imports or timers.",
+    "prompt_sha256": "29604f96b9ed6797211c7d53266fded2d56d6121df6f178fe7c75a152cbe8f51",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "tq/intervals",
+    "suite": "tq",
+    "slug": "intervals",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function subtractIntervals(base,cuts). Each argument is an array of [start,end] finite-number pairs with start<=end; reject invalid pairs using RangeError. Interpret half-open intervals [start,end). Ignore zero-length intervals. Normalize overlapping or touching intervals, subtract the union of cuts from union of base, and return sorted disjoint non-touching intervals. Neither inputs nor nested arrays may be mutated or reused in output. Support negative and fractional endpoints. No imports or libraries.",
+    "prompt_sha256": "ff9b6b72818c782b6df35d96f43bd4b146933debc22892c9aabaed486da50b02",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/front-matter-fields",
+    "suite": "ss",
+    "slug": "front-matter-fields",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function parseFields(text). Reject non-strings with TypeError. Split text on LF; a CR immediately before any LF is part of that line ending and is removed, and a terminal CR not followed by LF remains content. If the first line is not exactly ---, return {fields: [], body: text}. Otherwise the next line exactly equal to --- closes the header; if absent throw RangeError. Every header line between delimiters must match /^([a-z][a-z0-9-]*): (.*)$/; reject malformed lines and repeated keys with RangeError. A value is the captured text, including any spaces, and may be empty. Return {fields, body}, where fields is an array of fresh [key, value] pairs in header order, and body is all lines after the closing delimiter joined with LF. Thus recognized headers normalize CRLF to LF in the body; preserve an ending LF through the final empty split line. No YAML interpretation, escaping, trimming, or special keys.\n",
+    "prompt_sha256": "38ba3859227d23aa4c745f5b4e14277a25c442b86627513220ca5c1b906cc903",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/grid-neighbors",
+    "suite": "ss",
+    "slug": "grid-neighbors",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function legalNeighbors(board, row, col). board must be a nonempty rectangular array of nonempty arrays containing only 0 or 1. row and col must be integers identifying a cell inside the board. Reject any invalid input with RangeError, including invalid cells anywhere on the board. A 0 cell is open and a 1 cell is blocked. If the starting cell is blocked, return []. Otherwise return the open orthogonal neighbors as fresh [row, col] pairs in this exact order: up, right, down, left; omit out-of-bounds and blocked cells. Do not mutate board or its rows.\n",
+    "prompt_sha256": "c41fa6483f2544e5e6136bc7b9bb0e5313ff217fd3e18a967b735c07fd04c854",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/heading-index",
+    "suite": "ss",
+    "slug": "heading-index",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function headingIndex(lines). lines must be an array of strings; otherwise throw TypeError. A heading is a line matching exactly /^(#{1,3}) ([A-Za-z0-9]+(?: [A-Za-z0-9]+)*) *$/; all other strings are ignored. Return an array in input order of {level, title, slug}, where level is the number of # characters, title is the captured words with their original case and single spaces, and slug is title lowercased with spaces replaced by hyphens. Make slugs unique across all headings in this call: use the base slug if unused, otherwise append -2, -3, and so on, choosing the first unused candidate. Previously generated slugs and natural base slugs occupy the same namespace. Do not mutate lines.\n",
+    "prompt_sha256": "60b099c8b67ea28a9784b82034dc511704f4018d662c5d020c602a0211027e61",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/line-winner",
+    "suite": "ss",
+    "slug": "line-winner",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function lineWinner(board, k). board must be an array of 1 to 12 rows, each an array of 1 to 12 cells of identical width. Each cell must be exactly null, 'A', or 'B'. k must be an integer from 1 through max(height, width). Otherwise throw RangeError. A player wins if at least k consecutive cells of that player occur horizontally, vertically, or on either diagonal; longer runs count. Return 'A' or 'B' if exactly that player has a winning run, 'both' if both do, and null if neither does. Ignore turn counts and whether the position could arise in play. Validate the entire board before deciding the result. Do not mutate board or its rows.\n",
+    "prompt_sha256": "f8a704f76b00128f963c84d2133cbd3dcef9e7fbfe66cea772644c2dca972358",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/monthly-occurrences",
+    "suite": "ss",
+    "slug": "monthly-occurrences",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function monthlyOccurrences(start, interval, count, policy). start must be a string in exactly YYYY-MM-DD form representing a valid proleptic Gregorian date from 0001-01-01 through 9999-12-31. interval and count must be safe integers in 1..1200 and 0..1200 respectively. policy must be 'skip' or 'clamp'. Any invalid argument throws RangeError, even when count is zero. Return an array of up to count date strings: inspect exactly count scheduled months, beginning with start's month and then advancing interval months each time. In each month use start's original day: if it exists, emit that date; if not, emit nothing for 'skip' or that month's last day for 'clamp'. Never carry a clamped day into later months. If any of the count scheduled months would fall after December 9999, throw RangeError instead of returning a partial result. Use Gregorian leap-year rules (divisible by 4, except centuries unless divisible by 400), independent of local timezone. count=0 returns [] after validation.\n",
+    "prompt_sha256": "07ef2ec1deeda54df49c5bcdfddde7a211840276ab5868cab9907c9e396296b7",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/patch-components",
+    "suite": "ss",
+    "slug": "patch-components",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function mergePatches(base, left, right). base is an array of strings. left and right are arrays of patch objects {start, end, lines}. start and end are integers with 0 <= start <= end <= base.length; lines is an array of strings. A patch replaces base[start:end] with lines; start=end is an insertion at that boundary. Within each side, patches must be given in ascending start order and must not conflict under the conflict rule below, including two insertions at the same boundary. Reject invalid input or a within-side conflict with RangeError. Ignore extra object properties. Never mutate or reuse base, patch arrays, patch objects, or lines arrays in the result.\n\nTwo patches conflict exactly when: both are insertions at the same boundary; or one is an insertion at p and the other is a nonempty range [s,e) with s <= p < e; or both are nonempty ranges with max(start) < min(end). A range ending at an insertion boundary does not conflict with that insertion. Build a graph whose vertices are all patches and whose edges connect conflicting patches on opposite sides. For every connected component containing patches from both sides, emit one conflict chunk. Its start is the minimum start and its end is the maximum end of its patches. Its left and right arrays are the result of applying just that side's component patches to base[start:end], preserving uncovered base lines. All other patches are applied normally. Output an array of chunks: {type:'ok', lines:[...]} for ordinary output and {type:'conflict', start, end, left:[...], right:[...]}. Traverse base from left to right, emitting conflict chunks at their component spans, and applying ordinary patches outside them. At a shared boundary, process a patch or conflict ending there before an insertion or conflict starting there. Adjacent ordinary lines, including replacement lines and untouched base lines, form one ok chunk; omit empty ok chunks. Conflict chunks are emitted even when their two alternatives are identical or empty. Empty input with no output returns [].\n",
+    "prompt_sha256": "08c1ece773685880d43f076d5b42de013ab64ec2b4bc2654314d75c0ebd7f41d",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ss/unit-sum",
+    "suite": "ss",
+    "slug": "unit-sum",
+    "kind": "single",
+    "prompt": "Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\nExport function sumLengths(text, unit). text must be a string of 1 to 30 terms separated by '+', with optional ASCII spaces around each term and around '+'. Each term is a nonnegative decimal written as one or more ASCII digits optionally followed by '.' and 1 to 3 digits, immediately followed by 'mm', 'cm', or 'm'. No other whitespace, signs, exponent, or syntax is allowed. Each term's numeric value must be at most 1000000. unit must be 'mm', 'cm', or 'm'. Reject any invalid argument with RangeError. Add the lengths exactly, convert the sum to unit, and return a string with exactly two decimal places, rounding to nearest with exact halfway cases rounded away from zero. No floating-point approximation may change the result. Leading zeros are accepted and are not preserved in output.\n",
+    "prompt_sha256": "794b2a8b244b9bc10e03cb784accda3aac728964d176d150dab107f47678957d",
+    "fixture_sha256": null
+  },
+  {
+    "task_id": "ag/batch-rollback-debug",
+    "suite": "ag",
+    "slug": "batch-rollback-debug",
+    "kind": "agent",
+    "prompt": "Investigate and fix the failing public test without weakening tests. Run `node --test test/public.test.mjs`. `createStore(initial)` accepts an object of account names to nonnegative safe integer balances and returns a store with `apply(batch)` and `snapshot()`. `apply` processes an array of `{from,to,amount}` in order. Both names must be existing own account names and amount must be a positive safe integer. A transfer requires enough funds and must not overflow the destination; a self-transfer requires enough funds and leaves the balance unchanged. On any invalid transfer, insufficient funds, or overflow, throw RangeError and leave every balance as it was before the entire batch. On success return undefined. An empty batch succeeds. `snapshot()` returns a fresh plain object with the current balances. Later changes to initial objects, transfer objects, or snapshots must not alter store state. Support `__proto__` and `constructor` as ordinary own account names. Reject invalid initial balances with RangeError. Use Node.js built-ins only. Do not modify the public test file.\n",
+    "prompt_sha256": "97684c2ce654dbdc2f073b21484059dfc95d00ff51e1d9161f4cdcb5622178b3",
+    "fixture_sha256": "b70ac0e7c485d033187e539f54fe75245fb4dde8eced966a93e7b6169ade0c72"
+  },
+  {
+    "task_id": "ag/calc-decimal-cli",
+    "suite": "ag",
+    "slug": "calc-decimal-cli",
+    "kind": "agent",
+    "prompt": "Extend this calculator CLI. Run `node --test test/public.test.mjs`. Usage is `node calc.mjs OP A B`, where OP is add, sub, or mul and A and B are signed base-10 integers matching `^[+-]?[0-9]+$`, with at most 30 digits each excluding the sign. Compute exact integer arithmetic and print the canonical decimal result followed by one newline to stdout; zero is `0`, with no plus sign or leading zeros. On any invalid argument, operator, or argument count, print `invalid input\\n` to stderr, print nothing to stdout, and exit with code 2. Successful runs exit 0 and print nothing to stderr. Preserve add and sub while adding mul. Use Node.js built-ins only. Do not modify the public test file.\n",
+    "prompt_sha256": "c1e8fa4477220630c0aa552a63faf19779557dd5acbfef7e1a836f34f7fcbb05",
+    "fixture_sha256": "ab44fffe83af6abe5b7fe5391c7354397c36b56951464de45d0d193f9de5ecfd"
+  },
+  {
+    "task_id": "ag/game-round-reducer",
+    "suite": "ag",
+    "slug": "game-round-reducer",
+    "kind": "agent",
+    "prompt": "Refactor `game.mjs` to export `initialState()` and `transition(state, event)` as pure functions. Run `node --test test/public.test.mjs`. State has exactly `{phase, score, lives}`, initially `{phase:'ready', score:0, lives:3}`. Events are objects with a `type` string: `start` changes ready to playing; `point` adds 1 to score only while playing; `hit` subtracts 1 life only while playing and changes phase to over when lives reaches 0; `restart` from over returns a new initial state. All other event/phase combinations are no-ops. A transition always returns a fresh state object, including no-ops, and never mutates its input or event. Preserve the existing `createGame()` API: its `dispatch(event)` applies the same transition and returns a fresh snapshot, and its `snapshot()` returns a fresh snapshot. Separate game instances must not share state. Use Node.js built-ins only. Do not modify the public test file.\n",
+    "prompt_sha256": "f64e9fa1e461a863f5444a2e52583b3de37b0e16d6fd5f2cb0b507e1fa6016e2",
+    "fixture_sha256": "c52bf7c5e1a6f7a0a0e695ae0dc0c998e46f1bc41e9a5ccb2c48f08fe4548d36"
+  },
+  {
+    "task_id": "ag/link-lint-scope",
+    "suite": "ag",
+    "slug": "link-lint-scope",
+    "kind": "agent",
+    "prompt": "Fix and extend the Markdown link checker. Run `node --test test/public.test.mjs`. `node lint.mjs FILE` reads UTF-8 text and scans inline links of the exact form `[label](target)` on each line; label is nonempty and contains neither `]` nor newline, target is nonempty and contains neither `)` nor newline. Ignore links inside fenced code blocks. A fence is a line whose trimmed text starts with three backticks; it toggles code-block state and is not scanned. Outside fences, report each link whose target starts with `http://` as `LINE: insecure link`, and each target starting with `/` as `LINE: root-relative link`, where LINE is the 1-based source line. Report in source order, one line per violation, including multiple violations on one source line. Other targets are allowed. Exit 1 if there are violations, otherwise 0; stdout contains only reports with a newline after each, and stderr is empty for readable files. An unreadable file or wrong argument count exits 2 with no stdout. Use Node.js built-ins only and do not modify the public test file.\n",
+    "prompt_sha256": "ee674fcdae2a42b9db9e19a57e940093a1f6eee07d44ae84d9a1eb03f6407995",
+    "fixture_sha256": "d8d3c7c3aa350b2daa636421b2b0d7cabbf7ae1c3b3086f5da050791262b343d"
+  },
+  {
+    "task_id": "ag/log-window-aggregate",
+    "suite": "ag",
+    "slug": "log-window-aggregate",
+    "kind": "agent",
+    "prompt": "Fix the log aggregator. Run `node --test test/public.test.mjs`. Usage: `node aggregate.mjs FILE START END`, where START and END are nonnegative safe decimal integers and START <= END. FILE is UTF-8 JSON Lines: each nonblank line must be a JSON object with `user` as a nonempty string, `time` as a nonnegative safe integer, and `bytes` as a nonnegative safe integer. Reject an invalid argument or any invalid nonblank record, even outside the window, with exit code 2 and no stdout. Blank lines contain only whitespace. Aggregate records with START <= time < END by exact user string. Print one JSON array and a newline: each element is `{user,count,bytes}`, sorted by user in ascending JavaScript string order; count is the number of included records and bytes their sum. Reject if a count or byte sum would exceed Number.MAX_SAFE_INTEGER. Empty windows produce `[]`. Successful runs exit 0. Process the file as a stream, keeping memory proportional to distinct included users rather than number of lines, and use only Node.js built-ins. Do not modify the public test file.\n",
+    "prompt_sha256": "d17711e5dacfbb8e16554840fb1a2f1f971bb384286ec0bc4d31c79fbc722d76",
+    "fixture_sha256": "235a332901edcca1125bf9598c00372da893e5be904cd21f93070d2acb7acdd0"
+  },
+  {
+    "task_id": "ag/site-route-repair",
+    "suite": "ag",
+    "slug": "site-route-repair",
+    "kind": "agent",
+    "prompt": "Fix this small static site builder. Run `node --test test/public.test.mjs` to see the public tests. `node build.mjs INPUT_DIR OUTPUT_DIR` must read the immediate `.md` files in INPUT_DIR and write one UTF-8 HTML file per post at OUTPUT_DIR/<slug>/index.html. Front matter begins with a line `---`, ends with another `---`, and has exactly one `title: value` and one `slug: value`; values are nonempty after trimming. A value may contain colons. Accept LF and CRLF. The slug must match `[a-z0-9]+(?:-[a-z0-9]+)*`. Reject missing, duplicate, or invalid fields and duplicate slugs with a nonzero exit. Validate all posts before writing any output. Process filenames in ascending JavaScript string order. The HTML must contain the title in an h1 and the body in a pre element; escape &, <, >, double quote, and single quote in both text values. Preserve the body text after the closing delimiter, including newlines. Ignore non-.md files. Create needed output directories. Keep the CLI interface and use only Node.js built-ins. Do not modify the public test file.\n",
+    "prompt_sha256": "396f83b48b0c19c619cb9acdb89b0331a6050b06912236c2272255a43c46743f",
+    "fixture_sha256": "df1e2e7e9c5d6c40e3428aead1e82e9c05757535da133fa2a1a9d064f07d0270"
+  }
+]

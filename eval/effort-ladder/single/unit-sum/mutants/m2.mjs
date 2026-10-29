@@ -1,0 +1,3 @@
+export function sumLengths(text,unit){
+ if(typeof text!=='string'||!['mm','cm','m'].includes(unit))throw new RangeError();const terms=text.split('+');if(terms.length>31)throw new RangeError();let sum=0n;for(const term of terms){const m=/^ *([0-9]+)(?:\.([0-9]{1,3}))?(mm|cm|m) *$/.exec(term);if(!m)throw new RangeError();const value=BigInt(m[1])*1000n+BigInt((m[2]||'').padEnd(3,'0'));if(value>1000000000n)throw new RangeError();sum+=value*({mm:1n,cm:10n,m:1000n}[m[3]]);}const divisor={mm:10n,cm:100n,m:10000n}[unit];const cents=(sum+divisor/2n)/divisor;return String(cents/100n)+'.'+String(cents%100n).padStart(2,'0');
+}

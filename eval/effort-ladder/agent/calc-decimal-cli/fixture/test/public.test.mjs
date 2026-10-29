@@ -1,0 +1,1 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';test('add and sub',()=>{for(const [op,a,b,out] of [['add','3','2','5\n'],['sub','3','2','1\n']])assert.equal(spawnSync(process.execPath,['calc.mjs',op,a,b],{encoding:'utf8'}).stdout,out)});

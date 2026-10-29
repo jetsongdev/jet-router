@@ -1,0 +1,10 @@
+{
+  "maxTurns": 36,
+  "hiddenTimeoutMs": 180000,
+  "budgetUsd": {
+    "low": 1.5,
+    "medium": 1.5,
+    "high": 2,
+    "xhigh": 3
+  }
+}

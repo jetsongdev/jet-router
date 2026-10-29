@@ -1,0 +1,5 @@
+# Invoice replay
+
+`createInvoice({customer, lines, discountCents})` returns `{customer, lines, totalCents}`. Each input line is `{id, quantity, unitMills, taxBasisPoints}`. IDs are distinct nonempty strings, quantity and unitMills are nonnegative safe integers, and unitMills is a thousandth of one cent. Tax is an integer number of basis points from 0 through 10000. The nonnegative integer discount never exceeds the sum of line gross cents. All final values are safe integers, though products may exceed the safe integer range. Empty lines require a zero discount.
+
+A returned line has `{id, grossCents, discountCents, taxCents, totalCents}`. Gross is the exact quantity times unitMills converted to cents, rounded to nearest cent with exact half cents rounded up. Tax is calculated on gross less allocated discount, multiplied by that line's basis points and divided by 10000, again rounded to nearest cent with exact halves up. A line total is gross minus allocated discount plus tax; the invoice total is the sum of line totals. Input objects are not modified. See `docs/allocation.md` for the billing breakdown contract.

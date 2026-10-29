@@ -1,0 +1,4 @@
+export function monthlyOccurrences(start,interval,count,policy){
+ const m=typeof start==='string'&&/^(\d{4})-(\d{2})-(\d{2})$/.exec(start);const days=(y,mo)=>[31,(y%4===0&&(y%100!==0||y%400===0))?29:28,31,30,31,30,31,31,30,31,30,31][mo-1];if(!m||+m[1]<1||+m[2]<1||+m[2]>12||+m[3]<1||+m[3]>days(+m[1],+m[2])||!Number.isSafeInteger(interval)||interval<1||interval>1200||!Number.isSafeInteger(count)||count<0||count>1200||!['skip','clamp'].includes(policy))throw new RangeError();
+ const startMonth=(+m[1]-1)*12+(+m[2]-1),day=+m[3];if(count&&startMonth+(count-1)*interval>=9999*12)throw new RangeError();const out=[];for(let i=0;i<count;i++){const n=startMonth+i*interval,y=Math.floor(n/12)+1,mo=n%12+1,last=days(y,mo);if(day<=last||policy==='clamp')out.push(String(y).padStart(4,'0')+'-'+String(mo).padStart(2,'0')+'-'+String(Math.min(day,last)).padStart(2,'0'));}return out;
+}

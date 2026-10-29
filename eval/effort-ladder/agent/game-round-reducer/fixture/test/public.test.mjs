@@ -1,0 +1,1 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {createGame} from '../game.mjs';test('start and point',()=>{const g=createGame();g.dispatch({type:'start'});assert.equal(g.dispatch({type:'point'}).score,1)});

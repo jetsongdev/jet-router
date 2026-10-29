@@ -1,0 +1,1 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';test('small log',()=>{const r=spawnSync(process.execPath,['aggregate.mjs','samples/events.jsonl','0','10'],{encoding:'utf8'});assert.equal(r.status,0);assert.deepEqual(JSON.parse(r.stdout),[{user:'a',count:2,bytes:5}])});

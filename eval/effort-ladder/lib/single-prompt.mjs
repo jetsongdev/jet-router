@@ -1,0 +1,1 @@
+export const prompt = spec => `Implement the following specification as a standalone JavaScript ES module. Return a JSON object with only a code string. Do not call tools, read files, use imports, or write tests. The evaluator will test the exported API separately.\n\n${spec}`;

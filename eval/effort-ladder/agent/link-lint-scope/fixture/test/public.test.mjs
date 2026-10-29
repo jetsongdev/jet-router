@@ -1,0 +1,1 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';test('insecure link',()=>{const r=spawnSync(process.execPath,['lint.mjs','samples/basic.md'],{encoding:'utf8'});assert.equal(r.stdout,'1: insecure link\n');assert.equal(r.status,1)});
