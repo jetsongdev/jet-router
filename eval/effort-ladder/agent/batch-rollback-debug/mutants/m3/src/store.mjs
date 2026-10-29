@@ -1,0 +1,2 @@
+import {applyBatch} from './batch.mjs';
+export function createStore(initial){const balances=new Map();for(const [name,value] of Object.entries(initial)){if(!Number.isSafeInteger(value)||value<0)throw new RangeError();balances.set(name,value)} return {apply(batch){const next=new Map(balances);applyBatch(next,batch);balances.clear();for(const [k,v] of next)balances.set(k,v)},snapshot(){return Object.fromEntries([...balances].filter(([k])=>k!=='constructor'))}}}

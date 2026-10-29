@@ -1,0 +1,3 @@
+export function initialState(){return {phase:'ready',score:0,lives:3}}
+export function transition(state,event){const next={...state}; if(event.type==='start'&&state.phase==='ready')next.phase='playing'; else if(event.type==='point'&&state.phase==='playing')next.score++; else if(event.type==='hit'&&state.phase==='playing'){next.lives--;if(next.lives===0)next.phase='over'} else if(event.type==='restart'&&state.phase==='over')return initialState(); return next}
+export function createGame(){let state=initialState();return {dispatch(event){state=transition(state,event);return {...state}},snapshot(){return {...state}}}}
