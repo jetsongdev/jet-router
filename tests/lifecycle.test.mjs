@@ -706,6 +706,100 @@ test('enabling usage logging preserves shadow and enforce requests and decisions
   }
 });
 
+test('deficiency signals follow main records, host efforts and flag reservations', async () => {
+  const lines = [];
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => {
+    lines.push(JSON.parse(init.stdin)); return { exitCode: 0 };
+  });
+  await w.start(); await w.command('shadow');
+  assert.equal(w.command('flag').text, '표시할 직전 턴이 없습니다');
+  const turn = async (id, text, effort, steps = [], model = 'm') => {
+    await w.submit(id, text); const first = await forward(w, { turnId: id, effort, model });
+    assert.equal(first.seen, first.e);
+    for (const step of steps) await forward(w, { turnId: id, index: 1, effort, model, ...step });
+    await w.event('turn.complete', { turnId: id, reason: 'answer' });
+  };
+  await turn('a', '다시 CANARY_PRIVATE', 'medium');
+  assert.deepEqual([lines[0].rework, lines[0].betweenTurnEffort, lines[0].midTurnEffort], ['unknown', 'unknown', 'unknown']);
+  assert.match(w.command('flag').text, /부족했음/);
+  await turn('b', '다시 CANARY_PRIVATE', 'high', [{ effort: 'high' }, { effort: 'xhigh', index: 2 }, { effort: 'low', index: 3 }]);
+  assert.deepEqual([lines[1].rework, lines[1].betweenTurnEffort, lines[1].midTurnEffort, lines[1].previousFlagged], ['yes', 'up', 'up', true]);
+  assert.equal(lines[1].previousRecordId, lines[0].recordId);
+  await turn('c', '새 요청', 'medium', [{ effort: 'medium' }]);
+  assert.deepEqual([lines[2].rework, lines[2].betweenTurnEffort, lines[2].midTurnEffort, lines[2].previousFlagged], ['no', 'down', 'same', false]);
+  await turn('d', '새 요청', 'medium', [{ effort: 'low' }]);
+  assert.deepEqual([lines[3].betweenTurnEffort, lines[3].midTurnEffort], ['same', 'down']);
+  await turn('e', '새 요청', 'medium', [{ effort: 'xhigh', agentId: 'child', turnId: 'child' }], 'other');
+  assert.deepEqual([lines[4].betweenTurnEffort, lines[4].midTurnEffort], ['unknown', 'unknown']);
+  assert.ok(!JSON.stringify(lines).includes('CANARY_PRIVATE'));
+  await w.command('lock'); await w.command('unlock');
+  await turn('f', '다시', 'high');
+  assert.deepEqual([lines[5].rework, lines[5].betweenTurnEffort, lines[5].previousRecordId], ['unknown', 'unknown', null]);
+});
+
+test('ambiguous submissions and recordless turns cannot fabricate signals', async () => {
+  const lines = [];
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => { lines.push(JSON.parse(init.stdin)); return { exitCode: 0 }; });
+  await w.start(); await w.command('shadow');
+  const complete = id => w.event('turn.complete', { turnId: id, reason: 'answer' });
+  await w.submit('a', 'first'); await forward(w, { turnId: 'a' }); await complete('a');
+  for (const [id, extra] of [['attachment', { attachments: [{}] }], ['queued', { wait: true }], ['empty', {}]]) {
+    await w.submit(id, id === 'empty' ? '' : '다시', extra); await forward(w, { turnId: id }); await complete(id);
+    assert.equal(lines.at(-1).rework, 'unknown');
+  }
+  await w.event('prompt.submit', { text: '다시', origin: { kind: 'composer' } }, async () => {
+    await w.event('turn.start', { turnId: 'rewrite', text: 'rewritten' }); return {};
+  });
+  await forward(w, { turnId: 'rewrite' }); await complete('rewrite');
+  assert.equal(lines.at(-1).rework, 'unknown');
+  await w.submit('model', 'request'); await forward(w, { turnId: 'model' });
+  await forward(w, { turnId: 'model', index: 1, model: 'changed' }); await complete('model');
+  await w.submit('after', 'request'); await forward(w, { turnId: 'after' }); await complete('after');
+  assert.equal(lines.at(-1).betweenTurnEffort, 'unknown');
+});
+
+test('mid-turn signals do not change yielded semantics', async () => {
+  for (const mode of ['shadow', 'enforce']) {
+    const lines = [];
+    const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => { lines.push(JSON.parse(init.stdin)); return { exitCode: 0 }; });
+    await w.start(); await w.command(mode); await w.submit();
+    await forward(w, { effort: 'high' }); await forward(w, { index: 1, effort: 'xhigh' });
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.equal(lines[0].midTurnEffort, 'up'); assert.equal(lines[0].yielded, mode === 'enforce');
+  }
+});
+
+test('flag survives a failed write and is reserved by only one concurrent record', async () => {
+  const lines = [], pending = deferred(), began = deferred(); let behavior = 'ok';
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => {
+    lines.push(JSON.parse(init.stdin));
+    if (behavior === 'fail') return { exitCode: 1 };
+    if (behavior === 'wait') { behavior = 'ok'; began.resolve(); return pending.promise; }
+    return { exitCode: 0 };
+  });
+  await w.start(); await w.command('shadow');
+  const start = async id => { await w.submit(id, 'request'); await forward(w, { turnId: id }); };
+  const complete = id => w.event('turn.complete', { turnId: id, reason: 'answer' });
+  await start('a'); await complete('a'); w.command('flag');
+  behavior = 'fail'; await start('b'); await complete('b');
+  behavior = 'wait'; await start('c'); const writing = complete('c'); await began.promise;
+  await start('d'); await complete('d'); pending.resolve({ exitCode: 0 }); await writing;
+  assert.deepEqual(lines.map(line => line.previousFlagged), [false, true, true, false]);
+  assert.equal(lines[2].betweenTurnEffort, 'unknown');
+});
+
+test('unsupported host effort cannot be compared between or within turns', async () => {
+  const lines = [];
+  const w = world(undefined, undefined, { usageLog: true }, async (argv, init) => { lines.push(JSON.parse(init.stdin)); return { exitCode: 0 }; });
+  await w.start(); await w.command('shadow'); await w.submit('a', 'first');
+  await forward(w, { turnId: 'a', effort: 'unsupported' });
+  await forward(w, { turnId: 'a', index: 1, effort: 'high' });
+  await w.event('turn.complete', { turnId: 'a', reason: 'answer' });
+  await w.submit('b', 'next'); await forward(w, { turnId: 'b', effort: 'high' });
+  await w.event('turn.complete', { turnId: 'b', reason: 'answer' });
+  assert.equal(lines[0].midTurnEffort, 'unknown'); assert.equal(lines[1].betweenTurnEffort, 'unknown');
+});
+
 test('holdout leaves a random share of applicable enforce turns unchanged and marks them', async () => {
   const runs = [];
   const run = async (argv, init) => { runs.push(JSON.parse(init.stdin)); return { exitCode: 0, stdout: '', stderr: '' }; };

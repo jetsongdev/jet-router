@@ -4,6 +4,7 @@ import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from 
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status, sessionNotice } from '../src/report.js';
 import { usageRecord } from '../src/usage.js';
+import { reworkSignal, effortDirection } from '../src/signals.js';
 
 // Jev p90 reached ~630ms with timeouts at the old 1000ms wait (2026-10-05).
 export const CLASSIFY_WAIT_MS = 1500;
@@ -41,6 +42,8 @@ export function registerRouter(on, classify, options = {}) {
   const sendContext = provider === 'jev' && options.sendTaskContext === true;
   let previous;
   let previousRecordId = null;
+  let previousMain;
+  let flagged;
   let chainGeneration = 0;
   const sessionSalt = randomHex();
 
@@ -55,6 +58,8 @@ export function registerRouter(on, classify, options = {}) {
 
   function invalidate() {
     previousRecordId = null;
+    previousMain = undefined;
+    flagged = undefined;
     chainGeneration++;
     pending = undefined;
     previous = undefined;
@@ -71,7 +76,7 @@ export function registerRouter(on, classify, options = {}) {
     lastSummary = undefined;
     project = typeof e.cwd === 'string' ? e.cwd : null;
     await $.command.register({ name: 'jet-router', description: 'Effort routing: observe (shadow) or apply per turn (enforce)',
-      argumentHint: 'status|shadow|enforce|off|lock|unlock|report', immediate: true });
+      argumentHint: 'status|shadow|enforce|off|lock|unlock|flag|report', immediate: true });
     publish($, sessionNotice(mode, provider));
     return next(e);
   });
@@ -80,6 +85,11 @@ export function registerRouter(on, classify, options = {}) {
     const action = e.args.trim() || 'status';
     // Only report is asynchronous; the other commands answer synchronously.
     if (action === 'report' || action.startsWith('report ')) return runReport($, action.split(/\s+/).slice(1)).then(text => ({ text }));
+    if (action === 'flag') {
+      if (!previousRecordId) return { text: '표시할 직전 턴이 없습니다' };
+      flagged = { recordId: previousRecordId };
+      return { text: "직전 턴을 '부족했음'으로 표시했습니다. 다음 턴 기록에 붙습니다." };
+    }
     if (action === 'off' || action === 'shadow' || action === 'enforce') {
       invalidate();
       mode = action;
@@ -87,7 +97,7 @@ export function registerRouter(on, classify, options = {}) {
       invalidate();
       locked = action === 'lock';
     } else if (action !== 'status') {
-      return { text: `사용법: /jet-router status|shadow|enforce|off|lock|unlock\n${REPORT_USAGE}` };
+      return { text: `사용법: /jet-router status|shadow|enforce|off|lock|unlock|flag\n${REPORT_USAGE}` };
     }
     try { $.ui.status(undefined); } catch { /* No interactive surface. */ }
     return { text: status(mode, locked, lastSummary, provider, options.cloudConsent === true, sendContext) };
@@ -101,6 +111,7 @@ export function registerRouter(on, classify, options = {}) {
       for (const turn of turns.values()) invalidateTurn(turn);
     }
     const ticket = { text: ambiguous ? undefined : e.text, ambiguous, user, reason,
+      rework: !ambiguous && previousMain && !e.text.trimStart().startsWith('/') ? reworkSignal(e.text) : 'unknown',
       command: e.text.trimStart().startsWith('/') };
     submissions.add(ticket);
     pending = ticket;
@@ -150,13 +161,14 @@ export function registerRouter(on, classify, options = {}) {
     let reason = 'queued';
     if (ticket) reason = ticket.reason ?? (ticket.ambiguous ? 'correlation'
       : turns.size > 0 ? 'overlap' : ticket.command ? 'command' : 'rewritten');
-    queuedUser = false;
     for (const turn of turns.values()) invalidateTurn(turn);
     turns.clear();
     if (routing()) {
       turns.set(e.turnId, { valid: Boolean(valid), silent, reason, text: valid ? e.text : '', started: false,
+        rework: valid && !ticket.command && !queuedUser ? ticket.rework : 'unknown',
         prompt: sendContext && valid ? e.text : null });
     }
+    queuedUser = false;
     return next(e);
   });
 
@@ -176,6 +188,8 @@ export function registerRouter(on, classify, options = {}) {
     turn.completing = true;
     turn.valid = false;
     turn.cancel?.();
+    const completedMain = { model: baseModel(turn.model), effort: turn.firstEffort, recordId: null };
+    previousMain = completedMain;
     try {
       const result = await next(e);
       // A notification turn the user did not type breaks the chain: sending the
@@ -189,12 +203,19 @@ export function registerRouter(on, classify, options = {}) {
         if (options.usageLog === true) {
           const recordId = `r_${randomHex()}`;
           const generation = chainGeneration;
-          const record = usageRecord({ project, model: baseModel(turn.model), record: { ...turn.record, recordId, previousRecordId },
+          const reservation = flagged?.recordId === previousRecordId ? flagged : undefined;
+          if (reservation) flagged = undefined;
+          const record = usageRecord({ project, model: baseModel(turn.model), record: { ...turn.record, recordId, previousRecordId,
+            previousFlagged: Boolean(reservation) },
             outcome: e.reason, durationMs: e.durationMs, usage: e.usage });
           let sessionId;
           try { sessionId = await $.session.id(); } catch { /* Session identity is optional. */ }
           const identity = typeof sessionId === 'string' ? { sessionId, sessionSalt } : {};
-          if (await recordUsage($, { ...record, ...identity }) && generation === chainGeneration) previousRecordId = recordId;
+          const recorded = await recordUsage($, { ...record, ...identity });
+          if (recorded && generation === chainGeneration) {
+            previousRecordId = recordId;
+            completedMain.recordId = recordId;
+          } else if (!recorded && generation === chainGeneration && !flagged && reservation?.recordId === previousRecordId) flagged = reservation;
         }
       }
       return result;
@@ -214,7 +235,7 @@ export function registerRouter(on, classify, options = {}) {
       // A held-out main turn keeps its subagents unchanged too: they are its control arm.
       subagents.set(e.turnId, { effort: inherit ? main.applied : undefined, requested: main?.requested, model: main?.model,
         stepModel: e.model ?? null, record: main?.record && { ...main.record, applied: inherit ? main.applied : undefined,
-          yielded: false, latencyMs: null } });
+          yielded: false, latencyMs: null, rework: undefined, betweenTurnEffort: undefined, midTurnEffort: undefined } });
     }
     const bound = subagents.get(e.turnId);
     if (bound.record) bound.record.forwarded = safeEffort(e.effort);
@@ -236,6 +257,14 @@ export function registerRouter(on, classify, options = {}) {
     if (!turn || turn.completing || turn.silent) return yield* next(e);
     if (turn.started) {
       if (turn.model !== (e.model ?? null)) invalidateTurn(turn);
+      if (turn.record && e.index > 0) {
+        const direction = effortDirection(turn.firstEffort, e.effort);
+        if (direction === 'unknown') turn.midUnknown = true;
+        if (turn.midUnknown) turn.record.midTurnEffort = 'unknown';
+        else if (turn.record.midTurnEffort === 'unknown' || turn.record.midTurnEffort === 'same') {
+          turn.record.midTurnEffort = direction;
+        }
+      }
       if (turn.record) turn.record.forwarded = safeEffort(e.effort);
       if (turn.applied && e.effort !== turn.requested) {
         // The user changed effort mid-turn; their choice wins for the rest of it.
@@ -246,8 +275,13 @@ export function registerRouter(on, classify, options = {}) {
     }
     turn.started = true;
     turn.model = e.model ?? null;
+    turn.firstEffort = e.index === 0 ? e.effort : undefined;
     const effort = safeEffort(e.effort);
     const record = { provider, mode, original: effort,
+      rework: turn.rework,
+      betweenTurnEffort: previousMain?.recordId && previousMain.recordId === previousRecordId &&
+        previousMain.model === baseModel(turn.model) ? effortDirection(previousMain.effort, turn.firstEffort) : 'unknown',
+      midTurnEffort: 'unknown',
       recommendation: 'keep', forwarded: effort, reasonCode: turn.valid ? 'correlation' : turn.reason, latencyMs: null };
     if (turn.valid && e.index === 0 && effort !== 'max' && effort !== 'unsupported') {
       const taskContext = sendContext ? contextText(previous) : null;
