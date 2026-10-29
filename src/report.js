@@ -72,5 +72,6 @@ export function status(mode, locked, lastSummary, provider = 'fake', cloudConsen
     `수동 잠금: ${locked ? '켜짐 — 분류 일시 정지' : '꺼짐'}`,
     `effort 자동 변경: ${mode === 'enforce' ? (locked ? '잠금으로 정지' : '켜짐 — 해당 턴과 그 턴의 subagent만, max 제외, 턴 도중 /effort 변경 시 양보') : '꺼짐 — 켜기: /jet-router enforce'}`,
     `최근 완료: ${lastSummary ?? '없음'}`,
+    '부족 표시: /jet-router flag',
   ].join('\n');
 }

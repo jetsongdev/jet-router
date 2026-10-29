@@ -89,6 +89,7 @@ claude --resume --plugin-dir /absolute/path/to/jet-router
 | `/jet-router lock` | 현재 모드를 유지하며 분류 일시 정지 |
 | `/jet-router unlock` | 잠금 해제. off였다면 계속 off |
 | `/jet-router enforce` | 추천 effort를 해당 턴에만 적용 (세션 기본값 변경 없음) |
+| `/jet-router flag` | 마지막으로 기록된 메인 턴을 부족했다고 표시하고 다음 메인 턴 기록에 연결 |
 | `/jet-router report [기준] [html]` | 사용량·절감 리포트. 기준 `day`(기본)·`week`·`month`·`project`·`model`·`mode`·`pair`·`all`, `html`이면 `~/.claude/jet-router/usage-report.html` 생성 |
 
 `on` 명령은 없습니다. 잠금 상태에서 shadow를 선택해도 잠금은 유지됩니다. 상태의 “최근 완료”는 이전 턴 기록이며 현재 모드와 다를 수 있습니다. 새 세션에서 초기화됩니다.
@@ -194,7 +195,8 @@ jet-router: Jev 생략: 시간 초과 · enforce
 shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용). 그 턴이 띄운 subagent도 subagent 턴이 끝날 때 `kind: "subagent"`로 따로 한 줄 기록합니다(0.11.0~, 이전 기록은 `main`).
 
 - 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, Jev 맥락·위험 점수(`contextScore`·`riskScore`, 0.12.2~, 기록만 하고 판정에는 쓰지 않음), 직전 턴 맥락 전송 여부(`contextSent`, 0.13.0~), 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.
-- 연결 필드: 메인 턴의 무작위 `recordId`, 직전 기록 성공 턴의 `previousRecordId`, 세션별 무작위 키로 가린 `sessionHash`. 모드·잠금 변경 시 연결을 끊고, subagent에는 기록하지 않습니다. `policyVersion`, `policyArm`, `policyCandidate`, `rework`, `betweenTurnEffort`, `midTurnEffort`, `previousFlagged`는 후속 작업을 위한 선택 필드로 현재 null입니다.
+- 연결 필드: 메인 턴의 무작위 `recordId`, 직전 기록 성공 턴의 `previousRecordId`, 세션별 무작위 키로 가린 `sessionHash`. 모드·잠금 변경 시 연결을 끊고, subagent에는 기록하지 않습니다. `policyVersion`, `policyArm`, `policyCandidate`는 후속 작업을 위한 선택 필드로 현재 null입니다.
+- 부족 신호: `rework`는 다음 입력의 재작업 요청을 추정하는 휴리스틱이며 원문과 매칭어는 저장하지 않습니다. `betweenTurnEffort`, `midTurnEffort`는 호스트가 보낸 effort의 변화 방향, `previousFlagged`는 직전 기록에 대한 수동 표시입니다. 신호가 없거나 침묵했다고 성공을 뜻하지 않습니다.
 - subagent 줄의 effort·대조군 여부는 자신을 띄운 메인 턴의 결정을 이어받고, 토큰은 subagent 턴 합계입니다(메인 턴 합계에는 subagent 토큰이 들어가지 않습니다). 메인 턴이 대조군이면 그 subagent도 대조군입니다.
 - 기록하지 않는 것: 프롬프트·답변 원문, API 키, off 모드 턴, 알림 턴, 메인 턴 없이 시작한 subagent(`/subtask` 등).
 - 끄기: `/plugin` → jet-router → Configure → `Record local token usage`를 false로 설정합니다.
