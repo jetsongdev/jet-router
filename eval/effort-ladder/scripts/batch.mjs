@@ -65,7 +65,7 @@ export async function execute(command, options, {client,env=process.env}={}) {
  ensurePaid(options.paid,env);
  if(!client) {const apiKey=loadKeys(env.LADDER_KEYS_FILE).ANTHROPIC_API_KEY; if(!apiKey) throw Error('missing-key'); const {default:Anthropic}=await import('@anthropic-ai/sdk'); client=new Anthropic({apiKey});}
  const {wave,outDir=join(root,'runs')}=options; if(!wave||!/^[A-Za-z0-9_-]+$/.test(wave)) throw Error('invalid wave');
- const dir=join(outDir,wave), statePath=join(dir,'batch.json'), ledgerPath=options.ledger??join(outDir,'ledger.jsonl');
+ const dir=join(outDir,wave), statePath=join(dir,'batch.json'), ledgerPath=options.ledger??join(root,'runs','ledger.jsonl');
  if(command==='submit') {
   if(existsSync(statePath)) throw Error('batch already submitted');
   const rows=readLines(join(dir,'requests.jsonl')); if(!rows.length) throw Error('empty batch');
@@ -73,8 +73,10 @@ export async function execute(command, options, {client,env=process.env}={}) {
   const estimate=estimates(rows,assumptions({assume:options.assume,assumeFrom:options.assumeFrom,outDir}));
   if(estimate.realisticUsd*1.25>cap) {const e=Error('wave estimate exceeds cap');e.exitCode=4;throw e;}
   const reservationUsd=Math.max(estimate.realisticUsd*1.25,0.5);
+  const segment=options.segment??'batch'; if(!['pilot','batch','agent','boost','turn2'].includes(segment)) throw Error('invalid segment');
+  mkdirSync(resolve(ledgerPath,'..'),{recursive:true});
   const ledger=openLedger(ledgerPath); let id;
-  try { id=ledger.reserve('batch',reservationUsd,`wave ${wave}`); json(statePath,{reservationId:id,reservationUsd,cap,...estimate,startedAt:new Date().toISOString(),status:'submitting'}); const batch=await client.messages.batches.create({requests:rows.map(({custom_id,params})=>({custom_id,params}))}); json(statePath,{...readJSON(statePath),batchId:batch.id,status:'submitted'}); return {...batch,...estimate,reservationUsd}; } finally {ledger.close();}
+  try { id=ledger.reserve(segment,reservationUsd,`wave ${wave}`); json(statePath,{reservationId:id,reservationUsd,cap,...estimate,startedAt:new Date().toISOString(),status:'submitting'}); const batch=await client.messages.batches.create({requests:rows.map(({custom_id,params})=>({custom_id,params}))}); json(statePath,{...readJSON(statePath),batchId:batch.id,status:'submitted'}); return {...batch,...estimate,reservationUsd}; } finally {ledger.close();}
  }
  const state=readJSON(statePath); if(!state.batchId) throw Error('submission outcome unknown; reservation retained');
  if(command==='status') return client.messages.batches.retrieve(state.batchId);

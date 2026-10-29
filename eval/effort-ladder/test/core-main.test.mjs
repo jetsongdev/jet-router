@@ -33,7 +33,7 @@ test('paid gate and mock batch roundtrip',async()=>{const dir=temp();try {
  const requests=readFileSync(built.path,'utf8').trim().split('\n').map(JSON.parse);assert.equal(requests[0].params.output_config.format.type,'json_schema');
  let calls=0; const ref=readFileSync(new URL('../../task-quality/reference.mjs',import.meta.url),'utf8'); const client={messages:{batches:{create:async ({requests})=>{calls++;assert.equal(requests.length,2);assert.equal(requests[0].meta,undefined);return {id:'batch-1'};},results:async ()=>requests.map((r,i)=>({custom_id:r.custom_id,result:{type:'succeeded',message:{stop_reason:i?'max_tokens':'end_turn',usage:{input_tokens:100,output_tokens:100},content:[{type:'text',text:JSON.stringify({code:ref})}]}}}))}}};
  await assert.rejects(execute('submit',{wave:'w0',outDir:dir},{client,env:{}}),e=>e.exitCode===3);assert.equal(calls,0);
- await execute('submit',{wave:'w0',outDir:dir,paid:true},{client,env:{LADDER_ALLOW_PAID:'1'}}); const done=await execute('collect',{wave:'w0',outDir:dir,paid:true},{client,env:{LADDER_ALLOW_PAID:'1'}});assert.equal(done.count,2);
+ await execute('submit',{wave:'w0',outDir:dir,ledger:join(dir,'ledger.jsonl'),paid:true},{client,env:{LADDER_ALLOW_PAID:'1'}}); const done=await execute('collect',{wave:'w0',outDir:dir,ledger:join(dir,'ledger.jsonl'),paid:true},{client,env:{LADDER_ALLOW_PAID:'1'}});assert.equal(done.count,2);
  const results=readFileSync(join(dir,'w0/results.jsonl'),'utf8').trim().split('\n').map(JSON.parse);assert.equal(results[0].passed,true);assert.equal(results[1].truncated,true);assert.equal(results[1].passed,false);
  const l=openLedger(join(dir,'ledger.jsonl'));assert.equal(l.totals().segments.batch.reserved,0);assert.ok(l.totals().segments.batch.spent>0);l.close();
  const blocked=spawnSync(process.execPath,['scripts/batch.mjs','submit','--wave','w0','--out-dir',dir],{encoding:'utf8',env:{}});assert.equal(blocked.status,3);assert.match(blocked.stderr,/paid call blocked/);
@@ -45,7 +45,7 @@ test('generation errors are distinct from quality failures',async()=>{const dir=
   {custom_id:requests[1].custom_id,result:{type:'errored',error:{type:'error'}}},
   {custom_id:requests[2].custom_id,result:{type:'expired'}}
  ]}}};
- const opts={wave:'w1',outDir:dir,paid:true}, deps={client,env:{LADDER_ALLOW_PAID:'1'}};
+ const opts={wave:'w1',outDir:dir,ledger:join(dir,'ledger.jsonl'),paid:true}, deps={client,env:{LADDER_ALLOW_PAID:'1'}};
  await execute('submit',opts,deps); await execute('collect',opts,deps);
  const rows=readFileSync(join(dir,'w1/results.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
  assert.deepEqual(rows.map(x=>x.generationError),['refusal','errored','expired']);assert.ok(rows.every(x=>!x.passed&&x.totalChecks===0));

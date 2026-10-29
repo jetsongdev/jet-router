@@ -27,3 +27,23 @@ test('max effort omits U and zero cost is charged at the cap', async () => {
  async function* query() {count++; yield {type:'result',subtype:'error_max_turns',is_error:true,session_id:'s',total_cost_usd:0,usage:{},modelUsage:{}};}
  try { const rows=await runAgent({wave:'w1',tasks:['ag/site-route-repair'],efforts:['max'],reps:1,twoTurn:true,query,grade,ledger,baseDir:dir}); assert.equal(count,2); assert.deepEqual(rows.map(r=>r.arm),[null,'S']); assert.ok(rows.every(r=>r.costUsd===1.5 && r.costSource==='assumed-max' && !r.passed)); } finally {ledger.close(); await rm(dir,{recursive:true,force:true});}
 });
+test('pilot forced forks save safe init and count tool errors', async () => {
+ const {dir} = await setup(); const calls=[];
+ async function* query({options}) {
+  calls.push(options); await writeFile(join(options.cwd,'x'),'fixed');
+  yield {type:'system',subtype:'init',session_id:'s',model:'mock',apiKey:'CANARY',env:{secret:'CANARY'},apiKeySource:'ANTHROPIC_API_KEY',mcp_servers:[{name:'m',status:'ok',apiKey:'CANARY'}],plugins:[{name:'p',path:'/p',apiKey:'CANARY'}]};
+  await options.hooks.PreToolUse[0].hooks[0]({effort:{level:options.effort}});
+  yield {type:'assistant',message:{content:[{type:'tool_use',name:'Bash',id:'b'},{type:'tool_use',name:'Read',id:'r'}]}};
+  yield {type:'user',message:{content:[{type:'tool_result',tool_use_id:'b',is_error:true},{type:'tool_result',tool_use_id:'r',is_error:true}]}};
+  yield {type:'result',subtype:'success',session_id:'s',total_cost_usd:options.forkSession?0.2:0.1,usage:{},modelUsage:{}};
+ }
+ try {
+  const rows=await runAgent({wave:'pilot',tasks:['ag/site-route-repair'],efforts:['low'],reps:1,twoTurn:true,forkAlways:true,segment:'pilot',query,grade,baseDir:dir});
+  assert.equal(rows.length,3); assert.deepEqual(rows.map(r=>r.effortEvidence),['low','low','medium']);
+  assert.ok(rows.every(r=>r.bashCalls===1&&r.bashErrors===1&&r.toolErrors===2)); assert.ok(rows.slice(1).every(r=>r.forced===true));
+  const init=await readFile(join(dir,'runs','pilot','init',`${rows[0].runId}.json`),'utf8'); assert.ok(!init.includes('CANARY')); assert.equal(JSON.parse(init).apiKeySource,'ANTHROPIC_API_KEY');
+  const ledger=openLedger(join(dir,'runs','ledger.jsonl')); assert.ok(Math.abs(ledger.totals().segments.pilot.spent-0.3)<1e-9); assert.equal(ledger.totals().segments.turn2.spent,0); ledger.close();
+  await assert.rejects(runAgent({wave:'bad',tasks:['ag/site-route-repair'],efforts:['low'],reps:1,forkAlways:true,segment:'pilot',query,grade,baseDir:dir}),/invalid arguments/);
+  await assert.rejects(runAgent({wave:'bad',tasks:['ag/site-route-repair'],efforts:['low'],reps:1,forkAlways:true,twoTurn:true,query,grade,baseDir:dir}),/invalid arguments/);
+ } finally {await rm(dir,{recursive:true,force:true});}
+});

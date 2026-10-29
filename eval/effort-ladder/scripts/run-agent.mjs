@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, readdir, rm, appendFile, mkdtemp } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, rm, appendFile, mkdtemp, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -10,6 +10,18 @@ import { createIsolation } from '../lib/agent-isolation.mjs';
 import { createShadowRaise } from '../lib/shadow-raise.mjs';
 
 const base = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const segments = ['pilot', 'batch', 'agent', 'boost', 'turn2'];
+function safeInit(message) {
+  const result = {};
+  for (const key of ['model', 'permissionMode', 'cwd', 'output_style']) if (typeof message[key] === 'string') result[key] = message[key];
+  for (const key of ['tools', 'slash_commands', 'agents', 'skills']) if (Array.isArray(message[key])) result[key] = message[key].filter(value => typeof value === 'string');
+  if (message.effort === null || EFFORTS.includes(message.effort)) result.effort = message.effort;
+  if (['ANTHROPIC_API_KEY', 'apiKeyHelper', '/login managed key', 'none', 'user', 'project', 'org', 'temporary', 'oauth'].includes(message.apiKeySource)) result.apiKeySource = message.apiKeySource;
+  for (const [key, fields] of [['mcp_servers', ['name', 'status', 'source']], ['plugins', ['name', 'path', 'version']]]) {
+    if (Array.isArray(message[key])) result[key] = message[key].map(item => Object.fromEntries(fields.filter(k => typeof item[k] === 'string').map(k => [k, item[k]])));
+  }
+  return result;
+}
 const targets = new Set(['site-route-repair', 'link-lint-scope', 'batch-rollback-debug']);
 export const FOLLOWUP = 'Some requirements in the original task are still not met. Re-read the task statement carefully, find what is missing or wrong, fix it, and run the public tests again.';
 
@@ -33,16 +45,19 @@ function shuffle(items, seed) {
 }
 
 // Supplying query is the only unpaid path, and must be a test stub.
-export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, paid = false, query: injectedQuery, grade: injectedGrade, ledger: injectedLedger, baseDir = base, outputDir }) {
+export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, forkAlways = false, segment, paid = false, query: injectedQuery, grade: injectedGrade, ledger: injectedLedger, ledgerPath, baseDir = base, outputDir }) {
   if (!injectedQuery && !(paid && process.env.LADDER_ALLOW_PAID === '1')) throw Error('paid call blocked');
   if (!/^[A-Za-z0-9_-]+$/.test(wave) || !Number.isSafeInteger(reps) || reps < 1 || !tasks.length || !efforts.length || efforts.some(e => !EFFORTS.includes(e)) || tasks.some(t => !/^ag\/[A-Za-z0-9_-]+$/.test(t))) throw Error('invalid arguments');
+  if ((segment !== undefined && !segments.includes(segment)) || (forkAlways && (!twoTurn || segment !== 'pilot'))) throw Error('invalid arguments');
   outputDir ??= join(baseDir, 'runs', wave);
+  ledgerPath ??= join(baseDir, 'runs', 'ledger.jsonl');
   const apiKey = injectedQuery ? undefined : loadKeys().ANTHROPIC_API_KEY;
   if (!injectedQuery && !apiKey) throw Error('missing-key');
   const query = injectedQuery ?? (await import('@anthropic-ai/claude-agent-sdk')).query;
   const grade = injectedGrade ?? (await import('../agent/grade-agent.mjs')).gradeWorkspace;
   await mkdir(outputDir, { recursive: true });
-  const ledger = injectedLedger ?? openLedger(join(baseDir, 'ledger.jsonl'));
+  if (!injectedLedger) await mkdir(dirname(ledgerPath), { recursive: true });
+  const ledger = injectedLedger ?? openLedger(ledgerPath);
   const rows = [];
   try {
     const matrix = [];
@@ -59,18 +74,30 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, pa
         const execute = async ({ effort, turn = 1, arm, parent }) => {
           const id = runId({ wave, suite: 'ag', slug, effort: item.effort, rep: item.rep, ...(turn === 2 ? { turn, arm } : {}) });
           const budget = effort === 'max' ? 1.5 : 1;
-          const reservation = await ledger.reserve(turn === 1 ? 'agent' : 'turn2', budget, id);
+          const reservation = await ledger.reserve(segment ?? (turn === 1 ? 'agent' : 'turn2'), budget, id);
           const shadow = createShadowRaise(), startedAt = new Date().toISOString(), start = Date.now();
-          let result, sessionId, effortEvidence = null, error;
+          let result, sessionId, effortEvidence = null, hookEffort = null, error;
+          const bashIds = new Set(), errorIds = new Set(); let bashCalls = 0, toolErrors = 0;
           try {
-            const options = { ...isolated.options, effort, maxBudgetUsd: budget, ...(parent ? { resume: parent.sessionId, forkSession: true } : {}) };
+            const options = { ...isolated.options, effort, maxBudgetUsd: budget, hooks: { PreToolUse: [{ hooks: [async input => { if (typeof input.effort?.level === 'string') hookEffort = input.effort.level; return {}; }] }] }, ...(parent ? { resume: parent.sessionId, forkSession: true } : {}) };
             for await (const message of query({ prompt: turn === 1 ? prompt : FOLLOWUP, options })) {
               shadow.observe(message);
               if (message.session_id) sessionId = message.session_id;
-              if (message.type === 'system' && message.subtype === 'init' && typeof message.effort === 'string') effortEvidence = message.effort;
+              if (message.type === 'system' && message.subtype === 'init') {
+                effortEvidence = typeof message.effort === 'string' ? message.effort : null;
+                const dir = join(outputDir, 'init'); await mkdir(dir, { recursive: true });
+                await writeFile(join(dir, `${id}.json`), JSON.stringify(safeInit(message), null, 2) + '\n');
+              }
+              const content = message.message?.content;
+              if (Array.isArray(content) && (message.type === 'assistant' || message.type === 'user')) for (const block of content) {
+                if (message.type === 'assistant' && block.type === 'tool_use' && block.name === 'Bash') { bashCalls++; bashIds.add(block.id); }
+                if (message.type === 'user' && block.type === 'tool_result' && block.is_error === true) { toolErrors++; errorIds.add(block.tool_use_id); }
+              }
               if (message.type === 'result') result = message;
             }
           } catch (e) { error = e; }
+          effortEvidence ??= hookEffort;
+          const bashErrors = [...errorIds].filter(id => bashIds.has(id)).length;
           const cumulative = result?.total_cost_usd;
           const usable = Number.isFinite(cumulative) && cumulative > 0 && (!parent || (Number.isFinite(parent.cost) && parent.cost > 0 && cumulative > parent.cost));
           const costUsd = usable ? cumulative - (parent?.cost ?? 0) : budget;
@@ -79,14 +106,14 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, pa
           const ws = join(outputDir, 'ws', id); await mkdir(dirname(ws), { recursive: true }); await cp(isolated.cwd, ws, { recursive: true, force: false, errorOnExist: true });
           const scored = await grade(slug, ws);
           const failedResult = !result || result.subtype !== 'success' || result.is_error;
-          const row = { v: 1, runId: id, taskId: item.task, kind: 'agent', effort, rep: item.rep, wave, turn, arm: arm ?? null, parentRunId: parent?.id ?? null, model: 'claude-opus-5-5', promptSha256: sha256(turn === 1 ? prompt : FOLLOWUP), fixtureSha256, startedAt, durationMs: Date.now() - start, endReason: result?.subtype ?? 'error_during_execution', truncated: ['error_max_turns', 'error_max_budget_usd'].includes(result?.subtype), usage: result ? { usage: result.usage, modelUsage: result.modelUsage } : null, costUsd, costSource, passed: !failedResult && scored.passed, passedChecks: scored.passedChecks, totalChecks: scored.totalChecks, publicTestsUnmodified: scored.publicTestsUnmodified, shadowRaise: turn === 2 ? parent.shadow : shadow.result(), effortEvidence, ...(turn === 2 ? { effortTurn2: effort } : {}) };
+          const row = { v: 1, runId: id, taskId: item.task, kind: 'agent', effort, rep: item.rep, wave, turn, arm: arm ?? null, parentRunId: parent?.id ?? null, model: 'claude-opus-5-5', promptSha256: sha256(turn === 1 ? prompt : FOLLOWUP), fixtureSha256, startedAt, durationMs: Date.now() - start, endReason: result?.subtype ?? 'error_during_execution', truncated: ['error_max_turns', 'error_max_budget_usd'].includes(result?.subtype), usage: result ? { usage: result.usage, modelUsage: result.modelUsage } : null, costUsd, costSource, passed: !failedResult && scored.passed, passedChecks: scored.passedChecks, totalChecks: scored.totalChecks, publicTestsUnmodified: scored.publicTestsUnmodified, shadowRaise: turn === 2 ? parent.shadow : shadow.result(), effortEvidence, bashCalls, bashErrors, toolErrors, ...(turn === 2 && forkAlways ? { forced: true } : {}), ...(turn === 2 ? { effortTurn2: effort } : {}) };
           await appendFile(join(outputDir, 'agent.jsonl'), JSON.stringify(row) + '\n'); rows.push(row);
           if (error) throw Error('agent-execution-failed');
           return { id, sessionId, cost: cumulative, shadow: shadow.result(), row };
         };
         const parent = await execute({ effort: item.effort });
-        if (twoTurn && targets.has(slug) && !parent.row.passed) {
-          if (!parent.sessionId) throw Error('failed run has no session ID for fork');
+        if (twoTurn && targets.has(slug) && (forkAlways || !parent.row.passed)) {
+          if (!parent.sessionId) throw Error('run has no session ID for fork');
           const snapshot = join(snapshotRoot, 'workspace'); await cp(isolated.cwd, snapshot, { recursive: true });
           for (const [arm, effort] of [['S', item.effort], ['U', EFFORTS[EFFORTS.indexOf(item.effort) + 1]]]) {
             if (!effort) continue;
@@ -106,7 +133,8 @@ function parseArgs(args) {
     const flag = args.shift();
     if (flag === '--paid') result.paid = true;
     else if (flag === '--two-turn') result.twoTurn = true;
-    else if (['--wave', '--tasks', '--efforts', '--reps'].includes(flag)) { const value = args.shift(); if (!value || value.startsWith('--')) throw Error('invalid arguments'); result[flag.slice(2)] = value; }
+    else if (flag === '--fork-always') result.forkAlways = true;
+    else if (['--wave', '--tasks', '--efforts', '--reps', '--segment', '--ledger'].includes(flag)) { const value = args.shift(); if (!value || value.startsWith('--')) throw Error('invalid arguments'); result[flag === '--ledger' ? 'ledgerPath' : flag.slice(2)] = value; }
     else throw Error('invalid arguments');
   }
   if (!result.paid || process.env.LADDER_ALLOW_PAID !== '1') throw Error('paid call blocked');
