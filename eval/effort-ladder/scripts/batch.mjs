@@ -38,20 +38,20 @@ function estimates(rows,values) {
   if(!Object.hasOwn(values,effort)) throw Error('invalid request effort');
   const input_tokens=Math.ceil(Buffer.byteLength(r.params.messages[0].content)/4);
   realisticUsd+=costFromUsage({input_tokens,output_tokens:values[effort]},{batch:true});
-  worstUsd+=costFromUsage({input_tokens,output_tokens:32000},{batch:true});
+  worstUsd+=costFromUsage({input_tokens,output_tokens:r.params.max_tokens},{batch:true});
  }
  return {realisticUsd,worstUsd};
 }
 function argsOf(args) {const out={}; for(let i=0;i<args.length;i++){const k=args[i]; if(!k.startsWith('--')) throw Error('invalid option'); out[k.slice(2)]=k==='--paid'?true:args[++i];} return out;}
-export function build({wave,tasks='tq,ss',efforts='low,medium,high,xhigh,max',reps='1',outDir=join(root,'runs'),assume,assumeFrom}) {
- if(!wave||!/^[A-Za-z0-9_-]+$/.test(wave)||!Number.isSafeInteger(Number(reps))||Number(reps)<1) throw Error('invalid build arguments');
+export function build({wave,tasks='tq,ss',efforts='low,medium,high,xhigh,max',reps='1',outDir=join(root,'runs'),assume,assumeFrom,maxTokens='32000'}) {
+ if(!wave||!/^[A-Za-z0-9_-]+$/.test(wave)||!Number.isSafeInteger(Number(reps))||Number(reps)<1||![32000,64000].includes(Number(maxTokens))) throw Error('invalid build arguments');
  const selected=tasks.split(','), levels=efforts.split(','); if(levels.some(e=>!EFFORTS.includes(e))||selected.some(s=>!['tq','ss'].includes(s)&&! /^(tq|ss)\/[A-Za-z0-9_-]+$/.test(s))||new Set(levels).size!==levels.length||new Set(selected).size!==selected.length) throw Error('invalid selection');
  const manifest=buildManifest().filter(t=>selected.includes(t.suite)||selected.includes(t.task_id));
  if(!manifest.length) throw Error('no tasks selected');
  const rows=[];
  for(const task of manifest) for(const effort of levels) for(let rep=1;rep<=Number(reps);rep++) {
   const id=runId({wave,suite:task.suite,slug:task.slug,effort,rep});
-  rows.push({custom_id:id,params:{model,max_tokens:32000,output_config:{effort,format:{type:'json_schema',schema}},messages:[{role:'user',content:task.prompt}]},meta:{wave,taskId:task.task_id,suite:task.suite,slug:task.slug,effort,rep,promptSha256:task.prompt_sha256,fixtureSha256:task.fixture_sha256}});
+  rows.push({custom_id:id,params:{model,max_tokens:Number(maxTokens),output_config:{effort,format:{type:'json_schema',schema}},messages:[{role:'user',content:task.prompt}]},meta:{wave,taskId:task.task_id,suite:task.suite,slug:task.slug,effort,rep,promptSha256:task.prompt_sha256,fixtureSha256:task.fixture_sha256}});
  }
  const estimate=estimates(rows,assumptions({assume,assumeFrom,outDir}));
  const dir=join(outDir,wave); mkdirSync(dir,{recursive:true}); const path=join(dir,'requests.jsonl'); if(existsSync(path)) throw Error('requests already exist');
@@ -69,7 +69,7 @@ export async function execute(command, options, {client,env=process.env}={}) {
  if(command==='submit') {
   if(existsSync(statePath)) throw Error('batch already submitted');
   const rows=readLines(join(dir,'requests.jsonl')); if(!rows.length) throw Error('empty batch');
-  const cap=Number(options.cap??8); if(!Number.isFinite(cap)||cap<=0||cap>30) throw Error('invalid wave cap');
+  const cap=Number(options.cap??8); if(!Number.isFinite(cap)||cap<=0||cap>37) throw Error('invalid wave cap');
   const estimate=estimates(rows,assumptions({assume:options.assume,assumeFrom:options.assumeFrom,outDir}));
   if(estimate.realisticUsd*1.25>cap) {const e=Error('wave estimate exceeds cap');e.exitCode=4;throw e;}
   const reservationUsd=Math.max(estimate.realisticUsd*1.25,0.5);
@@ -109,4 +109,4 @@ export async function execute(command, options, {client,env=process.env}={}) {
  } finally {ledger.close();}
  return {count:records.length,costUsd:settledUsd,overrun};
 }
-if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url) {try {const [command,...rest]=process.argv.slice(2); const a=argsOf(rest); const result=await execute(command,{...a,outDir:a['out-dir'],assumeFrom:a['assume-from']}); console.log(JSON.stringify(result));} catch(e) {console.error(e.message);process.exitCode=e.exitCode??1;}}
+if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url) {try {const [command,...rest]=process.argv.slice(2); const a=argsOf(rest); const result=await execute(command,{...a,outDir:a['out-dir'],assumeFrom:a['assume-from'],maxTokens:a['max-tokens']}); console.log(JSON.stringify(result));} catch(e) {console.error(e.message);process.exitCode=e.exitCode??1;}}

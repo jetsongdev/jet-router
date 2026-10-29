@@ -1,7 +1,7 @@
 import { openSync, closeSync, unlinkSync, readFileSync, appendFileSync, existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 export class CapExceededError extends Error {}
-export const DEFAULT_CAPS = {pilot:5,batch:30,agent:85,boost:20,turn2:15};
+export const DEFAULT_CAPS = {pilot:5,batch:37,agent:85,boost:13,turn2:15};
 export function openLedger(path, caps = DEFAULT_CAPS) {
  caps = {...DEFAULT_CAPS,...caps};
  const lock = `${path}.lock`;

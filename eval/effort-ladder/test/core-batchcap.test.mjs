@@ -52,7 +52,7 @@ test('batch and agent share ledger, pilot cap and total cap',async()=>{
   const grade=async()=>({passed:true,passedChecks:1,totalChecks:1,publicTestsUnmodified:true});
   await runAgent({wave:'a',tasks:['ag/site-route-repair'],efforts:['low'],reps:1,segment:'pilot',query,grade,baseDir:dir,ledgerPath});
   let ledger=openLedger(ledgerPath); assert.equal(ledger.totals().segments.pilot.reserved,0.5); assert.equal(ledger.totals().segments.pilot.spent,0.2); assert.throws(()=>ledger.reserve('pilot',4.31),/cap exceeded/);
-  for(const [segment,usd] of [['batch',30],['agent',85],['boost',20]]) {const id=ledger.reserve(segment,usd);ledger.settle(id,{runId:segment,usd,source:'assumed-max'});}
+  for(const [segment,usd] of [['batch',37],['agent',85],['boost',13]]) {const id=ledger.reserve(segment,usd);ledger.settle(id,{runId:segment,usd,source:'assumed-max'});}
   const id=ledger.reserve('pilot',4.0);ledger.settle(id,{runId:'fill',usd:4.0,source:'assumed-max'});ledger.close();
   ledger=openLedger(ledgerPath,{agent:100}); assert.ok(Math.abs(ledger.totals().total.remaining-0.3)<1e-9); assert.ok(ledger.totals().segments.agent.remaining>1); assert.throws(()=>ledger.reserve('agent',0.31),/cap exceeded/); ledger.close();
   await assert.rejects(runAgent({wave:'blocked',tasks:['ag/site-route-repair'],efforts:['low'],reps:1,segment:'agent',query,grade,baseDir:dir,ledgerPath}),/cap exceeded/);
