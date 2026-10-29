@@ -22,7 +22,7 @@ function safeInit(message) {
   }
   return result;
 }
-function budgetFor(effort) { return effort === 'max' ? 3 : effort === 'xhigh' ? 1.5 : 1; }
+function budgetFor(effort, meta) { return meta.budgetUsd?.[effort] ?? (effort === 'max' ? 3 : effort === 'xhigh' ? 1.5 : 1); }
 function classifyError(error) {
   const status = error?.status ?? error?.statusCode;
   const detail = `${error?.name ?? ''} ${error?.code ?? ''} ${error?.message ?? ''}`;
@@ -81,10 +81,10 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, fo
       const snapshotRoot = await mkdtemp(join(tmpdir(), 'effort-parent-'));
       let isolated;
       try {
-        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: budgetFor(item.effort), apiKey });
+        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: budgetFor(item.effort, meta), apiKey });
         const execute = async ({ effort, turn = 1, arm, parent }) => {
           const id = runId({ wave, suite: 'ag', slug, effort: item.effort, rep: item.rep, ...(turn === 2 ? { turn, arm } : {}) });
-          const budget = budgetFor(effort);
+          const budget = budgetFor(effort, meta);
           const reservation = await ledger.reserve(segment ?? (turn === 1 ? 'agent' : 'turn2'), budget, id);
           const shadow = createShadowRaise(), shadowV0b = createShadowRaise({ rule: 'v0b' }), startedAt = new Date().toISOString(), start = Date.now();
           let result, sessionId, effortEvidence = null, hookEffort = null, error;

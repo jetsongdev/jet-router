@@ -1,0 +1,5 @@
+# Offline notebook synchronization
+
+`sync(state, operations, {now, ttl})` returns a fresh `{records, fences, seen}`. The initial state is `{records:[], fences:[], seen:[]}`. An operation is `{key, id, time, actor, deleted}` and, only for a live operation, a string `value`. IDs, keys and actors are nonempty strings. Times and ttl are nonnegative safe integers; each operation time is at most now and calls use nondecreasing now. Records and fences contain winning operation objects without `key`; `seen` contains operation keys. State supplied to a call is a previous result. The input is not mutated.
+
+The winning update per ID has the lexicographically greatest tuple `(time, actor, deleted, value)` where time is numeric, actor and value use JavaScript string ordering, false sorts before true, and deleted operations use the empty string in place of value. This makes equal timestamp conflicts independent of arrival order; deletion wins over a live update when time and actor tie. Records are returned sorted by ID, as are fences; seen keys are sorted using JavaScript string ordering. Consult `docs/retention.md` for the rules used when a device reconnects.

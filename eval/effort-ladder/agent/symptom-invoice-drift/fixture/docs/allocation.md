@@ -1,0 +1,3 @@
+# Discount breakdown
+
+For a positive invoice discount, apportion whole cents in proportion to the already rounded gross cents of each line. First give each line the floor of its exact fractional share. Assign remaining cents to the lines with the largest fractional remainders, one cent apiece, breaking equal remainders by ascending ID using JavaScript string ordering. A zero-gross line has zero share. A zero discount allocates zero to each line, including an invoice whose total gross is zero. The sum of allocations equals the input discount. Output lines are always sorted by ID using JavaScript string ordering, independent of input order. Never use input order to break a remainder tie; changing it can change taxes when the tied lines have different rates.

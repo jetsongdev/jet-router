@@ -1,0 +1,3142 @@
+{
+  "waves": [
+    "w1",
+    "w2",
+    "w2m",
+    "w3",
+    "a1",
+    "a2",
+    "a3",
+    "a4"
+  ],
+  "excludedW1Max": 30,
+  "tasks": [
+    {
+      "taskId": "ag/batch-rollback-debug",
+      "cells": {
+        "low": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 1481,
+          "meanCostUsd": 0.07151613333333333
+        },
+        "medium": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 2314.5,
+          "meanCostUsd": 0.09271077500000001
+        },
+        "high": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 2908,
+          "meanCostUsd": 0.11820133333333332
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 5374,
+          "meanCostUsd": 0.18441739999999998
+        },
+        "max": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 43278,
+          "meanCostUsd": 1.29745405
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ag/calc-decimal-cli",
+      "cells": {
+        "low": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 1161.5,
+          "meanCostUsd": 0.052003675
+        },
+        "medium": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 1615,
+          "meanCostUsd": 0.07182670000000001
+        },
+        "high": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 1774,
+          "meanCostUsd": 0.08168186666666667
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 2210,
+          "meanCostUsd": 0.09087993333333333
+        },
+        "max": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 24137,
+          "meanCostUsd": 0.7605231666666666
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ag/game-round-reducer",
+      "cells": {
+        "low": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 1018,
+          "meanCostUsd": 0.05561676666666667
+        },
+        "medium": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 1856,
+          "meanCostUsd": 0.0791793
+        },
+        "high": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 2318,
+          "meanCostUsd": 0.09050925
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 3036,
+          "meanCostUsd": 0.12047216666666666
+        },
+        "max": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 21036,
+          "meanCostUsd": 0.5962704666666667
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ag/link-lint-scope",
+      "cells": {
+        "low": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 915,
+          "meanCostUsd": 0.05190290000000001
+        },
+        "medium": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 1557.5,
+          "meanCostUsd": 0.0720682
+        },
+        "high": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 2160,
+          "meanCostUsd": 0.10208236666666666
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 6137,
+          "meanCostUsd": 0.20270503333333334
+        },
+        "max": {
+          "k": 2,
+          "N": 3,
+          "p": 0.6666666666666666,
+          "wilson95": [
+            0.2076596008020477,
+            0.9385080552796037
+          ],
+          "medianOutputTokens": 48819,
+          "meanCostUsd": 1.3563303000000004
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 0.6666666666666666,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": null,
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 0.9999999999999994,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 0.9999999999999994,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 0.9999999999999994,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 0.7999999999999998,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ag/log-window-aggregate",
+      "cells": {
+        "low": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 1892,
+          "meanCostUsd": 0.08260986666666667
+        },
+        "medium": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 2825,
+          "meanCostUsd": 0.10830616666666666
+        },
+        "high": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 3897,
+          "meanCostUsd": 0.13573856666666667
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 9008,
+          "meanCostUsd": 0.26248963333333336
+        },
+        "max": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 73201.5,
+          "meanCostUsd": 1.9782308999999998
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ag/site-route-repair",
+      "cells": {
+        "low": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 2699,
+          "meanCostUsd": 0.10097680000000002
+        },
+        "medium": {
+          "k": 4,
+          "N": 4,
+          "p": 1,
+          "wilson95": [
+            0.5101091635454027,
+            1
+          ],
+          "medianOutputTokens": 3710,
+          "meanCostUsd": 0.139854725
+        },
+        "high": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 4663,
+          "meanCostUsd": 0.16045853333333335
+        },
+        "xhigh": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 7653,
+          "meanCostUsd": 0.2561818
+        },
+        "max": {
+          "k": 3,
+          "N": 3,
+          "p": 1,
+          "wilson95": [
+            0.4385029682449546,
+            1
+          ],
+          "medianOutputTokens": 52763,
+          "meanCostUsd": 1.6165861333333333
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 3,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/front-matter-fields",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 441.5,
+          "meanCostUsd": 0.00531
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 681,
+          "meanCostUsd": 0.008283
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 853.5,
+          "meanCostUsd": 0.009670000000000002
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1302,
+          "meanCostUsd": 0.014244999999999999
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 9666,
+          "meanCostUsd": 0.106833
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/grid-neighbors",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 467,
+          "meanCostUsd": 0.005554000000000001
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 532,
+          "meanCostUsd": 0.006222
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 556,
+          "meanCostUsd": 0.006468
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 838.5,
+          "meanCostUsd": 0.009288
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 6845,
+          "meanCostUsd": 0.069787
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/heading-index",
+      "cells": {
+        "low": {
+          "k": 0,
+          "N": 10,
+          "p": 0,
+          "wilson95": [
+            0,
+            0.2775327998628892
+          ],
+          "medianOutputTokens": 255,
+          "meanCostUsd": 0.00352
+        },
+        "medium": {
+          "k": 9,
+          "N": 10,
+          "p": 0.9,
+          "wilson95": [
+            0.5958499732047615,
+            0.9821237869049271
+          ],
+          "medianOutputTokens": 616,
+          "meanCostUsd": 0.007174999999999999
+        },
+        "high": {
+          "k": 8,
+          "N": 10,
+          "p": 0.8,
+          "wilson95": [
+            0.49016247153664183,
+            0.9433178485456247
+          ],
+          "medianOutputTokens": 639.5,
+          "meanCostUsd": 0.007487000000000001
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 813.5,
+          "meanCostUsd": 0.00923
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 6744.5,
+          "meanCostUsd": 0.074084
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "xhigh",
+      "status": "ok",
+      "rule0": {
+        "label": "xhigh",
+        "status": "unstable"
+      },
+      "label_bprime": "xhigh",
+      "ruleA": {
+        "label": "xhigh",
+        "status": "ok",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": false,
+            "severe": true
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": false,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "medium",
+        "status": "ok",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 0.000005412544112234521,
+            "meets": false,
+            "severe": true
+          },
+          "medium": {
+            "p": 0.5000000000000009,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 0.23684210526315808,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/line-winner",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 654,
+          "meanCostUsd": 0.0075639999999999995
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 675.5,
+          "meanCostUsd": 0.0077859999999999995
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 941,
+          "meanCostUsd": 0.010389
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1127,
+          "meanCostUsd": 0.012713000000000002
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 9371.5,
+          "meanCostUsd": 0.10167699999999999
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/monthly-occurrences",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 707,
+          "meanCostUsd": 0.008271
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 775.5,
+          "meanCostUsd": 0.008832999999999999
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 930,
+          "meanCostUsd": 0.010539
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1445.5,
+          "meanCostUsd": 0.015665000000000002
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 8206,
+          "meanCostUsd": 0.08174699999999999
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/patch-components",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 2486,
+          "meanCostUsd": 0.026583000000000002
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 3773.5,
+          "meanCostUsd": 0.04041
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 4913,
+          "meanCostUsd": 0.052334000000000006
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 10163.5,
+          "meanCostUsd": 0.10322900000000002
+        },
+        "max": {
+          "k": 5,
+          "N": 5,
+          "p": 1,
+          "wilson95": [
+            0.5655175352168251,
+            1
+          ],
+          "medianOutputTokens": 34083,
+          "meanCostUsd": 0.348426
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 4,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "ss/unit-sum",
+      "cells": {
+        "low": {
+          "k": 9,
+          "N": 10,
+          "p": 0.9,
+          "wilson95": [
+            0.5958499732047615,
+            0.9821237869049271
+          ],
+          "medianOutputTokens": 732.5,
+          "meanCostUsd": 0.008385
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 968,
+          "meanCostUsd": 0.010836
+        },
+        "high": {
+          "k": 9,
+          "N": 10,
+          "p": 0.9,
+          "wilson95": [
+            0.5958499732047615,
+            0.9821237869049271
+          ],
+          "medianOutputTokens": 1017.5,
+          "meanCostUsd": 0.011329
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1470.5,
+          "meanCostUsd": 0.016583
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 12455,
+          "meanCostUsd": 0.13169
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 0.5000000000000009,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 0.5000000000000009,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/async-memo",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 547.5,
+          "meanCostUsd": 0.006606999999999999
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 872.5,
+          "meanCostUsd": 0.009449
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 936.5,
+          "meanCostUsd": 0.010291
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1868.5,
+          "meanCostUsd": 0.021383999999999997
+        },
+        "max": {
+          "k": 3,
+          "N": 5,
+          "p": 0.6,
+          "wilson95": [
+            0.2307242812760128,
+            0.882379225767352
+          ],
+          "medianOutputTokens": 48958,
+          "meanCostUsd": 0.482512
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 0.6,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": null,
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 0.7380952380952377,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/intervals",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 598,
+          "meanCostUsd": 0.006848999999999999
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 782.5,
+          "meanCostUsd": 0.009846
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1221.5,
+          "meanCostUsd": 0.012915000000000001
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1765,
+          "meanCostUsd": 0.018829
+        },
+        "max": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 19047,
+          "meanCostUsd": 0.187263
+        }
+      },
+      "refEffort": "max",
+      "unequalN": false,
+      "threshold": 0.9,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/keyed-queue",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 172,
+          "meanCostUsd": 0.002556
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 507,
+          "meanCostUsd": 0.00581
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 619.5,
+          "meanCostUsd": 0.007334
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1301.5,
+          "meanCostUsd": 0.013735
+        },
+        "max": {
+          "k": 3,
+          "N": 5,
+          "p": 0.6,
+          "wilson95": [
+            0.2307242812760128,
+            0.882379225767352
+          ],
+          "medianOutputTokens": 41429,
+          "meanCostUsd": 0.473558
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 0.6,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": null,
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 5,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 2,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 0.9999999999999991,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 0.7380952380952377,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/ledger",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 702.5,
+          "meanCostUsd": 0.008492999999999999
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1356.5,
+          "meanCostUsd": 0.015116000000000001
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1627,
+          "meanCostUsd": 0.017088000000000002
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 3106.5,
+          "meanCostUsd": 0.029658
+        },
+        "max": {
+          "k": 5,
+          "N": 5,
+          "p": 1,
+          "wilson95": [
+            0.5655175352168251,
+            1
+          ],
+          "medianOutputTokens": 26723,
+          "meanCostUsd": 0.259712
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 4,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/ranges",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 455,
+          "meanCostUsd": 0.00537
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 989,
+          "meanCostUsd": 0.010647
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1064,
+          "meanCostUsd": 0.011883
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1838.5,
+          "meanCostUsd": 0.019720999999999995
+        },
+        "max": {
+          "k": 5,
+          "N": 5,
+          "p": 1,
+          "wilson95": [
+            0.5655175352168251,
+            1
+          ],
+          "medianOutputTokens": 20429,
+          "meanCostUsd": 0.20790999999999998
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 4,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    },
+    {
+      "taskId": "tq/ttl-lru",
+      "cells": {
+        "low": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 533,
+          "meanCostUsd": 0.0064
+        },
+        "medium": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 990,
+          "meanCostUsd": 0.011010999999999998
+        },
+        "high": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1074,
+          "meanCostUsd": 0.011940000000000001
+        },
+        "xhigh": {
+          "k": 10,
+          "N": 10,
+          "p": 1,
+          "wilson95": [
+            0.7224672001371107,
+            0.9999999999999999
+          ],
+          "medianOutputTokens": 1670,
+          "meanCostUsd": 0.0177
+        },
+        "max": {
+          "k": 5,
+          "N": 5,
+          "p": 1,
+          "wilson95": [
+            0.5655175352168251,
+            1
+          ],
+          "medianOutputTokens": 35894,
+          "meanCostUsd": 0.41634000000000004
+        }
+      },
+      "refEffort": "max",
+      "unequalN": true,
+      "threshold": 1,
+      "label": "low",
+      "status": "saturated",
+      "rule0": {
+        "label": "low",
+        "status": "saturated"
+      },
+      "label_bprime": "low",
+      "ruleA": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "required": 9,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "required": 4,
+            "meets": true,
+            "severe": false
+          }
+        }
+      },
+      "ruleF": {
+        "label": "low",
+        "status": "saturated",
+        "tooHard": false,
+        "checks": {
+          "low": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "medium": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "high": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "xhigh": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          },
+          "max": {
+            "p": 1,
+            "meets": true,
+            "severe": false
+          }
+        }
+      }
+    }
+  ],
+  "e1": {
+    "applied": {
+      "under": 2,
+      "equal": 0,
+      "over": 36,
+      "unjudged": 0
+    },
+    "recommendation": {
+      "under": 2,
+      "equal": 0,
+      "over": 36,
+      "unjudged": 0
+    },
+    "rows": [
+      {
+        "taskId": "tq/ranges",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.81,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/ranges",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.68,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/ttl-lru",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.88,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/ttl-lru",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.81,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/async-memo",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "xhigh",
+        "applied": "medium",
+        "probability": 0.41,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/async-memo",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "xhigh",
+        "applied": "high",
+        "probability": 0.54,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/ledger",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.59,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/ledger",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.5,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/keyed-queue",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.49,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/keyed-queue",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.37,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/intervals",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.81,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "tq/intervals",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.65,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/front-matter-fields",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.84,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/front-matter-fields",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.69,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/grid-neighbors",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.96,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/grid-neighbors",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.92,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/heading-index",
+        "original": "medium",
+        "label": "xhigh",
+        "status": "ok",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.93,
+        "recommendationResult": "under",
+        "appliedResult": "under"
+      },
+      {
+        "taskId": "ss/heading-index",
+        "original": "high",
+        "label": "xhigh",
+        "status": "ok",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.9,
+        "recommendationResult": "under",
+        "appliedResult": "under"
+      },
+      {
+        "taskId": "ss/line-winner",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.75,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/line-winner",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.7,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/monthly-occurrences",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.76,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/monthly-occurrences",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.53,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/patch-components",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.48,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/patch-components",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.66,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/unit-sum",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.59,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ss/unit-sum",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.55,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/batch-rollback-debug",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "medium",
+        "probability": 0.68,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/batch-rollback-debug",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.74,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/calc-decimal-cli",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.73,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/calc-decimal-cli",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.6900000000000001,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/game-round-reducer",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.76,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/game-round-reducer",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "high",
+        "probability": 0.65,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/link-lint-scope",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.52,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/link-lint-scope",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.43,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/log-window-aggregate",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.45,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/log-window-aggregate",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.54,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/site-route-repair",
+        "original": "medium",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "medium",
+        "applied": "medium",
+        "probability": 0.57,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      },
+      {
+        "taskId": "ag/site-route-repair",
+        "original": "high",
+        "label": "low",
+        "status": "saturated",
+        "recommendation": "high",
+        "applied": "high",
+        "probability": 0.53,
+        "recommendationResult": "over",
+        "appliedResult": "over"
+      }
+    ]
+  },
+  "e2": {
+    "shadowRaise": {
+      "low": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 19,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "medium": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 22,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "high": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 19,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "xhigh": {
+        "triggered": {
+          "passed": 2,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 16,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "max": {
+        "triggered": {
+          "passed": 17,
+          "failed": 1
+        },
+        "not_triggered": {
+          "passed": 2,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "total": {
+        "triggered": {
+          "passed": 19,
+          "failed": 1
+        },
+        "not_triggered": {
+          "passed": 78,
+          "failed": 0
+        },
+        "unknown": 0
+      }
+    },
+    "shadowRaiseV0b": {
+      "low": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 19,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "medium": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 22,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "high": {
+        "triggered": {
+          "passed": 0,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 19,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "xhigh": {
+        "triggered": {
+          "passed": 2,
+          "failed": 0
+        },
+        "not_triggered": {
+          "passed": 16,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "max": {
+        "triggered": {
+          "passed": 17,
+          "failed": 1
+        },
+        "not_triggered": {
+          "passed": 2,
+          "failed": 0
+        },
+        "unknown": 0
+      },
+      "total": {
+        "triggered": {
+          "passed": 19,
+          "failed": 1
+        },
+        "not_triggered": {
+          "passed": 78,
+          "failed": 0
+        },
+        "unknown": 0
+      }
+    }
+  },
+  "turn2": [
+    {
+      "runId": "a3-ag-link-lint-scope-max-r01-t2S",
+      "parentRunId": "a3-ag-link-lint-scope-max-r01",
+      "taskId": "ag/link-lint-scope",
+      "arm": "S",
+      "passed": true
+    }
+  ]
+}

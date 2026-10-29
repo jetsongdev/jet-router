@@ -110,3 +110,16 @@ test('error classes and consecutive failure reset', async () => {
   const rows=await runAgent({wave:'reset',tasks:['ag/site-route-repair'],efforts:['low'],reps:5,query:mixed,grade,ledger,baseDir:dir}); assert.equal(calls,5); assert.deepEqual(rows.map(r=>r.endReason),['error_during_execution','error_during_execution','success','error_during_execution','error_during_execution']);
  } finally {await rm(dir,{recursive:true,force:true});}
 });
+test('task budget overrides apply to reservations and both arms, with per-effort fallback', async () => {
+ const {dir,task}=await setup(); const reservations=[], calls=[];
+ await writeFile(join(task,'meta.json'), JSON.stringify({maxTurns:4,budgetUsd:{low:0.4,medium:0.7}}));
+ const ledger={reserve:async (_segment,usd)=>{reservations.push(usd); return reservations.length;},settle:async()=>{}};
+ async function* query({options}) {calls.push([options.effort,options.maxBudgetUsd]); yield {type:'result',subtype:'error_max_turns',session_id:'s',total_cost_usd:0};}
+ try {
+  const result=await runAgent({wave:'override',tasks:['ag/site-route-repair'],efforts:['low','high'],reps:1,twoTurn:true,query,grade,ledger,baseDir:dir});
+  assert.deepEqual(calls.map(([,budget])=>budget),reservations);
+  assert.ok(calls.every(([effort,budget])=>budget===({low:0.4,medium:0.7,high:1,xhigh:1.5}[effort])));
+  assert.ok(calls.some(([effort])=>effort==='medium')); assert.ok(calls.some(([effort])=>effort==='xhigh'));
+  assert.ok(result.every(row=>row.truncated && row.costUsd===({low:0.4,medium:0.7,high:1,xhigh:1.5}[row.effort])));
+ } finally {await rm(dir,{recursive:true,force:true});}
+});
