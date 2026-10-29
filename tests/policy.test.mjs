@@ -1,9 +1,32 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decide, parseDecision, belowApplyProbability, MIN_APPLY_PROBABILITY } from '../src/policy.js';
+import { decide, parseDecision, belowApplyProbability, MIN_APPLY_PROBABILITY, policyCandidate } from '../src/policy.js';
 
 const verdict = { choice: 'low', contextSufficient: true, risky: false };
 const input = { original: 'high', supported: ['low', 'medium', 'high', 'xhigh', 'max'], decision: verdict };
+
+test('policy candidate table applies ordered shadow rules', () => {
+  const cases = [
+    ['medium', null, {}, 'medium', []],
+    ['high', null, {}, 'medium', ['ceiling']],
+    ['xhigh', null, {}, 'medium', ['ceiling']],
+    ['medium', 'high', {}, 'medium', ['ceiling']],
+    ['medium', 'high', { blockUpshift: true }, 'medium', ['no-up']],
+    ['medium', 'low', {}, 'medium', ['floor']],
+    ['high', 'medium', {}, 'medium', []],
+    ['max', null, {}, 'max', []],
+    ['max', null, { maxCap: true }, 'medium', ['max-cap', 'ceiling']],
+    ['xhigh', null, { ceiling: 'high' }, 'high', ['ceiling']],
+    ['low', null, { floor: 'low', ceiling: 'high' }, 'low', []],
+    ['high', null, { floor: 'high', ceiling: 'low' }, 'medium', ['ceiling']],
+    ['high', null, { ceiling: 'bad', floor: 'bad' }, 'medium', ['ceiling']],
+  ];
+  for (const [original, recommendationApplied, config, effort, reasons] of cases) {
+    assert.deepEqual(policyCandidate({ original, recommendationApplied, config, model: 'claude-opus-5-5' }), { effort, reasons });
+  }
+  assert.deepEqual(policyCandidate({ original: 'high', model: 'other' }), { effort: 'high', reasons: ['model'] });
+  for (const original of ['unsupported', undefined, 'turbo']) assert.equal(policyCandidate({ original, model: 'other' }), null);
+});
 
 test('valid recommendations pass; keep remains a decision, not an effort', () => {
   assert.equal(decide(input).candidate, 'low');

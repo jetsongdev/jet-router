@@ -4,6 +4,36 @@ export const CHOICES = Object.freeze(['low', 'medium', 'high', 'xhigh', 'keep'])
 // probability. Usage logs (2026-09-28~10-05) applied upshifts at 0.48~0.55.
 export const MIN_APPLY_PROBABILITY = 0.7;
 
+export function policyCandidate({ original, model, recommendationApplied, config = {} }) {
+  if (!EFFORTS.includes(original)) return null;
+  const models = config.models ?? ['claude-opus-5-5'];
+  if (!models.includes(model)) return { effort: original, reasons: ['model'] };
+  const limits = EFFORTS.slice(0, 4);
+  let ceiling = limits.includes(config.ceiling) ? config.ceiling : 'medium';
+  let floor = limits.includes(config.floor) ? config.floor : 'medium';
+  if (EFFORTS.indexOf(floor) > EFFORTS.indexOf(ceiling)) ceiling = floor = 'medium';
+  const reasons = [];
+  if (original === 'max') {
+    if (config.maxCap !== true) return { effort: 'max', reasons };
+    original = 'xhigh';
+    reasons.push('max-cap');
+  }
+  let candidate = EFFORTS.includes(recommendationApplied) ? recommendationApplied : original;
+  if (config.blockUpshift === true && EFFORTS.indexOf(candidate) > EFFORTS.indexOf(original)) {
+    candidate = original;
+    reasons.push('no-up');
+  }
+  if (EFFORTS.indexOf(candidate) > EFFORTS.indexOf(ceiling)) {
+    candidate = ceiling;
+    reasons.push('ceiling');
+  }
+  if (EFFORTS.indexOf(candidate) < EFFORTS.indexOf(floor)) {
+    candidate = floor;
+    reasons.push('floor');
+  }
+  return { effort: candidate, reasons };
+}
+
 export function belowApplyProbability(probability) {
   return typeof probability === 'number' && probability < MIN_APPLY_PROBABILITY;
 }
