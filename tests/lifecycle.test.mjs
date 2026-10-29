@@ -78,6 +78,68 @@ async function forward(w, extra = {}) {
   return { e, seen };
 }
 
+test('policy shadow records main candidates without changing routing or subagent records', async () => {
+  for (const mode of ['shadow', 'enforce']) for (const effortPolicy of [undefined, 'off', 'shadow', 'invalid']) {
+    for (const [original, recommendation] of [['medium', 'high'], ['high', 'keep'], ['max', 'keep'], ['unsupported', 'keep']]) {
+      const records = [];
+      const w = world(async () => ({ ...choice, choice: recommendation }), undefined,
+        { effortPolicy, usageLog: true, holdoutRate: '0.5', random: () => 0 },
+        async (argv, init) => { records.push(JSON.parse(init.stdin)); return { exitCode: 0 }; });
+      await w.start(); await w.command(mode); await w.submit();
+      const first = await forward(w, { effort: original, model: 'claude-opus-5-5[1m]' });
+      assert.equal(first.seen, first.e);
+      const sub = await forward(w, { turnId: 's1', agentId: 'a1', effort: original, model: 'claude-opus-5-5[1m]' });
+      assert.equal(sub.seen, sub.e);
+      await w.event('turn.complete', { turnId: 's1', agentId: 'a1', reason: 'answer' });
+      await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+      const [child, main] = records;
+      assert.deepEqual([child.policyVersion, child.policyArm, child.policyCandidate], [null, null, null]);
+      if (effortPolicy !== 'shadow') assert.deepEqual([main.policyVersion, main.policyArm, main.policyCandidate], [null, null, null]);
+      else {
+        const expected = original === 'unsupported' ? null : original === 'max' ? { effort: 'max', reasons: [] }
+          : { effort: 'medium', reasons: ['ceiling'] };
+        assert.deepEqual([main.policyVersion, main.policyArm, main.policyCandidate], ['p1', 'none', expected]);
+      }
+    }
+  }
+});
+
+test('policy options fall back and shadow does not alter enforce application', async () => {
+  for (const [options, expected] of [
+    [{ effortCeiling: 'bad', effortFloor: 'bad', blockUpshift: 'true', maxCap: 'true' }, { effort: 'medium', reasons: ['ceiling'] }],
+    [{ effortCeiling: 'high', effortFloor: 'low', blockUpshift: true }, { effort: 'medium', reasons: ['no-up'] }],
+    [{ effortCeiling: 'low', effortFloor: 'high' }, { effort: 'medium', reasons: ['ceiling'] }],
+  ]) {
+    let recorded;
+    const w = world(async () => ({ ...choice, choice: 'high' }), undefined, { effortPolicy: 'shadow', usageLog: true, ...options },
+      async (argv, init) => { recorded = JSON.parse(init.stdin); return { exitCode: 0 }; });
+    await w.start(); await w.command('enforce'); await w.submit();
+    const { e, seen } = await forward(w, { effort: 'medium', model: 'claude-opus-5-5' });
+    assert.deepEqual(seen, { ...e, effort: 'high' }); assert.notEqual(seen, e);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    assert.deepEqual(recorded.policyCandidate, expected);
+    assert.equal(recorded.applied, 'high');
+  }
+});
+
+test('policy shadow handles omitted classification and excludes invalid and silent turns', async () => {
+  for (const [prompt, expectedVersion] of [[{}, 'p1'], [{ attachments: [{ type: 'image' }] }, null],
+    [{ origin: { kind: 'plugin' } }, null]]) {
+    const records = [];
+    const w = world(async () => { throw new Error('omitted'); }, undefined, { effortPolicy: 'shadow', usageLog: true },
+      async (argv, init) => { records.push(JSON.parse(init.stdin)); return { exitCode: 0 }; });
+    await w.start(); await w.command('shadow'); await w.submit('t1', 'prompt', prompt);
+    const { e, seen } = await forward(w, { effort: 'high', model: 'claude-opus-5-5' });
+    assert.equal(seen, e);
+    await w.event('turn.complete', { turnId: 't1', reason: 'answer' });
+    if (prompt.origin) assert.equal(records.length, 0);
+    else {
+      assert.equal(records[0].policyVersion, expectedVersion);
+      assert.deepEqual(records[0].policyCandidate, expectedVersion ? { effort: 'medium', reasons: ['ceiling'] } : null);
+    }
+  }
+});
+
 test('enforce applies downshifts and upshifts to every step of that turn only', async () => {
   for (const [original, chosen] of [['high', 'low'], ['medium', 'xhigh']]) {
     let calls = 0; // The next turn's own decision is keep, so nothing may carry over.

@@ -1,6 +1,6 @@
 {
   "name": "jet-router",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "description": "Experimental Claude Code effort router: fake and opt-in Jev shadow",
   "author": { "name": "jetsongdev" },
   "repository": "https://github.com/jetsongdev/jet-router",
@@ -37,6 +37,39 @@
       "description": "Share of applicable enforce turns left unchanged at random so savings can be measured on real work: 0, 0.05, 0.1 or 0.2.",
       "options": ["0", "0.05", "0.1", "0.2"],
       "default": "0.1"
+    },
+    "effortPolicy": {
+      "type": "string",
+      "title": "Effort policy",
+      "description": "Record a policy candidate in shadow without changing effort.",
+      "options": ["off", "shadow"],
+      "default": "off"
+    },
+    "effortCeiling": {
+      "type": "string",
+      "title": "Policy ceiling",
+      "description": "Maximum effort for the recorded policy candidate.",
+      "options": ["low", "medium", "high", "xhigh"],
+      "default": "medium"
+    },
+    "effortFloor": {
+      "type": "string",
+      "title": "Policy floor",
+      "description": "Minimum effort for the recorded policy candidate.",
+      "options": ["low", "medium", "high", "xhigh"],
+      "default": "medium"
+    },
+    "blockUpshift": {
+      "type": "boolean",
+      "title": "Block policy upshifts",
+      "description": "Keep the recorded policy candidate at or below the original effort before applying limits.",
+      "default": false
+    },
+    "maxCap": {
+      "type": "boolean",
+      "title": "Include max in policy ceiling",
+      "description": "Include original max in the recorded policy candidate limits.",
+      "default": false
     },
     "cloudConsent": {
       "type": "boolean",

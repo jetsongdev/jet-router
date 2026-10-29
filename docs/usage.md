@@ -192,6 +192,8 @@ jet-router: Jev 생략: 시간 초과 · enforce
 
 ## 7. 사용량 기록과 절감 리포트
 
+`effortPolicy`는 기본 `off`입니다. `shadow`로 켜면 라우터의 shadow 또는 enforce 모드에서 메인 턴 사용량 기록에 정책 후보값만 남깁니다. 후보 기록은 실제 effort나 적용 결정을 바꾸지 않습니다.
+
 shadow·enforce로 분류한 사용자 턴은 턴이 끝날 때 한 줄씩 `~/.claude/jet-router/usage/YYYY-MM.jsonl`에 기록합니다(권한 600, 로컬 전용). 그 턴이 띄운 subagent도 subagent 턴이 끝날 때 `kind: "subagent"`로 따로 한 줄 기록합니다(0.11.0~, 이전 기록은 `main`).
 
 - 기록 항목: 시각, 구분(`kind`: main·subagent), 프로젝트(`cwd`), 모델, 모드, 원래·추천·적용 effort, 양보 여부, 생략 사유, 확률, Jev 맥락·위험 점수(`contextScore`·`riskScore`, 0.12.2~, 기록만 하고 판정에는 쓰지 않음), 직전 턴 맥락 전송 여부(`contextSent`, 0.13.0~), 분류 지연, 턴 시간, 턴 합계 토큰(입력·출력·캐시 읽기·캐시 쓰기). 토큰은 Claude Code가 턴 종료 훅에 넘기는 값입니다.

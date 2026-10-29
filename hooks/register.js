@@ -1,5 +1,5 @@
 import { prepareRoutingRequest } from '../src/harness.js';
-import { parseDecision, EFFORTS, belowApplyProbability } from '../src/policy.js';
+import { parseDecision, EFFORTS, belowApplyProbability, policyCandidate } from '../src/policy.js';
 import { parseHelperResult, validJevKey, PROCESS_ENV, PROCESS_TIMEOUT_MS } from '../src/providers/jev.js';
 import { fakeProvider } from '../src/providers/fake.js';
 import { summary, status, sessionNotice } from '../src/report.js';
@@ -235,7 +235,8 @@ export function registerRouter(on, classify, options = {}) {
       // A held-out main turn keeps its subagents unchanged too: they are its control arm.
       subagents.set(e.turnId, { effort: inherit ? main.applied : undefined, requested: main?.requested, model: main?.model,
         stepModel: e.model ?? null, record: main?.record && { ...main.record, applied: inherit ? main.applied : undefined,
-          yielded: false, latencyMs: null, rework: undefined, betweenTurnEffort: undefined, midTurnEffort: undefined } });
+          policyVersion: null, policyArm: null, policyCandidate: null, yielded: false, latencyMs: null,
+          rework: undefined, betweenTurnEffort: undefined, midTurnEffort: undefined } });
     }
     const bound = subagents.get(e.turnId);
     if (bound.record) bound.record.forwarded = safeEffort(e.effort);
@@ -326,6 +327,14 @@ export function registerRouter(on, classify, options = {}) {
     } else if (e.effort === 'max') record.reasonCode = 'max';
     else if (effort === 'unsupported') record.reasonCode = 'unsupported';
     if (!routing() || turns.get(e.turnId) !== turn) return yield* next(e);
+    if (turn.valid && options.effortPolicy === 'shadow') {
+      record.policyVersion = 'p1';
+      record.policyArm = 'none';
+      record.policyCandidate = policyCandidate({ original: effort, model: baseModel(turn.model),
+        recommendationApplied: applicable(record) ? record.recommendation : undefined,
+        config: { ceiling: options.effortCeiling, floor: options.effortFloor,
+          blockUpshift: options.blockUpshift, maxCap: options.maxCap } });
+    }
     turn.record = record;
     if (mode === 'enforce' && applicable(record)) {
       if (holdoutRate > 0 && random() < holdoutRate) {
