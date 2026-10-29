@@ -89,4 +89,42 @@ describe('installed Claude function-hook contract (no model or network)', () => 
     // The report command resolves the script from the loaded plugin root.
     expect((await command('report')).text).toBe('REPORT_TABLE');
   });
+
+  test('a turn.start that arrives after prompt.submit resolved still routes its prompt', async ($, on) => {
+    mock.clock(on);
+    const requests: { effort?: unknown }[] = [];
+    const logs: string[] = [];
+    on('process.run', ($, e) => (e.argv[1].endsWith('/scripts/usage.mjs')
+      ? { value: { exitCode: 0, stdout: '', stderr: '' } }
+      : { value: { exitCode: 0, stdout: JSON.stringify({ ok: true, decision: {
+        provider: 'jev', choice: 'low', confidence: 0.8, contextScore: 0.9, riskScore: 0.1,
+      } }), stderr: '' } }));
+    on('session.start', ($, e) => ({ cwd: e.cwd }));
+    on('command.register', ($, e) => ({ value: { command: e.name } }));
+    on('ui.status', () => ({ value: undefined }));
+    on('ui.log', ($, e) => { logs.push(e.text); return { value: undefined }; });
+    on('turn.start', ($, e) => ({ turnId: e.turnId }));
+    on('turn.complete', ($, e) => ({ text: e.answer }));
+    // The engine resolves the submission first; another plugin's async
+    // turn.start hook delivers this plugin's turn.start afterwards.
+    on('prompt.submit', ($, e) => ({ text: e.text, origin: e.origin }));
+    on('turn.step', async function* ($, e) {
+      requests.push(e);
+      return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null };
+    });
+    await $.session.start({ cwd: '/offline-no-sdd', surface: 'terminal', isInteractive: true });
+    const command = (args: string) => $.command.run({ command: 'jet-router', args, origin: { kind: 'composer' } });
+    const jev = (await command('status')).text?.includes('분류기: Jev');
+    await command('enforce');
+    logs.length = 0;
+    await $.prompt.submit({ text: 'RUNTIME_CANARY', origin: { kind: 'composer' }, wait: false });
+    await $.turn.start({ turnId: 'late-turn', text: 'RUNTIME_CANARY' });
+    const stream = $.turn.step({ turnId: 'late-turn', index: 0, model: 'claude-opus-5-5', effort: 'high' as const, messageCount: 1 });
+    for await (const chunk of stream) void chunk;
+    await stream.result;
+    expect(requests[0].effort).toBe(jev ? 'low' : 'high');
+    await $.turn.complete({ turnId: 'late-turn', answer: 'done', durationMs: 10, isAborted: false, reason: 'answer' });
+    expect(logs[0]).toContain(jev ? 'Jev.enforce(): high → low 적용' : 'fake.enforce(): high 유지(고정값)');
+    expect(logs[0]).not.toContain('대기 중 입력');
+  });
 });
