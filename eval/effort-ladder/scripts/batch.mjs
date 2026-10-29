@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, appendFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadKeys } from '../lib/keys.mjs';
 import { buildManifest } from './build-manifest.mjs';
 import { EFFORTS, runId } from '../lib/ids.mjs';
 import { costFromUsage } from '../lib/pricing.mjs';
@@ -62,7 +63,7 @@ export async function execute(command, options, {client,env=process.env}={}) {
  if(command==='build') return build(options);
  if(!['submit','status','cancel','collect'].includes(command)) throw Error('unknown command');
  ensurePaid(options.paid,env);
- if(!client) {const {default:Anthropic}=await import('@anthropic-ai/sdk'); client=new Anthropic();}
+ if(!client) {const apiKey=loadKeys(env.LADDER_KEYS_FILE).ANTHROPIC_API_KEY; if(!apiKey) throw Error('missing-key'); const {default:Anthropic}=await import('@anthropic-ai/sdk'); client=new Anthropic({apiKey});}
  const {wave,outDir=join(root,'runs')}=options; if(!wave||!/^[A-Za-z0-9_-]+$/.test(wave)) throw Error('invalid wave');
  const dir=join(outDir,wave), statePath=join(dir,'batch.json'), ledgerPath=options.ledger??join(outDir,'ledger.jsonl');
  if(command==='submit') {

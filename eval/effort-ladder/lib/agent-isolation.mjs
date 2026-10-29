@@ -16,7 +16,7 @@ export async function assertHiddenOutside({ cwd, hiddenPaths, options }) {
   }
 }
 
-export async function createIsolation({ fixture, hiddenPaths, effort, maxTurns, maxBudgetUsd }) {
+export async function createIsolation({ fixture, hiddenPaths, effort, maxTurns, maxBudgetUsd, apiKey }) {
   const root = await mkdtemp(join(tmpdir(), 'effort-agent-'));
   try {
     const cwd = join(root, 'workspace'), home = join(root, 'home'), config = join(root, 'config'), temp = join(root, 'tmp');
@@ -24,7 +24,7 @@ export async function createIsolation({ fixture, hiddenPaths, effort, maxTurns, 
     await cp(fixture, cwd, { recursive: true, dereference: false });
     const hidden = await Promise.all(hiddenPaths.map(p => realpath(p)));
     const env = { PATH: process.env.PATH, HOME: home, CLAUDE_CONFIG_DIR: config, TMPDIR: temp };
-    if (Boolean(process.env.ANTHROPIC_API_KEY)) env.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+    if (apiKey) env.ANTHROPIC_API_KEY = apiKey;
     const options = {
       model: 'claude-opus-5-5', effort, maxTurns, maxBudgetUsd, cwd, env,
       settingSources: [], plugins: [], strictMcpConfig: true,

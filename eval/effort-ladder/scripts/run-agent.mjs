@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { EFFORTS, runId, sha256 } from '../lib/ids.mjs';
 import { openLedger } from '../lib/ledger.mjs';
+import { loadKeys } from '../lib/keys.mjs';
 import { createIsolation } from '../lib/agent-isolation.mjs';
 import { createShadowRaise } from '../lib/shadow-raise.mjs';
 
@@ -36,6 +37,8 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, pa
   if (!injectedQuery && !(paid && process.env.LADDER_ALLOW_PAID === '1')) throw Error('paid call blocked');
   if (!/^[A-Za-z0-9_-]+$/.test(wave) || !Number.isSafeInteger(reps) || reps < 1 || !tasks.length || !efforts.length || efforts.some(e => !EFFORTS.includes(e)) || tasks.some(t => !/^ag\/[A-Za-z0-9_-]+$/.test(t))) throw Error('invalid arguments');
   outputDir ??= join(baseDir, 'runs', wave);
+  const apiKey = injectedQuery ? undefined : loadKeys().ANTHROPIC_API_KEY;
+  if (!injectedQuery && !apiKey) throw Error('missing-key');
   const query = injectedQuery ?? (await import('@anthropic-ai/claude-agent-sdk')).query;
   const grade = injectedGrade ?? (await import('../agent/grade-agent.mjs')).gradeWorkspace;
   await mkdir(outputDir, { recursive: true });
@@ -52,7 +55,7 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, pa
       const snapshotRoot = await mkdtemp(join(tmpdir(), 'effort-parent-'));
       let isolated;
       try {
-        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: item.effort === 'max' ? 1.5 : 1 });
+        isolated = await createIsolation({ fixture: join(taskDir, 'fixture'), hiddenPaths: [join(baseDir, 'agent'), snapshotRoot], effort: item.effort, maxTurns: meta.maxTurns, maxBudgetUsd: item.effort === 'max' ? 1.5 : 1, apiKey });
         const execute = async ({ effort, turn = 1, arm, parent }) => {
           const id = runId({ wave, suite: 'ag', slug, effort: item.effort, rep: item.rep, ...(turn === 2 ? { turn, arm } : {}) });
           const budget = effort === 'max' ? 1.5 : 1;
@@ -78,7 +81,7 @@ export async function runAgent({ wave, tasks, efforts, reps, twoTurn = false, pa
           const failedResult = !result || result.subtype !== 'success' || result.is_error;
           const row = { v: 1, runId: id, taskId: item.task, kind: 'agent', effort, rep: item.rep, wave, turn, arm: arm ?? null, parentRunId: parent?.id ?? null, model: 'claude-opus-5-5', promptSha256: sha256(turn === 1 ? prompt : FOLLOWUP), fixtureSha256, startedAt, durationMs: Date.now() - start, endReason: result?.subtype ?? 'error_during_execution', truncated: ['error_max_turns', 'error_max_budget_usd'].includes(result?.subtype), usage: result ? { usage: result.usage, modelUsage: result.modelUsage } : null, costUsd, costSource, passed: !failedResult && scored.passed, passedChecks: scored.passedChecks, totalChecks: scored.totalChecks, publicTestsUnmodified: scored.publicTestsUnmodified, shadowRaise: turn === 2 ? parent.shadow : shadow.result(), effortEvidence, ...(turn === 2 ? { effortTurn2: effort } : {}) };
           await appendFile(join(outputDir, 'agent.jsonl'), JSON.stringify(row) + '\n'); rows.push(row);
-          if (error) throw error;
+          if (error) throw Error('agent-execution-failed');
           return { id, sessionId, cost: cumulative, shadow: shadow.result(), row };
         };
         const parent = await execute({ effort: item.effort });
